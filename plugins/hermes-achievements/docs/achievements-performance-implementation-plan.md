@@ -1,4 +1,4 @@
-# Hermes Achievements Performance Implementation Plan
+# Pichkoo Achievements Performance Implementation Plan
 
 Status: Ready for execution after hackathon review window
 Constraint: Plugin remains frozen until judging is complete
