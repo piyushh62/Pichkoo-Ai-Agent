@@ -618,7 +618,7 @@ class TestRegistration:
 # ---------------------------------------------------------------------------
 
 class TestToolsetInclusion:
-    def test_discord_tools_in_hermes_discord_toolset(self):
+    def test_discord_tools_in_pichkoo_discord_toolset(self):
         from toolsets import TOOLSETS
         assert "discord" in TOOLSETS["pichkoo-discord"]["tools"]
         assert "discord_admin" in TOOLSETS["pichkoo-discord"]["tools"]

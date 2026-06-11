@@ -34,7 +34,7 @@ from __future__ import annotations
 from typing import List
 
 
-def _hermes_version() -> str:
+def _pichkoo_version() -> str:
     """Return the current Pichkoo release version, e.g. ``"0.13.0"``.
 
     Falls back to ``"unknown"`` if ``pichkoo_cli`` cannot be imported (should
@@ -52,7 +52,7 @@ def pichkoo_client_tag() -> str:
 
     Format: ``client=pichkoo-client-v<MAJOR>.<MINOR>.<PATCH>``.
     """
-    return f"client=pichkoo-client-v{_hermes_version()}"
+    return f"client=pichkoo-client-v{_pichkoo_version()}"
 
 
 def nous_portal_tags() -> List[str]:

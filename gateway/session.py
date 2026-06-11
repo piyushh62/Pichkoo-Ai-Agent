@@ -395,7 +395,7 @@ def build_session_context_prompt(
     lines.append("")
     lines.append("**Delivery options for scheduled tasks:**")
 
-    from pichkoo_constants import display_hermes_home
+    from pichkoo_constants import display_pichkoo_home
 
     # Origin delivery
     if context.source.platform == Platform.LOCAL:
@@ -408,7 +408,7 @@ def build_session_context_prompt(
 
     # Local always available
     lines.append(
-        f"- `\"local\"` → Save to local files only ({display_hermes_home()}/cron/output/)"
+        f"- `\"local\"` → Save to local files only ({display_pichkoo_home()}/cron/output/)"
     )
 
     # Platform home channels

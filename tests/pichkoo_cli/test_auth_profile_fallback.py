@@ -334,11 +334,11 @@ def test_load_provider_state_classic_mode_no_fallback(tmp_path, monkeypatch):
     fake_home = tmp_path / "home"
     fake_home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: fake_home)
-    hermes_home = tmp_path / "classic"
-    hermes_home.mkdir()
-    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    pichkoo_home = tmp_path / "classic"
+    pichkoo_home.mkdir()
+    monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
-    _write(hermes_home / "auth.json", _make_auth_store(providers={
+    _write(pichkoo_home / "auth.json", _make_auth_store(providers={
         "nous": {"access_token": "classic-token"},
     }))
 
@@ -384,11 +384,11 @@ def test_classic_mode_does_not_double_read_same_file(tmp_path, monkeypatch):
     fake_home = tmp_path / "home"
     fake_home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: fake_home)
-    hermes_home = tmp_path / "classic"
-    hermes_home.mkdir()
-    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    pichkoo_home = tmp_path / "classic"
+    pichkoo_home.mkdir()
+    monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
-    _write(hermes_home / "auth.json", _make_auth_store(pool={
+    _write(pichkoo_home / "auth.json", _make_auth_store(pool={
         "openrouter": [{
             "id": "only",
             "label": "classic",
@@ -402,7 +402,7 @@ def test_classic_mode_does_not_double_read_same_file(tmp_path, monkeypatch):
     from pichkoo_cli.auth import read_credential_pool, _global_auth_file_path
 
     # Classic mode: PICHKOO_HOME is set to a custom path that is NOT under
-    # ~/.pichkoo/profiles/ — get_default_hermes_root() returns PICHKOO_HOME
+    # ~/.pichkoo/profiles/ — get_default_pichkoo_root() returns PICHKOO_HOME
     # itself, so the profile root and global root are the same directory,
     # and the helper correctly returns None (no fallback).
     assert _global_auth_file_path() is None

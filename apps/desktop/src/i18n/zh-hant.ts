@@ -798,7 +798,7 @@ export const zhHant = defineLocale({
     noSessions: '暫無工作階段。',
     gatewayRunning: '訊息閘道執行中',
     gatewayStopped: '訊息閘道已停止',
-    hermesActiveSessions: (version, count) => `Pichkoo ${version} · 活躍工作階段 ${count}`,
+    pichkooActiveSessions: (version, count) => `Pichkoo ${version} · 活躍工作階段 ${count}`,
     restartMessaging: '重新啟動訊息服務',
     updatePichkoo: '更新 Pichkoo',
     actionRunning: '執行中',

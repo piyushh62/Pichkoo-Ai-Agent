@@ -72,7 +72,7 @@ def generate_bash(parser: argparse.ArgumentParser) -> str:
                 f"                    return\n"
                 f"                    ;;\n"
                 f"                {profile_actions.replace(' ', '|')})\n"
-                f"                    COMPREPLY=($(compgen -W \"$(_hermes_profiles)\" -- \"$cur\"))\n"
+                f"                    COMPREPLY=($(compgen -W \"$(_pichkoo_profiles)\" -- \"$cur\"))\n"
                 f"                    return\n"
                 f"                    ;;\n"
                 f"            esac\n"
@@ -101,7 +101,7 @@ def generate_bash(parser: argparse.ArgumentParser) -> str:
 # Add to ~/.bashrc:
 #   eval "$(pichkoo completion bash)"
 
-_hermes_profiles() {{
+_pichkoo_profiles() {{
     local profiles_dir="$HOME/.pichkoo/profiles"
     local profiles="default"
     if [ -d "$profiles_dir" ]; then
@@ -112,7 +112,7 @@ _hermes_profiles() {{
     echo "$profiles"
 }}
 
-_hermes_completion() {{
+_pichkoo_completion() {{
     local cur prev
     COMPREPLY=()
     cur="${{COMP_WORDS[COMP_CWORD]}}"
@@ -120,7 +120,7 @@ _hermes_completion() {{
 
     # Complete profile names after -p / --profile
     if [[ "$prev" == "-p" || "$prev" == "--profile" ]]; then
-        COMPREPLY=($(compgen -W "$(_hermes_profiles)" -- "$cur"))
+        COMPREPLY=($(compgen -W "$(_pichkoo_profiles)" -- "$cur"))
         return
     fi
 
@@ -135,7 +135,7 @@ _hermes_completion() {{
     fi
 }}
 
-complete -F _hermes_completion pichkoo
+complete -F _pichkoo_completion pichkoo
 """
 
 
@@ -169,7 +169,7 @@ def generate_zsh(parser: argparse.ArgumentParser) -> str:
                 f"                profile)\n"
                 f"                    case ${{line[2]}} in\n"
                 f"                        use|delete|show|alias|rename|export)\n"
-                f"                            _hermes_profiles\n"
+                f"                            _pichkoo_profiles\n"
                 f"                            ;;\n"
                 f"                        *)\n"
                 f"                            local -a profile_cmds\n"
@@ -204,7 +204,7 @@ def generate_zsh(parser: argparse.ArgumentParser) -> str:
 # Add to ~/.zshrc:
 #   eval "$(pichkoo completion zsh)"
 
-_hermes_profiles() {{
+_pichkoo_profiles() {{
     local -a profiles
     profiles=(default)
     if [[ -d "$HOME/.pichkoo/profiles" ]]; then
@@ -213,14 +213,14 @@ _hermes_profiles() {{
     _describe 'profile' profiles
 }}
 
-_hermes() {{
+_pichkoo() {{
     local context state line
     typeset -A opt_args
 
     _arguments -C \\
         '(-)'{{-h,--help}}'[Show help and exit]' \\
         '(-)'{{-V,--version}}'[Show version and exit]' \\
-        '(-)'{{-p,--profile}}'[Profile name]:profile:_hermes_profiles' \\
+        '(-)'{{-p,--profile}}'[Profile name]:profile:_pichkoo_profiles' \\
         '1:command:->commands' \\
         '*::arg:->args'
 
@@ -240,7 +240,7 @@ _hermes() {{
     esac
 }}
 
-compdef _hermes pichkoo
+compdef _pichkoo pichkoo
 """
 
 
@@ -259,7 +259,7 @@ def generate_fish(parser: argparse.ArgumentParser) -> str:
         "#   pichkoo completion fish | source",
         "",
         "# Helper: list available profiles",
-        "function __hermes_profiles",
+        "function __pichkoo_profiles",
         "    echo default",
         "    if test -d $HOME/.pichkoo/profiles",
         "        for d in $HOME/.pichkoo/profiles/*/",
@@ -273,7 +273,7 @@ def generate_fish(parser: argparse.ArgumentParser) -> str:
         "",
         "# Complete profile names after -p / --profile",
         "complete -c pichkoo -f -s p -l profile"
-        " -d 'Profile name' -xa '(__hermes_profiles)'",
+        " -d 'Profile name' -xa '(__pichkoo_profiles)'",
         "",
         "# Top-level subcommands",
     ]
@@ -312,7 +312,7 @@ def generate_fish(parser: argparse.ArgumentParser) -> str:
                     f"complete -c pichkoo -f "
                     f"-n '__fish_seen_subcommand_from {action}; "
                     f"and __fish_seen_subcommand_from profile' "
-                    f"-a '(__hermes_profiles)' -d 'Profile name'"
+                    f"-a '(__pichkoo_profiles)' -d 'Profile name'"
                 )
 
     lines.append("")

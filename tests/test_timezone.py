@@ -261,7 +261,7 @@ class TestCronTimezone:
     def test_ensure_aware_naive_preserves_absolute_time(self):
         """_ensure_aware must preserve the absolute instant for naive datetimes.
 
-        Regression: the old code used replace(tzinfo=hermes_tz) which shifted
+        Regression: the old code used replace(tzinfo=pichkoo_tz) which shifted
         absolute time when system-local tz != Pichkoo tz.  The fix interprets
         naive values as system-local wall time, then converts.
         """
@@ -287,7 +287,7 @@ class TestCronTimezone:
             f"Absolute time shifted: expected {expected_utc}, got {actual_utc}"
         )
 
-    def test_ensure_aware_normalizes_aware_to_hermes_tz(self):
+    def test_ensure_aware_normalizes_aware_to_pichkoo_tz(self):
         """Already-aware datetimes should be normalized to Pichkoo tz."""
         from cron.jobs import _ensure_aware
 
@@ -346,7 +346,7 @@ class TestCronTimezone:
         monkeypatch.setattr(jobs_module, "OUTPUT_DIR", tmp_path / "cron" / "output")
 
         # Use a Pichkoo timezone far behind UTC so that the numeric wall time
-        # of the naive timestamp exceeds _hermes_now's wall time — this would
+        # of the naive timestamp exceeds _pichkoo_now's wall time — this would
         # have caused a false "not due" with the old replace(tzinfo=...) approach.
         os.environ["PICHKOO_TIMEZONE"] = "Pacific/Midway"  # UTC-11
         _reset_pichkoo_time_cache()

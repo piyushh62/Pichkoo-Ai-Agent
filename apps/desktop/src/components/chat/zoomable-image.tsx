@@ -71,8 +71,8 @@ export function ZoomableImage({ className, containerClassName, src, alt, slot, .
     setSaving(true)
 
     try {
-      if (window.hermesDesktop?.saveImageFromUrl) {
-        const saved = await window.hermesDesktop.saveImageFromUrl(src)
+      if (window.pichkooDesktop?.saveImageFromUrl) {
+        const saved = await window.pichkooDesktop.saveImageFromUrl(src)
 
         if (saved) {
           notify({ kind: 'success', title: copy.imageSaved, message: imageFilename(src) })

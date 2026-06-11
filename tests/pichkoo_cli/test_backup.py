@@ -15,7 +15,7 @@ import pytest
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _make_hermes_tree(root: Path) -> None:
+def _make_pichkoo_tree(root: Path) -> None:
     """Create a realistic ~/.pichkoo directory structure for testing."""
     (root / "config.yaml").write_text("model:\n  provider: openrouter\n")
     (root / ".env").write_text("OPENROUTER_API_KEY=sk-test-123\n")
@@ -154,12 +154,12 @@ class TestShouldExclude:
 class TestBackup:
     def test_creates_zip(self, tmp_path, monkeypatch):
         """Backup creates a valid zip containing expected files."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        _make_hermes_tree(hermes_home)
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        _make_pichkoo_tree(pichkoo_home)
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
-        # get_default_hermes_root needs this
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
+        # get_default_pichkoo_root needs this
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_zip = tmp_path / "backup.zip"
@@ -188,11 +188,11 @@ class TestBackup:
 
     def test_excludes_pichkoo_ai_agent(self, tmp_path, monkeypatch):
         """Backup does NOT include pichkoo-agent/ directory."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        _make_hermes_tree(hermes_home)
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        _make_pichkoo_tree(pichkoo_home)
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_zip = tmp_path / "backup.zip"
@@ -208,11 +208,11 @@ class TestBackup:
 
     def test_excludes_pycache(self, tmp_path, monkeypatch):
         """Backup does NOT include __pycache__ dirs."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        _make_hermes_tree(hermes_home)
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        _make_pichkoo_tree(pichkoo_home)
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_zip = tmp_path / "backup.zip"
@@ -228,11 +228,11 @@ class TestBackup:
 
     def test_excludes_pid_files(self, tmp_path, monkeypatch):
         """Backup does NOT include PID files."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        _make_hermes_tree(hermes_home)
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        _make_pichkoo_tree(pichkoo_home)
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_zip = tmp_path / "backup.zip"
@@ -248,11 +248,11 @@ class TestBackup:
 
     def test_default_output_path(self, tmp_path, monkeypatch):
         """When no output path given, zip goes to ~/pichkoo-backup-*.zip."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("model: test\n")
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("model: test\n")
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         args = Namespace(output=None)
@@ -266,14 +266,14 @@ class TestBackup:
 
     def test_skips_symlinked_files(self, tmp_path, monkeypatch):
         """Backup must not dereference symlinks and leak files outside PICHKOO_HOME."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        _make_hermes_tree(hermes_home)
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        _make_pichkoo_tree(pichkoo_home)
         outside = tmp_path / "outside-secret.txt"
         outside.write_text("outside secret\n")
-        _symlink_file_or_skip(hermes_home / "skills" / "outside-link.txt", outside)
+        _symlink_file_or_skip(pichkoo_home / "skills" / "outside-link.txt", outside)
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_zip = tmp_path / "backup.zip"
@@ -342,9 +342,9 @@ class TestImport:
 
     def test_restores_files(self, tmp_path, monkeypatch):
         """Import extracts files into pichkoo home."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -360,16 +360,16 @@ class TestImport:
         from pichkoo_cli.backup import run_import
         run_import(args)
 
-        assert (hermes_home / "config.yaml").read_text() == "model:\n  provider: openrouter\n"
-        assert (hermes_home / ".env").read_text() == "OPENROUTER_API_KEY=sk-test\n"
-        assert (hermes_home / "skills" / "my-skill" / "SKILL.md").read_text() == "# My Skill\n"
-        assert (hermes_home / "profiles" / "coder" / "config.yaml").exists()
+        assert (pichkoo_home / "config.yaml").read_text() == "model:\n  provider: openrouter\n"
+        assert (pichkoo_home / ".env").read_text() == "OPENROUTER_API_KEY=sk-test\n"
+        assert (pichkoo_home / "skills" / "my-skill" / "SKILL.md").read_text() == "# My Skill\n"
+        assert (pichkoo_home / "profiles" / "coder" / "config.yaml").exists()
 
-    def test_strips_hermes_prefix(self, tmp_path, monkeypatch):
+    def test_strips_pichkoo_prefix(self, tmp_path, monkeypatch):
         """Import strips .pichkoo/ prefix if all entries share it."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -383,14 +383,14 @@ class TestImport:
         from pichkoo_cli.backup import run_import
         run_import(args)
 
-        assert (hermes_home / "config.yaml").read_text() == "model: test\n"
-        assert (hermes_home / "skills" / "a" / "SKILL.md").read_text() == "# A\n"
+        assert (pichkoo_home / "config.yaml").read_text() == "model: test\n"
+        assert (pichkoo_home / "skills" / "a" / "SKILL.md").read_text() == "# A\n"
 
     def test_rejects_empty_zip(self, tmp_path, monkeypatch):
         """Import rejects an empty zip."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "empty.zip"
@@ -403,11 +403,11 @@ class TestImport:
         with pytest.raises(SystemExit):
             run_import(args)
 
-    def test_rejects_non_hermes_zip(self, tmp_path, monkeypatch):
+    def test_rejects_non_pichkoo_zip(self, tmp_path, monkeypatch):
         """Import rejects a zip that doesn't look like a pichkoo backup."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "random.zip"
@@ -424,9 +424,9 @@ class TestImport:
 
     def test_blocks_path_traversal(self, tmp_path, monkeypatch):
         """Import blocks zip entries with path traversal."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "evil.zip"
@@ -442,17 +442,17 @@ class TestImport:
         run_import(args)
 
         # config.yaml should be restored
-        assert (hermes_home / "config.yaml").exists()
+        assert (pichkoo_home / "config.yaml").exists()
         # traversal file should NOT exist outside pichkoo home
         assert not (tmp_path / "etc" / "passwd").exists()
 
     def test_confirmation_prompt_abort(self, tmp_path, monkeypatch):
         """Import aborts when user says no to confirmation."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
         # Pre-existing config triggers the confirmation
-        (hermes_home / "config.yaml").write_text("existing: true\n")
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        (pichkoo_home / "config.yaml").write_text("existing: true\n")
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -467,14 +467,14 @@ class TestImport:
             run_import(args)
 
         # Original config should be unchanged
-        assert (hermes_home / "config.yaml").read_text() == "existing: true\n"
+        assert (pichkoo_home / "config.yaml").read_text() == "existing: true\n"
 
     def test_force_skips_confirmation(self, tmp_path, monkeypatch):
         """Import with --force skips confirmation and overwrites."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("existing: true\n")
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("existing: true\n")
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -487,13 +487,13 @@ class TestImport:
         from pichkoo_cli.backup import run_import
         run_import(args)
 
-        assert (hermes_home / "config.yaml").read_text() == "model: restored\n"
+        assert (pichkoo_home / "config.yaml").read_text() == "model: restored\n"
 
     def test_missing_file_exits(self, tmp_path, monkeypatch):
         """Import exits with error for nonexistent file."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
         args = Namespace(zipfile=str(tmp_path / "nonexistent.zip"), force=True)
 
@@ -504,9 +504,9 @@ class TestImport:
     @pytest.mark.skipif(os.name != "posix", reason="POSIX file permissions only")
     def test_restores_secret_files_with_0600_perms(self, tmp_path, monkeypatch):
         """Secret files must end up at 0600 after restore (zipfile drops mode bits)."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -524,7 +524,7 @@ class TestImport:
         run_import(args)
 
         for rel in (".env", "auth.json", "state.db", "profiles/coder/.env"):
-            mode = (hermes_home / rel).stat().st_mode & 0o777
+            mode = (pichkoo_home / rel).stat().st_mode & 0o777
             assert mode == 0o600, f"{rel} restored with mode {oct(mode)}, expected 0o600"
 
 
@@ -538,7 +538,7 @@ class TestRoundTrip:
         # Source
         src_home = tmp_path / "source" / ".pichkoo"
         src_home.mkdir(parents=True)
-        _make_hermes_tree(src_home)
+        _make_pichkoo_tree(src_home)
 
         monkeypatch.setenv("PICHKOO_HOME", str(src_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path / "source")
@@ -640,7 +640,7 @@ class TestValidation:
             ok, reason = _validate_backup_zip(zf)
         assert not ok
 
-    def test_detect_prefix_hermes(self):
+    def test_detect_prefix_pichkoo(self):
         """Detects .pichkoo/ prefix wrapping all entries."""
         import io
         from pichkoo_cli.backup import _detect_prefix
@@ -686,7 +686,7 @@ class TestValidation:
 # ---------------------------------------------------------------------------
 
 class TestBackupEdgeCases:
-    def test_nonexistent_hermes_home(self, tmp_path, monkeypatch):
+    def test_nonexistent_pichkoo_home(self, tmp_path, monkeypatch):
         """Backup exits when pichkoo home doesn't exist."""
         fake_home = tmp_path / "nonexistent" / ".pichkoo"
         monkeypatch.setenv("PICHKOO_HOME", str(fake_home))
@@ -700,11 +700,11 @@ class TestBackupEdgeCases:
 
     def test_output_is_directory(self, tmp_path, monkeypatch):
         """When output path is a directory, zip is created inside it."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("model: test\n")
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("model: test\n")
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_dir = tmp_path / "backups"
@@ -720,11 +720,11 @@ class TestBackupEdgeCases:
 
     def test_output_without_zip_suffix(self, tmp_path, monkeypatch):
         """Output path without .zip gets suffix appended."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("model: test\n")
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("model: test\n")
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_path = tmp_path / "mybackup.tar"
@@ -736,15 +736,15 @@ class TestBackupEdgeCases:
         # Should have .tar.zip suffix
         assert (tmp_path / "mybackup.tar.zip").exists()
 
-    def test_empty_hermes_home(self, tmp_path, monkeypatch):
+    def test_empty_pichkoo_home(self, tmp_path, monkeypatch):
         """Backup handles empty pichkoo home (no files to back up)."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
         # Only excluded dirs, no actual files
-        (hermes_home / "__pycache__").mkdir()
-        (hermes_home / "__pycache__" / "foo.pyc").write_bytes(b"\x00")
+        (pichkoo_home / "__pycache__").mkdir()
+        (pichkoo_home / "__pycache__" / "foo.pyc").write_bytes(b"\x00")
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         args = Namespace(output=str(tmp_path / "out.zip"))
@@ -757,16 +757,16 @@ class TestBackupEdgeCases:
 
     def test_permission_error_during_backup(self, tmp_path, monkeypatch):
         """Backup handles permission errors gracefully."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("model: test\n")
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("model: test\n")
 
         # Create an unreadable file
-        bad_file = hermes_home / "secret.db"
+        bad_file = pichkoo_home / "secret.db"
         bad_file.write_text("data")
         bad_file.chmod(0o000)
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_zip = tmp_path / "out.zip"
@@ -784,16 +784,16 @@ class TestBackupEdgeCases:
 
     def test_pre1980_timestamp_skipped(self, tmp_path, monkeypatch):
         """Backup skips files with pre-1980 timestamps (ZIP limitation)."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("model: test\n")
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("model: test\n")
 
         # Create a file with epoch timestamp (1970-01-01)
-        old_file = hermes_home / "ancient.txt"
+        old_file = pichkoo_home / "ancient.txt"
         old_file.write_text("old data")
         os.utime(old_file, (0, 0))
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         out_zip = tmp_path / "out.zip"
@@ -810,17 +810,17 @@ class TestBackupEdgeCases:
             # The pre-1980 file should be skipped, not crash the backup
             assert "ancient.txt" not in names
 
-    def test_skips_output_zip_inside_hermes(self, tmp_path, monkeypatch):
+    def test_skips_output_zip_inside_pichkoo(self, tmp_path, monkeypatch):
         """Backup skips its own output zip if it's inside pichkoo root."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("model: test\n")
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("model: test\n")
 
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         # Output inside pichkoo home
-        out_zip = hermes_home / "backup.zip"
+        out_zip = pichkoo_home / "backup.zip"
         args = Namespace(output=str(out_zip))
 
         from pichkoo_cli.backup import run_backup
@@ -840,9 +840,9 @@ class TestImportEdgeCases:
 
     def test_not_a_zip(self, tmp_path, monkeypatch):
         """Import rejects a non-zip file."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
         not_zip = tmp_path / "fake.zip"
         not_zip.write_text("this is not a zip")
@@ -855,10 +855,10 @@ class TestImportEdgeCases:
 
     def test_eof_during_confirmation(self, tmp_path, monkeypatch):
         """Import handles EOFError during confirmation prompt."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("existing\n")
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("existing\n")
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -873,10 +873,10 @@ class TestImportEdgeCases:
 
     def test_keyboard_interrupt_during_confirmation(self, tmp_path, monkeypatch):
         """Import handles KeyboardInterrupt during confirmation prompt."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / ".env").write_text("KEY=val\n")
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / ".env").write_text("KEY=val\n")
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -891,13 +891,13 @@ class TestImportEdgeCases:
 
     def test_permission_error_during_import(self, tmp_path, monkeypatch):
         """Import handles permission errors during extraction."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         # Create a read-only directory so extraction fails
-        locked_dir = hermes_home / "locked"
+        locked_dir = pichkoo_home / "locked"
         locked_dir.mkdir()
         locked_dir.chmod(0o555)
 
@@ -916,13 +916,13 @@ class TestImportEdgeCases:
             locked_dir.chmod(0o755)
 
         # config.yaml should still be restored despite the error
-        assert (hermes_home / "config.yaml").exists()
+        assert (pichkoo_home / "config.yaml").exists()
 
     def test_progress_with_many_files(self, tmp_path, monkeypatch):
         """Import shows progress with 500+ files."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "big.zip"
@@ -937,8 +937,8 @@ class TestImportEdgeCases:
         from pichkoo_cli.backup import run_import
         run_import(args)
 
-        assert (hermes_home / "config.yaml").exists()
-        assert (hermes_home / "sessions" / "s0599.json").exists()
+        assert (pichkoo_home / "config.yaml").exists()
+        assert (pichkoo_home / "sessions" / "s0599.json").exists()
 
 
 # ---------------------------------------------------------------------------
@@ -953,9 +953,9 @@ class TestProfileRestoration:
 
     def test_import_creates_profile_wrappers(self, tmp_path, monkeypatch):
         """Import auto-creates wrapper scripts for restored profiles."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         # Mock the wrapper dir to be inside tmp_path
@@ -976,8 +976,8 @@ class TestProfileRestoration:
         run_import(args)
 
         # Profile directories should exist
-        assert (hermes_home / "profiles" / "coder" / "config.yaml").exists()
-        assert (hermes_home / "profiles" / "researcher" / "config.yaml").exists()
+        assert (pichkoo_home / "profiles" / "coder" / "config.yaml").exists()
+        assert (pichkoo_home / "profiles" / "researcher" / "config.yaml").exists()
 
         # Wrapper scripts should be created
         assert (wrapper_dir / "coder").exists()
@@ -989,9 +989,9 @@ class TestProfileRestoration:
 
     def test_import_skips_profile_dirs_without_config(self, tmp_path, monkeypatch):
         """Import doesn't create wrappers for profile dirs without config."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         wrapper_dir = tmp_path / ".local" / "bin"
@@ -1015,9 +1015,9 @@ class TestProfileRestoration:
 
     def test_import_without_profiles_module(self, tmp_path, monkeypatch):
         """Import gracefully handles missing profiles module (fresh install)."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
         zip_path = tmp_path / "backup.zip"
@@ -1041,7 +1041,7 @@ class TestProfileRestoration:
             run_import(args)
 
         # Files should still be restored even if wrappers can't be created
-        assert (hermes_home / "profiles" / "coder" / "config.yaml").exists()
+        assert (pichkoo_home / "profiles" / "coder" / "config.yaml").exists()
 
 
 # ---------------------------------------------------------------------------
@@ -1095,7 +1095,7 @@ class TestSafeCopyDb:
 
 class TestQuickSnapshot:
     @pytest.fixture
-    def hermes_home(self, tmp_path):
+    def pichkoo_home(self, tmp_path):
         """Create a fake PICHKOO_HOME with critical state files."""
         home = tmp_path / ".pichkoo"
         home.mkdir()
@@ -1114,23 +1114,23 @@ class TestQuickSnapshot:
         conn.close()
         return home
 
-    def test_creates_snapshot(self, hermes_home):
+    def test_creates_snapshot(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
         assert snap_id is not None
-        snap_dir = hermes_home / "state-snapshots" / snap_id
+        snap_dir = pichkoo_home / "state-snapshots" / snap_id
         assert snap_dir.is_dir()
         assert (snap_dir / "manifest.json").exists()
 
-    def test_label_in_id(self, hermes_home):
+    def test_label_in_id(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot
-        snap_id = create_quick_snapshot(label="before-upgrade", hermes_home=hermes_home)
+        snap_id = create_quick_snapshot(label="before-upgrade", pichkoo_home=pichkoo_home)
         assert "before-upgrade" in snap_id
 
-    def test_state_db_safely_copied(self, hermes_home):
+    def test_state_db_safely_copied(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
-        db_copy = hermes_home / "state-snapshots" / snap_id / "state.db"
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
+        db_copy = pichkoo_home / "state-snapshots" / snap_id / "state.db"
         assert db_copy.exists()
 
         conn = sqlite3.connect(str(db_copy))
@@ -1139,15 +1139,15 @@ class TestQuickSnapshot:
         assert len(rows) == 1
         assert rows[0] == ("s1", "hello world")
 
-    def test_copies_nested_files(self, hermes_home):
+    def test_copies_nested_files(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
-        assert (hermes_home / "state-snapshots" / snap_id / "cron" / "jobs.json").exists()
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
+        assert (pichkoo_home / "state-snapshots" / snap_id / "cron" / "jobs.json").exists()
 
-    def test_missing_files_skipped(self, hermes_home):
+    def test_missing_files_skipped(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
-        with open(hermes_home / "state-snapshots" / snap_id / "manifest.json") as f:
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
+        with open(pichkoo_home / "state-snapshots" / snap_id / "manifest.json") as f:
             meta = json.load(f)
         # gateway_state.json etc. don't exist in fixture
         assert "gateway_state.json" not in meta["files"]
@@ -1156,99 +1156,99 @@ class TestQuickSnapshot:
         from pichkoo_cli.backup import create_quick_snapshot
         empty = tmp_path / "empty"
         empty.mkdir()
-        assert create_quick_snapshot(hermes_home=empty) is None
+        assert create_quick_snapshot(pichkoo_home=empty) is None
 
-    def test_list_snapshots(self, hermes_home):
+    def test_list_snapshots(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot, list_quick_snapshots
-        id1 = create_quick_snapshot(label="first", hermes_home=hermes_home)
-        id2 = create_quick_snapshot(label="second", hermes_home=hermes_home)
+        id1 = create_quick_snapshot(label="first", pichkoo_home=pichkoo_home)
+        id2 = create_quick_snapshot(label="second", pichkoo_home=pichkoo_home)
 
-        snaps = list_quick_snapshots(hermes_home=hermes_home)
+        snaps = list_quick_snapshots(pichkoo_home=pichkoo_home)
         assert len(snaps) == 2
         assert snaps[0]["id"] == id2  # most recent first
         assert snaps[1]["id"] == id1
 
-    def test_list_limit(self, hermes_home):
+    def test_list_limit(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot, list_quick_snapshots
         for i in range(5):
-            create_quick_snapshot(label=f"s{i}", hermes_home=hermes_home)
-        snaps = list_quick_snapshots(limit=3, hermes_home=hermes_home)
+            create_quick_snapshot(label=f"s{i}", pichkoo_home=pichkoo_home)
+        snaps = list_quick_snapshots(limit=3, pichkoo_home=pichkoo_home)
         assert len(snaps) == 3
 
-    def test_restore_config(self, hermes_home):
+    def test_restore_config(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot, restore_quick_snapshot
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
 
-        (hermes_home / "config.yaml").write_text("model:\n  provider: anthropic\n")
-        assert "anthropic" in (hermes_home / "config.yaml").read_text()
+        (pichkoo_home / "config.yaml").write_text("model:\n  provider: anthropic\n")
+        assert "anthropic" in (pichkoo_home / "config.yaml").read_text()
 
-        result = restore_quick_snapshot(snap_id, hermes_home=hermes_home)
+        result = restore_quick_snapshot(snap_id, pichkoo_home=pichkoo_home)
         assert result is True
-        assert "openrouter" in (hermes_home / "config.yaml").read_text()
+        assert "openrouter" in (pichkoo_home / "config.yaml").read_text()
 
-    def test_restore_state_db(self, hermes_home):
+    def test_restore_state_db(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot, restore_quick_snapshot
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
 
-        conn = sqlite3.connect(str(hermes_home / "state.db"))
+        conn = sqlite3.connect(str(pichkoo_home / "state.db"))
         conn.execute("INSERT INTO sessions VALUES ('s2', 'new')")
         conn.commit()
         conn.close()
 
-        restore_quick_snapshot(snap_id, hermes_home=hermes_home)
+        restore_quick_snapshot(snap_id, pichkoo_home=pichkoo_home)
 
-        conn = sqlite3.connect(str(hermes_home / "state.db"))
+        conn = sqlite3.connect(str(pichkoo_home / "state.db"))
         rows = conn.execute("SELECT * FROM sessions").fetchall()
         conn.close()
         assert len(rows) == 1
 
-    def test_restore_nonexistent(self, hermes_home):
+    def test_restore_nonexistent(self, pichkoo_home):
         from pichkoo_cli.backup import restore_quick_snapshot
-        assert restore_quick_snapshot("nonexistent", hermes_home=hermes_home) is False
+        assert restore_quick_snapshot("nonexistent", pichkoo_home=pichkoo_home) is False
 
-    def test_auto_prune(self, hermes_home):
+    def test_auto_prune(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot, list_quick_snapshots, _QUICK_DEFAULT_KEEP
         for i in range(_QUICK_DEFAULT_KEEP + 5):
-            create_quick_snapshot(label=f"snap-{i:03d}", hermes_home=hermes_home)
-        snaps = list_quick_snapshots(limit=100, hermes_home=hermes_home)
+            create_quick_snapshot(label=f"snap-{i:03d}", pichkoo_home=pichkoo_home)
+        snaps = list_quick_snapshots(limit=100, pichkoo_home=pichkoo_home)
         assert len(snaps) <= _QUICK_DEFAULT_KEEP
 
-    def test_manual_prune(self, hermes_home):
+    def test_manual_prune(self, pichkoo_home):
         from pichkoo_cli.backup import create_quick_snapshot, prune_quick_snapshots, list_quick_snapshots
         for i in range(10):
-            create_quick_snapshot(label=f"s{i}", hermes_home=hermes_home)
-        deleted = prune_quick_snapshots(keep=3, hermes_home=hermes_home)
+            create_quick_snapshot(label=f"s{i}", pichkoo_home=pichkoo_home)
+        deleted = prune_quick_snapshots(keep=3, pichkoo_home=pichkoo_home)
         assert deleted == 7
-        assert len(list_quick_snapshots(hermes_home=hermes_home)) == 3
+        assert len(list_quick_snapshots(pichkoo_home=pichkoo_home)) == 3
 
-    def test_snapshot_includes_pairing_directories(self, hermes_home):
+    def test_snapshot_includes_pairing_directories(self, pichkoo_home):
         """Pairing JSONs live outside state.db — snapshot must capture them
         recursively (generic + per-platform) so approved-user lists survive
         disasters like #15733."""
         from pichkoo_cli.backup import create_quick_snapshot
 
         # Generic pairing store (new location)
-        (hermes_home / "platforms" / "pairing").mkdir(parents=True)
-        (hermes_home / "platforms" / "pairing" / "telegram-approved.json").write_text(
+        (pichkoo_home / "platforms" / "pairing").mkdir(parents=True)
+        (pichkoo_home / "platforms" / "pairing" / "telegram-approved.json").write_text(
             '{"12345": {"user_name": "alice"}}'
         )
-        (hermes_home / "platforms" / "pairing" / "discord-approved.json").write_text(
+        (pichkoo_home / "platforms" / "pairing" / "discord-approved.json").write_text(
             '{"67890": {"user_name": "bob"}}'
         )
         # Legacy pairing store (old location)
-        (hermes_home / "pairing").mkdir()
-        (hermes_home / "pairing" / "matrix-approved.json").write_text(
+        (pichkoo_home / "pairing").mkdir()
+        (pichkoo_home / "pairing" / "matrix-approved.json").write_text(
             '{"@charlie:server": {"user_name": "charlie"}}'
         )
         # Feishu's separate JSON
-        (hermes_home / "feishu_comment_pairing.json").write_text(
+        (pichkoo_home / "feishu_comment_pairing.json").write_text(
             '{"doc_abc": {"allow_from": ["user_xyz"]}}'
         )
 
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
         assert snap_id is not None
 
-        snap_dir = hermes_home / "state-snapshots" / snap_id
+        snap_dir = pichkoo_home / "state-snapshots" / snap_id
         assert (snap_dir / "platforms" / "pairing" / "telegram-approved.json").exists()
         assert (snap_dir / "platforms" / "pairing" / "discord-approved.json").exists()
         assert (snap_dir / "pairing" / "matrix-approved.json").exists()
@@ -1262,18 +1262,18 @@ class TestQuickSnapshot:
         assert "pairing/matrix-approved.json" in files
         assert "feishu_comment_pairing.json" in files
 
-    def test_restore_recovers_pairing_data(self, hermes_home):
+    def test_restore_recovers_pairing_data(self, pichkoo_home):
         """After restore, deleted pairing files reappear with original content."""
         from pichkoo_cli.backup import create_quick_snapshot, restore_quick_snapshot
 
-        pairing_dir = hermes_home / "platforms" / "pairing"
+        pairing_dir = pichkoo_home / "platforms" / "pairing"
         pairing_dir.mkdir(parents=True)
         approved = pairing_dir / "telegram-approved.json"
         approved.write_text('{"12345": {"user_name": "alice"}}')
-        feishu = hermes_home / "feishu_comment_pairing.json"
+        feishu = pichkoo_home / "feishu_comment_pairing.json"
         feishu.write_text('{"doc_abc": {"allow_from": ["user_xyz"]}}')
 
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
         assert snap_id is not None
 
         # Simulate the disaster — user loses both pairing files.
@@ -1282,19 +1282,19 @@ class TestQuickSnapshot:
         assert not approved.exists()
         assert not feishu.exists()
 
-        assert restore_quick_snapshot(snap_id, hermes_home=hermes_home) is True
+        assert restore_quick_snapshot(snap_id, pichkoo_home=pichkoo_home) is True
         assert approved.exists()
         assert '"alice"' in approved.read_text()
         assert feishu.exists()
         assert '"user_xyz"' in feishu.read_text()
 
-    def test_empty_pairing_dir_does_not_fail(self, hermes_home):
+    def test_empty_pairing_dir_does_not_fail(self, pichkoo_home):
         """An empty pairing directory should be silently skipped."""
         from pichkoo_cli.backup import create_quick_snapshot
 
-        (hermes_home / "platforms" / "pairing").mkdir(parents=True)
+        (pichkoo_home / "platforms" / "pairing").mkdir(parents=True)
         # Directory exists but contains no files.
-        snap_id = create_quick_snapshot(hermes_home=hermes_home)
+        snap_id = create_quick_snapshot(pichkoo_home=pichkoo_home)
         # Other state still present → snapshot succeeds.
         assert snap_id is not None
 
@@ -1307,26 +1307,26 @@ class TestPreUpdateBackup:
     runs before touching anything."""
 
     @pytest.fixture
-    def hermes_home(self, tmp_path):
+    def pichkoo_home(self, tmp_path):
         root = tmp_path / ".pichkoo"
         root.mkdir()
-        _make_hermes_tree(root)
+        _make_pichkoo_tree(root)
         return root
 
-    def test_creates_backup_under_backups_dir(self, hermes_home):
+    def test_creates_backup_under_backups_dir(self, pichkoo_home):
         from pichkoo_cli.backup import create_pre_update_backup
-        out = create_pre_update_backup(hermes_home=hermes_home)
+        out = create_pre_update_backup(pichkoo_home=pichkoo_home)
         assert out is not None
         assert out.exists()
-        assert out.parent == hermes_home / "backups"
+        assert out.parent == pichkoo_home / "backups"
         assert out.name.startswith("pre-update-")
         assert out.suffix == ".zip"
 
-    def test_backup_contents_match_full_backup(self, hermes_home):
+    def test_backup_contents_match_full_backup(self, pichkoo_home):
         """Pre-update backup should include the same user data that
         ``pichkoo backup`` would, and should exclude the same directories."""
         from pichkoo_cli.backup import create_pre_update_backup
-        out = create_pre_update_backup(hermes_home=hermes_home)
+        out = create_pre_update_backup(pichkoo_home=pichkoo_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
             names = set(zf.namelist())
@@ -1343,15 +1343,15 @@ class TestPreUpdateBackup:
         # pid files excluded
         assert "gateway.pid" not in names
 
-    def test_does_not_recurse_into_prior_backups(self, hermes_home):
+    def test_does_not_recurse_into_prior_backups(self, pichkoo_home):
         """The ``backups/`` directory must be excluded so that each backup
         doesn't grow exponentially by including all prior backups."""
         from pichkoo_cli.backup import create_pre_update_backup
         # First backup
-        out1 = create_pre_update_backup(hermes_home=hermes_home)
+        out1 = create_pre_update_backup(pichkoo_home=pichkoo_home)
         assert out1 is not None
         # Second backup — must not include the first
-        out2 = create_pre_update_backup(hermes_home=hermes_home)
+        out2 = create_pre_update_backup(pichkoo_home=pichkoo_home)
         assert out2 is not None
         with zipfile.ZipFile(out2) as zf:
             names = zf.namelist()
@@ -1360,7 +1360,7 @@ class TestPreUpdateBackup:
             f"{[n for n in names if n.startswith('backups/')]}"
         )
 
-    def test_rotation_keeps_only_n(self, hermes_home):
+    def test_rotation_keeps_only_n(self, pichkoo_home):
         """After more than ``keep`` backups are created, older ones are
         pruned automatically."""
         import time as _t
@@ -1368,12 +1368,12 @@ class TestPreUpdateBackup:
 
         created = []
         for _ in range(5):
-            out = create_pre_update_backup(hermes_home=hermes_home, keep=3)
+            out = create_pre_update_backup(pichkoo_home=pichkoo_home, keep=3)
             created.append(out)
             _t.sleep(1.05)  # ensure distinct seconds in timestamp
 
         remaining = sorted(
-            p.name for p in (hermes_home / "backups").iterdir()
+            p.name for p in (pichkoo_home / "backups").iterdir()
             if p.name.startswith("pre-update-")
         )
         assert len(remaining) == 3
@@ -1383,27 +1383,27 @@ class TestPreUpdateBackup:
         # Newest three should remain
         assert created[4].name in remaining
 
-    def test_rotation_preserves_manual_files(self, hermes_home):
+    def test_rotation_preserves_manual_files(self, pichkoo_home):
         """Hand-dropped zips in ``backups/`` must not be touched by
         rotation — it only prunes files matching ``pre-update-*.zip``."""
         import time as _t
         from pichkoo_cli.backup import create_pre_update_backup
 
-        (hermes_home / "backups").mkdir(exist_ok=True)
-        manual = hermes_home / "backups" / "my-manual.zip"
+        (pichkoo_home / "backups").mkdir(exist_ok=True)
+        manual = pichkoo_home / "backups" / "my-manual.zip"
         manual.write_bytes(b"manual backup")
 
         for _ in range(5):
-            create_pre_update_backup(hermes_home=hermes_home, keep=2)
+            create_pre_update_backup(pichkoo_home=pichkoo_home, keep=2)
             _t.sleep(1.05)
 
         assert manual.exists(), "Manual backup zip was incorrectly pruned"
 
     def test_returns_none_if_root_missing(self, tmp_path):
         from pichkoo_cli.backup import create_pre_update_backup
-        assert create_pre_update_backup(hermes_home=tmp_path / "does-not-exist") is None
+        assert create_pre_update_backup(pichkoo_home=tmp_path / "does-not-exist") is None
 
-    def test_keep_zero_does_not_delete_freshly_created_backup(self, hermes_home):
+    def test_keep_zero_does_not_delete_freshly_created_backup(self, pichkoo_home):
         """Regression: ``backup_keep: 0`` previously triggered ``backups[0:]``
         in the pruner — wiping the just-created zip and leaving the user
         with no recovery point.  The floor (keep>=1) preserves the new file
@@ -1411,22 +1411,22 @@ class TestPreUpdateBackup:
         set ``pre_update_backup: false`` instead.
         """
         from pichkoo_cli.backup import create_pre_update_backup
-        out = create_pre_update_backup(hermes_home=hermes_home, keep=0)
+        out = create_pre_update_backup(pichkoo_home=pichkoo_home, keep=0)
         assert out is not None
         assert out.exists(), (
             "keep=0 silently deleted the freshly-created backup; floor "
             "should preserve the just-written file."
         )
 
-    def test_keep_negative_does_not_delete_freshly_created_backup(self, hermes_home):
+    def test_keep_negative_does_not_delete_freshly_created_backup(self, pichkoo_home):
         """Mirror coverage: any value <1 should be floored, not literally
         applied as a slice index."""
         from pichkoo_cli.backup import create_pre_update_backup
-        out = create_pre_update_backup(hermes_home=hermes_home, keep=-3)
+        out = create_pre_update_backup(pichkoo_home=pichkoo_home, keep=-3)
         assert out is not None
         assert out.exists()
 
-    def test_keep_zero_still_prunes_older_backups(self, hermes_home):
+    def test_keep_zero_still_prunes_older_backups(self, pichkoo_home):
         """The floor preserves the new backup but should NOT regress the
         rotation behaviour for older zips: a third call with keep=0 must
         still remove pre-existing backups beyond the (floored) limit of 1.
@@ -1434,14 +1434,14 @@ class TestPreUpdateBackup:
         import time as _t
         from pichkoo_cli.backup import create_pre_update_backup
 
-        first = create_pre_update_backup(hermes_home=hermes_home, keep=5)
+        first = create_pre_update_backup(pichkoo_home=pichkoo_home, keep=5)
         _t.sleep(1.05)
-        second = create_pre_update_backup(hermes_home=hermes_home, keep=5)
+        second = create_pre_update_backup(pichkoo_home=pichkoo_home, keep=5)
         _t.sleep(1.05)
-        third = create_pre_update_backup(hermes_home=hermes_home, keep=0)
+        third = create_pre_update_backup(pichkoo_home=pichkoo_home, keep=0)
 
         remaining = {
-            p.name for p in (hermes_home / "backups").iterdir()
+            p.name for p in (pichkoo_home / "backups").iterdir()
             if p.name.startswith("pre-update-")
         }
         assert third.name in remaining, "Floor must preserve the new backup"
@@ -1450,15 +1450,15 @@ class TestPreUpdateBackup:
             f"remaining={remaining}"
         )
 
-    def test_skips_symlinked_files(self, hermes_home, tmp_path):
+    def test_skips_symlinked_files(self, pichkoo_home, tmp_path):
         """Pre-update backups must not dereference symlinks outside PICHKOO_HOME."""
         from pichkoo_cli.backup import create_pre_update_backup
 
         outside = tmp_path / "outside-secret.txt"
         outside.write_text("outside secret\n")
-        _symlink_file_or_skip(hermes_home / "skills" / "outside-link.txt", outside)
+        _symlink_file_or_skip(pichkoo_home / "skills" / "outside-link.txt", outside)
 
-        out = create_pre_update_backup(hermes_home=hermes_home)
+        out = create_pre_update_backup(pichkoo_home=pichkoo_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
             names = zf.namelist()
@@ -1471,10 +1471,10 @@ class TestRunPreUpdateBackup:
     covers config gate, ``--no-backup`` flag, and user-facing output."""
 
     @pytest.fixture
-    def hermes_home(self, tmp_path, monkeypatch):
+    def pichkoo_home(self, tmp_path, monkeypatch):
         root = tmp_path / ".pichkoo"
         root.mkdir()
-        _make_hermes_tree(root)
+        _make_pichkoo_tree(root)
         # Point PICHKOO_HOME at the temp dir so config + backup paths resolve here
         monkeypatch.setenv("PICHKOO_HOME", str(root))
         # Make Path.home() point at tmp_path for anything that uses it
@@ -1485,7 +1485,7 @@ class TestRunPreUpdateBackup:
                 del __import__("sys").modules[mod]
         return root
 
-    def test_backup_flag_creates_backup(self, hermes_home, capsys):
+    def test_backup_flag_creates_backup(self, pichkoo_home, capsys):
         """--backup forces the pre-update backup for one run even when config is off."""
         from pichkoo_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=False, backup=True))
@@ -1496,36 +1496,36 @@ class TestRunPreUpdateBackup:
         assert "pichkoo import" in out
         assert "Disable:" in out
         # Actual backup was created
-        backups = list((hermes_home / "backups").glob("pre-update-*.zip"))
+        backups = list((pichkoo_home / "backups").glob("pre-update-*.zip"))
         assert len(backups) == 1
 
-    def test_default_disabled_is_silent(self, hermes_home, capsys):
+    def test_default_disabled_is_silent(self, pichkoo_home, capsys):
         """With the default-off config and no --backup flag, the hook is silent
         and creates no backup.  This is the common case for every update."""
         from pichkoo_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=False, backup=False))
         out = capsys.readouterr().out
         assert out == ""
-        assert not (hermes_home / "backups").exists() or not list(
-            (hermes_home / "backups").glob("pre-update-*.zip")
+        assert not (pichkoo_home / "backups").exists() or not list(
+            (pichkoo_home / "backups").glob("pre-update-*.zip")
         )
 
-    def test_no_backup_flag_skips(self, hermes_home, capsys):
+    def test_no_backup_flag_skips(self, pichkoo_home, capsys):
         from pichkoo_cli.main import _run_pre_update_backup
         _run_pre_update_backup(Namespace(no_backup=True, backup=False))
         out = capsys.readouterr().out
         assert "skipped (--no-backup)" in out
         assert "Creating pre-update backup" not in out
         # No backup written
-        assert not (hermes_home / "backups").exists() or not list(
-            (hermes_home / "backups").glob("pre-update-*.zip")
+        assert not (pichkoo_home / "backups").exists() or not list(
+            (pichkoo_home / "backups").glob("pre-update-*.zip")
         )
 
-    def test_config_enabled_creates_backup(self, hermes_home, capsys):
+    def test_config_enabled_creates_backup(self, pichkoo_home, capsys):
         """Users who explicitly set updates.pre_update_backup: true still get
         a backup on every update — this is the opt-in legacy behavior."""
         import yaml
-        (hermes_home / "config.yaml").write_text(yaml.safe_dump({
+        (pichkoo_home / "config.yaml").write_text(yaml.safe_dump({
             "_config_version": 22,
             "updates": {"pre_update_backup": True},
         }))
@@ -1539,14 +1539,14 @@ class TestRunPreUpdateBackup:
         out = capsys.readouterr().out
         assert "Creating pre-update backup" in out
         assert "Saved:" in out
-        backups = list((hermes_home / "backups").glob("pre-update-*.zip"))
+        backups = list((pichkoo_home / "backups").glob("pre-update-*.zip"))
         assert len(backups) == 1
 
-    def test_config_disabled_is_silent(self, hermes_home, capsys):
+    def test_config_disabled_is_silent(self, pichkoo_home, capsys):
         """Explicit pre_update_backup: false behaves the same as the default —
         silent no-op, no message spam."""
         import yaml
-        (hermes_home / "config.yaml").write_text(yaml.safe_dump({
+        (pichkoo_home / "config.yaml").write_text(yaml.safe_dump({
             "_config_version": 22,
             "updates": {"pre_update_backup": False},
         }))
@@ -1560,13 +1560,13 @@ class TestRunPreUpdateBackup:
         _run_pre_update_backup(Namespace(no_backup=False, backup=False))
         out = capsys.readouterr().out
         assert out == ""
-        assert not list((hermes_home / "backups").glob("pre-update-*.zip")) \
-            if (hermes_home / "backups").exists() else True
+        assert not list((pichkoo_home / "backups").glob("pre-update-*.zip")) \
+            if (pichkoo_home / "backups").exists() else True
 
-    def test_cli_flag_overrides_enabled_config(self, hermes_home, capsys):
+    def test_cli_flag_overrides_enabled_config(self, pichkoo_home, capsys):
         """--no-backup wins even when config says pre_update_backup: true."""
         import yaml
-        (hermes_home / "config.yaml").write_text(yaml.safe_dump({
+        (pichkoo_home / "config.yaml").write_text(yaml.safe_dump({
             "_config_version": 22,
             "updates": {"pre_update_backup": True},
         }))
@@ -1590,28 +1590,28 @@ class TestPreMigrationBackup:
     ``pichkoo claw migrate`` runs before mutating ~/.pichkoo/."""
 
     @pytest.fixture
-    def hermes_home(self, tmp_path):
+    def pichkoo_home(self, tmp_path):
         root = tmp_path / ".pichkoo"
         root.mkdir()
-        _make_hermes_tree(root)
+        _make_pichkoo_tree(root)
         return root
 
-    def test_creates_backup_under_backups_dir(self, hermes_home):
+    def test_creates_backup_under_backups_dir(self, pichkoo_home):
         from pichkoo_cli.backup import create_pre_migration_backup
-        out = create_pre_migration_backup(hermes_home=hermes_home)
+        out = create_pre_migration_backup(pichkoo_home=pichkoo_home)
         assert out is not None
         assert out.exists()
         # Shares the backups/ directory with pre-update backups so `pichkoo
         # import` and the update-backup listing both pick them up.
-        assert out.parent == hermes_home / "backups"
+        assert out.parent == pichkoo_home / "backups"
         assert out.name.startswith("pre-migration-")
         assert out.suffix == ".zip"
 
-    def test_backup_uses_shared_exclusion_rules(self, hermes_home):
+    def test_backup_uses_shared_exclusion_rules(self, pichkoo_home):
         """Pre-migration backup reuses the same exclusion rules as
         ``pichkoo backup`` / ``create_pre_update_backup`` — no drift."""
         from pichkoo_cli.backup import create_pre_migration_backup
-        out = create_pre_migration_backup(hermes_home=hermes_home)
+        out = create_pre_migration_backup(pichkoo_home=pichkoo_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
             names = set(zf.namelist())
@@ -1624,57 +1624,57 @@ class TestPreMigrationBackup:
         assert not any("__pycache__" in n for n in names)
         assert "gateway.pid" not in names
 
-    def test_restorable_with_hermes_import(self, hermes_home, tmp_path):
+    def test_restorable_with_pichkoo_import(self, pichkoo_home, tmp_path):
         """The zip produced by pre-migration backup must be a valid Pichkoo
         backup — `pichkoo import` should accept it."""
         from pichkoo_cli.backup import create_pre_migration_backup, _validate_backup_zip
-        out = create_pre_migration_backup(hermes_home=hermes_home)
+        out = create_pre_migration_backup(pichkoo_home=pichkoo_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
             valid, _reason = _validate_backup_zip(zf)
         assert valid, "pre-migration zip failed _validate_backup_zip"
 
-    def test_does_not_recurse_into_prior_backups(self, hermes_home):
+    def test_does_not_recurse_into_prior_backups(self, pichkoo_home):
         from pichkoo_cli.backup import create_pre_migration_backup
-        out1 = create_pre_migration_backup(hermes_home=hermes_home)
+        out1 = create_pre_migration_backup(pichkoo_home=pichkoo_home)
         assert out1 is not None
-        out2 = create_pre_migration_backup(hermes_home=hermes_home)
+        out2 = create_pre_migration_backup(pichkoo_home=pichkoo_home)
         assert out2 is not None
         with zipfile.ZipFile(out2) as zf:
             names = zf.namelist()
         assert not any(n.startswith("backups/") for n in names)
 
-    def test_rotation_keeps_only_n(self, hermes_home):
+    def test_rotation_keeps_only_n(self, pichkoo_home):
         import time as _t
         from pichkoo_cli.backup import create_pre_migration_backup
 
         created = []
         for _ in range(7):
-            out = create_pre_migration_backup(hermes_home=hermes_home, keep=3)
+            out = create_pre_migration_backup(pichkoo_home=pichkoo_home, keep=3)
             if out is not None:
                 created.append(out)
             _t.sleep(1.05)  # timestamp resolution
 
-        remaining = sorted((hermes_home / "backups").glob("pre-migration-*.zip"))
+        remaining = sorted((pichkoo_home / "backups").glob("pre-migration-*.zip"))
         assert len(remaining) <= 3, f"expected <=3 backups retained, got {len(remaining)}"
 
-    def test_missing_hermes_home_returns_none(self, tmp_path):
+    def test_missing_pichkoo_home_returns_none(self, tmp_path):
         """Fresh install with no ~/.pichkoo yet — nothing to back up."""
         from pichkoo_cli.backup import create_pre_migration_backup
         missing = tmp_path / "does-not-exist"
-        out = create_pre_migration_backup(hermes_home=missing)
+        out = create_pre_migration_backup(pichkoo_home=missing)
         assert out is None
 
-    def test_does_not_touch_pre_update_backups(self, hermes_home):
+    def test_does_not_touch_pre_update_backups(self, pichkoo_home):
         """Pre-migration rotation must only prune pre-migration-*.zip files,
         leaving pre-update-*.zip backups untouched."""
         from pichkoo_cli.backup import create_pre_update_backup, create_pre_migration_backup
-        update_backup = create_pre_update_backup(hermes_home=hermes_home, keep=5)
+        update_backup = create_pre_update_backup(pichkoo_home=pichkoo_home, keep=5)
         assert update_backup is not None and update_backup.exists()
         # Spin up a lot of migration backups with keep=1
         import time as _t
         for _ in range(3):
-            out = create_pre_migration_backup(hermes_home=hermes_home, keep=1)
+            out = create_pre_migration_backup(pichkoo_home=pichkoo_home, keep=1)
             assert out is not None
             _t.sleep(1.05)
         # Update backup must still be there
@@ -1695,23 +1695,23 @@ class TestRestoreCronJobsIfEmptied:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps({"jobs": jobs}))
 
-    def _make_snapshot(self, hermes_home: Path, label="pre-update"):
+    def _make_snapshot(self, pichkoo_home: Path, label="pre-update"):
         from pichkoo_cli.backup import create_quick_snapshot
-        return create_quick_snapshot(label=label, hermes_home=hermes_home, keep=5)
+        return create_quick_snapshot(label=label, pichkoo_home=pichkoo_home, keep=5)
 
     def test_restores_when_emptied_after_migration(self, tmp_path):
         from pichkoo_cli.backup import restore_cron_jobs_if_emptied
-        hermes_home = tmp_path / ".pichkoo"
-        jobs_path = hermes_home / "cron" / "jobs.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        jobs_path = pichkoo_home / "cron" / "jobs.json"
         # Pre-update: 3 real jobs.
         self._seed_jobs(jobs_path, [{"id": "a"}, {"id": "b"}, {"id": "c"}])
-        snap_id = self._make_snapshot(hermes_home)
+        snap_id = self._make_snapshot(pichkoo_home)
         assert snap_id
 
         # Migration silently empties the file (valid JSON, zero jobs).
         jobs_path.write_text(json.dumps({"jobs": []}))
 
-        result = restore_cron_jobs_if_emptied(snap_id, hermes_home=hermes_home)
+        result = restore_cron_jobs_if_emptied(snap_id, pichkoo_home=pichkoo_home)
         assert result is not None
         assert result["restored"] is True
         assert result["job_count"] == 3
@@ -1723,61 +1723,61 @@ class TestRestoreCronJobsIfEmptied:
 
     def test_noop_when_live_file_still_has_jobs(self, tmp_path):
         from pichkoo_cli.backup import restore_cron_jobs_if_emptied
-        hermes_home = tmp_path / ".pichkoo"
-        jobs_path = hermes_home / "cron" / "jobs.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        jobs_path = pichkoo_home / "cron" / "jobs.json"
         self._seed_jobs(jobs_path, [{"id": "a"}, {"id": "b"}])
-        snap_id = self._make_snapshot(hermes_home)
+        snap_id = self._make_snapshot(pichkoo_home)
 
         # Healthy path: file unchanged after update.
-        result = restore_cron_jobs_if_emptied(snap_id, hermes_home=hermes_home)
+        result = restore_cron_jobs_if_emptied(snap_id, pichkoo_home=pichkoo_home)
         assert result is None
 
     def test_noop_when_snapshot_had_no_jobs(self, tmp_path):
         from pichkoo_cli.backup import restore_cron_jobs_if_emptied
-        hermes_home = tmp_path / ".pichkoo"
-        jobs_path = hermes_home / "cron" / "jobs.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        jobs_path = pichkoo_home / "cron" / "jobs.json"
         # Pre-update genuinely had zero jobs; current is also empty.
         self._seed_jobs(jobs_path, [])
-        snap_id = self._make_snapshot(hermes_home)
+        snap_id = self._make_snapshot(pichkoo_home)
         jobs_path.write_text(json.dumps({"jobs": []}))
 
-        result = restore_cron_jobs_if_emptied(snap_id, hermes_home=hermes_home)
+        result = restore_cron_jobs_if_emptied(snap_id, pichkoo_home=pichkoo_home)
         assert result is None
 
     def test_noop_when_live_file_unreadable(self, tmp_path):
         """An unparseable live file is left alone — that's a different failure
         mode the user should see, not silently overwrite."""
         from pichkoo_cli.backup import restore_cron_jobs_if_emptied
-        hermes_home = tmp_path / ".pichkoo"
-        jobs_path = hermes_home / "cron" / "jobs.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        jobs_path = pichkoo_home / "cron" / "jobs.json"
         self._seed_jobs(jobs_path, [{"id": "a"}])
-        snap_id = self._make_snapshot(hermes_home)
+        snap_id = self._make_snapshot(pichkoo_home)
         jobs_path.write_text("{ this is not valid json")
 
-        result = restore_cron_jobs_if_emptied(snap_id, hermes_home=hermes_home)
+        result = restore_cron_jobs_if_emptied(snap_id, pichkoo_home=pichkoo_home)
         assert result is None
         # File left untouched.
         assert jobs_path.read_text() == "{ this is not valid json"
 
     def test_noop_when_snapshot_id_missing(self, tmp_path):
         from pichkoo_cli.backup import restore_cron_jobs_if_emptied
-        hermes_home = tmp_path / ".pichkoo"
-        jobs_path = hermes_home / "cron" / "jobs.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        jobs_path = pichkoo_home / "cron" / "jobs.json"
         self._seed_jobs(jobs_path, [])
-        assert restore_cron_jobs_if_emptied(None, hermes_home=hermes_home) is None
-        assert restore_cron_jobs_if_emptied("", hermes_home=hermes_home) is None
+        assert restore_cron_jobs_if_emptied(None, pichkoo_home=pichkoo_home) is None
+        assert restore_cron_jobs_if_emptied("", pichkoo_home=pichkoo_home) is None
 
     def test_restores_legacy_bare_list_snapshot_shape(self, tmp_path):
         """A legacy snapshot storing a bare JSON list (not {"jobs": [...]}) is
         still counted and restored."""
         from pichkoo_cli.backup import restore_cron_jobs_if_emptied
-        hermes_home = tmp_path / ".pichkoo"
-        jobs_path = hermes_home / "cron" / "jobs.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        jobs_path = pichkoo_home / "cron" / "jobs.json"
         jobs_path.parent.mkdir(parents=True, exist_ok=True)
         jobs_path.write_text(json.dumps([{"id": "a"}, {"id": "b"}]))
-        snap_id = self._make_snapshot(hermes_home)
+        snap_id = self._make_snapshot(pichkoo_home)
 
         jobs_path.write_text(json.dumps({"jobs": []}))
-        result = restore_cron_jobs_if_emptied(snap_id, hermes_home=hermes_home)
+        result = restore_cron_jobs_if_emptied(snap_id, pichkoo_home=pichkoo_home)
         assert result is not None
         assert result["job_count"] == 2

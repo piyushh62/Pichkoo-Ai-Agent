@@ -25,7 +25,7 @@ export HOME=/opt/data
 
 cd /opt/data
 # shellcheck disable=SC1091
-. /opt/hermes/.venv/bin/activate
+. /opt/pichkoo/.venv/bin/activate
 
 dash_host="${HERMES_DASHBOARD_HOST:-0.0.0.0}"
 dash_port="${HERMES_DASHBOARD_PORT:-9119}"
@@ -49,7 +49,7 @@ esac
 
 # Skip the drop when already non-root.
 # shellcheck disable=SC2086  # word-splitting of $insecure is intentional
-[ "$(id -u)" = 0 ] || exec hermes dashboard --host "$dash_host" --port "$dash_port" --no-open $insecure
+[ "$(id -u)" = 0 ] || exec pichkoo dashboard --host "$dash_host" --port "$dash_port" --no-open $insecure
 # shellcheck disable=SC2086  # word-splitting of $insecure is intentional
-exec s6-setuidgid hermes hermes dashboard \
+exec s6-setuidgid pichkoo pichkoo dashboard \
     --host "$dash_host" --port "$dash_port" --no-open $insecure

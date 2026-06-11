@@ -176,10 +176,10 @@ def check_env_vars():
 
     # Load .env
     try:
-        from pichkoo_cli.env_loader import load_hermes_dotenv
+        from pichkoo_cli.env_loader import load_pichkoo_dotenv
 
-        load_hermes_dotenv(
-            hermes_home=ENV_FILE.parent,
+        load_pichkoo_dotenv(
+            pichkoo_home=ENV_FILE.parent,
             project_env=PROJECT_ROOT / ".env",
         )
     except ImportError:

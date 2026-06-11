@@ -49,7 +49,7 @@ from agent.tool_guardrails import (
 )
 from pichkoo_cli.config import cfg_get
 from pichkoo_cli.timeouts import get_provider_request_timeout
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 from utils import base_url_host_matches
 
 # Use the same logger name as run_agent so tests patching ``run_agent.logger``
@@ -550,7 +550,7 @@ def init_agent(
     # both live under ~/.pichkoo/logs/.  Idempotent, so gateway mode
     # (which creates a new AIAgent per message) won't duplicate handlers.
     from pichkoo_logging import setup_logging, setup_verbose_logging
-    setup_logging(hermes_home=_ra()._hermes_home)
+    setup_logging(pichkoo_home=_ra()._pichkoo_home)
 
     if agent.verbose_logging:
         setup_verbose_logging()
@@ -1028,8 +1028,8 @@ def init_agent(
         os.environ["PICHKOO_SESSION_ID"] = agent.session_id
 
     # Session logs go into ~/.pichkoo/sessions/ alongside gateway sessions
-    hermes_home = get_hermes_home()
-    agent.logs_dir = hermes_home / "sessions"
+    pichkoo_home = get_pichkoo_home()
+    agent.logs_dir = pichkoo_home / "sessions"
     agent.logs_dir.mkdir(parents=True, exist_ok=True)
     # Per-session JSON snapshot writer (~/.pichkoo/sessions/session_{sid}.json)
     # is opt-in via sessions.write_json_snapshots (default False).  state.db
@@ -1146,7 +1146,7 @@ def init_agent(
                     _init_kwargs = {
                         "session_id": agent.session_id,
                         "platform": platform or "cli",
-                        "hermes_home": str(get_hermes_home()),
+                        "pichkoo_home": str(get_pichkoo_home()),
                         "agent_context": "primary",
                     }
                     # Thread session title for memory provider scoping
@@ -1599,7 +1599,7 @@ def init_agent(
         try:
             agent.context_compressor.on_session_start(
                 agent.session_id,
-                hermes_home=str(get_hermes_home()),
+                pichkoo_home=str(get_pichkoo_home()),
                 platform=agent.platform or "cli",
                 model=agent.model,
                 context_length=getattr(agent.context_compressor, "context_length", 0),

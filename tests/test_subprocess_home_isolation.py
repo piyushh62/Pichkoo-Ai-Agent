@@ -20,25 +20,25 @@ from pathlib import Path
 class TestGetSubprocessHome:
     """Unit tests for pichkoo_constants.get_subprocess_home()."""
 
-    def test_returns_none_when_hermes_home_unset(self, monkeypatch):
+    def test_returns_none_when_pichkoo_home_unset(self, monkeypatch):
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
         from pichkoo_constants import get_subprocess_home
         assert get_subprocess_home() is None
 
     def test_returns_none_when_home_dir_missing(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         # No home/ subdirectory created
         from pichkoo_constants import get_subprocess_home
         assert get_subprocess_home() is None
 
     def test_returns_path_when_home_dir_exists(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        profile_home = hermes_home / "home"
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        profile_home = pichkoo_home / "home"
         profile_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         from pichkoo_constants import get_subprocess_home
         assert get_subprocess_home() == str(profile_home)
 
@@ -81,9 +81,9 @@ class TestGetSubprocessHome:
         monkeypatch.setenv("PICHKOO_HOME", str(root))
 
         from pichkoo_constants import (
-            get_hermes_home,
-            reset_hermes_home_override,
-            set_hermes_home_override,
+            get_pichkoo_home,
+            reset_pichkoo_home_override,
+            set_pichkoo_home_override,
         )
 
         ready = threading.Event()
@@ -93,23 +93,23 @@ class TestGetSubprocessHome:
         def read_from_other_thread():
             ready.set()
             release.wait(timeout=5)
-            seen.append(str(get_hermes_home()))
+            seen.append(str(get_pichkoo_home()))
 
         thread = threading.Thread(target=read_from_other_thread)
         thread.start()
         assert ready.wait(timeout=5)
 
-        token = set_hermes_home_override(profile)
+        token = set_pichkoo_home_override(profile)
         try:
-            assert get_hermes_home() == profile
+            assert get_pichkoo_home() == profile
             release.set()
             thread.join(timeout=5)
         finally:
-            reset_hermes_home_override(token)
+            reset_pichkoo_home_override(token)
             release.set()
 
         assert seen == [str(root)]
-        assert get_hermes_home() == root
+        assert get_pichkoo_home() == root
 
 
 # ---------------------------------------------------------------------------
@@ -120,23 +120,23 @@ class TestMakeRunEnvHomeInjection:
     """Verify _make_run_env() injects HOME into subprocess envs."""
 
     def test_injects_home_when_profile_home_exists(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "home").mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "home").mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setenv("HOME", "/root")
         monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
         from tools.environments.local import _make_run_env
         result = _make_run_env({})
 
-        assert result["HOME"] == str(hermes_home / "home")
+        assert result["HOME"] == str(pichkoo_home / "home")
 
     def test_no_injection_when_home_dir_missing(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
         # No home/ subdirectory
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.setenv("HOME", "/root")
         monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
@@ -145,7 +145,7 @@ class TestMakeRunEnvHomeInjection:
 
         assert result["HOME"] == "/root"
 
-    def test_no_injection_when_hermes_home_unset(self, monkeypatch):
+    def test_no_injection_when_pichkoo_home_unset(self, monkeypatch):
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
         monkeypatch.setenv("HOME", "/home/user")
         monkeypatch.setenv("PATH", "/usr/bin:/bin")
@@ -165,14 +165,14 @@ class TestMakeRunEnvHomeInjection:
         monkeypatch.setenv("HOME", "/root")
         monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
-        from pichkoo_constants import reset_hermes_home_override, set_hermes_home_override
+        from pichkoo_constants import reset_pichkoo_home_override, set_pichkoo_home_override
         from tools.environments.local import _make_run_env
 
-        token = set_hermes_home_override(profile)
+        token = set_pichkoo_home_override(profile)
         try:
             result = _make_run_env({})
         finally:
-            reset_hermes_home_override(token)
+            reset_pichkoo_home_override(token)
 
         assert result["PICHKOO_HOME"] == str(profile)
         assert result["HOME"] == str(profile / "home")
@@ -186,21 +186,21 @@ class TestSanitizeSubprocessEnvHomeInjection:
     """Verify _sanitize_subprocess_env() injects HOME for background procs."""
 
     def test_injects_home_when_profile_home_exists(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "home").mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "home").mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
         base_env = {"HOME": "/root", "PATH": "/usr/bin", "USER": "root"}
         from tools.environments.local import _sanitize_subprocess_env
         result = _sanitize_subprocess_env(base_env)
 
-        assert result["HOME"] == str(hermes_home / "home")
+        assert result["HOME"] == str(pichkoo_home / "home")
 
     def test_no_injection_when_home_dir_missing(self, tmp_path, monkeypatch):
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
         base_env = {"HOME": "/root", "PATH": "/usr/bin"}
         from tools.environments.local import _sanitize_subprocess_env
@@ -217,14 +217,14 @@ class TestSanitizeSubprocessEnvHomeInjection:
         monkeypatch.setenv("PICHKOO_HOME", str(root))
 
         base_env = {"HOME": "/root", "PATH": "/usr/bin"}
-        from pichkoo_constants import reset_hermes_home_override, set_hermes_home_override
+        from pichkoo_constants import reset_pichkoo_home_override, set_pichkoo_home_override
         from tools.environments.local import _sanitize_subprocess_env
 
-        token = set_hermes_home_override(profile)
+        token = set_pichkoo_home_override(profile)
         try:
             result = _sanitize_subprocess_env(base_env)
         finally:
-            reset_hermes_home_override(token)
+            reset_pichkoo_home_override(token)
 
         assert result["PICHKOO_HOME"] == str(profile)
         assert result["HOME"] == str(profile / "home")
@@ -263,10 +263,10 @@ class TestPythonProcessUnchanged:
     def test_path_home_unchanged_after_subprocess_home_resolved(
         self, tmp_path, monkeypatch
     ):
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "home").mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "home").mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
         original_home = os.environ.get("HOME")
         original_path_home = str(Path.home())

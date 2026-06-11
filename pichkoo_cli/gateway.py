@@ -25,14 +25,14 @@ from gateway.restart import (
 )
 from pichkoo_cli.config import (
     get_env_value,
-    get_hermes_home,
+    get_pichkoo_home,
     is_managed,
     managed_error,
     read_raw_config,
     save_env_value,
 )
 
-# display_hermes_home is imported lazily at call sites to avoid ImportError
+# display_pichkoo_home is imported lazily at call sites to avoid ImportError
 # when pichkoo_constants is cached from a pre-update version during `pichkoo update`.
 from pichkoo_cli.setup import (
     print_header,
@@ -335,7 +335,7 @@ def _scan_gateway_pids(exclude_pids: set[int], all_profiles: bool = False) -> li
         "pichkoo-gateway.exe",
         "gateway/run.py",
     ]
-    current_home = str(get_hermes_home().resolve())
+    current_home = str(get_pichkoo_home().resolve())
     current_home_lc = current_home.lower()
     current_profile_arg = _profile_arg(current_home)
     current_profile_name = (
@@ -349,7 +349,7 @@ def _scan_gateway_pids(exclude_pids: set[int], all_profiles: bool = False) -> li
             return (
                 f"--profile {current_profile_name_lc}" in command_lc
                 or f"-p {current_profile_name_lc}" in command_lc
-                or f"hermes_home={current_home_lc}" in command_lc
+                or f"pichkoo_home={current_home_lc}" in command_lc
             )
 
         # Default-profile case: no profile flag in argv. Accept as long as
@@ -360,8 +360,8 @@ def _scan_gateway_pids(exclude_pids: set[int], all_profiles: bool = False) -> li
         if "--profile " in command_lc or " -p " in command_lc:
             return False
         if (
-            "hermes_home=" in command_lc
-            and f"hermes_home={current_home_lc}" not in command_lc
+            "pichkoo_home=" in command_lc
+            and f"pichkoo_home={current_home_lc}" not in command_lc
         ):
             return False
         return True
@@ -800,11 +800,11 @@ def _read_systemd_unit_environment(system: bool = False) -> dict[str, str]:
     return parsed
 
 
-def _sync_hermes_home_from_systemd_unit(system: bool) -> None:
+def _sync_pichkoo_home_from_systemd_unit(system: bool) -> None:
     """When acting on a system-scope unit, adopt its ``PICHKOO_HOME``.
 
     Under ``sudo``, ``PICHKOO_HOME`` is stripped and ``HOME=/root``, so
-    :func:`get_hermes_home` falls back to ``/root/.pichkoo`` — the wrong
+    :func:`get_pichkoo_home` falls back to ``/root/.pichkoo`` — the wrong
     profile. The unit file pins ``PICHKOO_HOME`` for the actual gateway
     process, so we mirror that into our own environment to make
     ``read_runtime_status`` / ``get_running_pid`` read the correct files.
@@ -1411,10 +1411,10 @@ def _profile_suffix() -> str:
     """
     import hashlib
     import re
-    from pichkoo_constants import get_default_hermes_root
+    from pichkoo_constants import get_default_pichkoo_root
 
-    home = get_hermes_home().resolve()
-    default = get_default_hermes_root().resolve()
+    home = get_pichkoo_home().resolve()
+    default = get_default_pichkoo_root().resolve()
     if home == default:
         return ""
     # Detect <root>/profiles/<name> pattern → use the profile name
@@ -1430,22 +1430,22 @@ def _profile_suffix() -> str:
     return hashlib.sha256(str(home).encode()).hexdigest()[:8]
 
 
-def _profile_arg(hermes_home: str | None = None) -> str:
+def _profile_arg(pichkoo_home: str | None = None) -> str:
     """Return ``--profile <name>`` only when PICHKOO_HOME is a named profile.
 
     For ``~/.pichkoo/profiles/<name>``, returns ``"--profile <name>"``.
     For the default profile or hash-based custom paths, returns the empty string.
 
     Args:
-        hermes_home: Optional explicit PICHKOO_HOME path. Defaults to the current
-            ``get_hermes_home()`` value. Should be passed when generating a
+        pichkoo_home: Optional explicit PICHKOO_HOME path. Defaults to the current
+            ``get_pichkoo_home()`` value. Should be passed when generating a
             service definition for a different user (e.g. system service).
     """
     import re
-    from pichkoo_constants import get_default_hermes_root
+    from pichkoo_constants import get_default_pichkoo_root
 
-    home = Path(hermes_home or str(get_hermes_home())).resolve()
-    default = get_default_hermes_root().resolve()
+    home = Path(pichkoo_home or str(get_pichkoo_home())).resolve()
+    default = get_default_pichkoo_root().resolve()
     if home == default:
         return ""
     profiles_root = (default / "profiles").resolve()
@@ -1755,7 +1755,7 @@ def _legacy_unit_search_paths() -> list[tuple[bool, Path]]:
     ]
 
 
-def _find_legacy_hermes_units() -> list[tuple[str, Path, bool]]:
+def _find_legacy_pichkoo_units() -> list[tuple[str, Path, bool]]:
     """Return ``[(unit_name, unit_path, is_system)]`` for legacy Pichkoo gateway units.
 
     Detects unit files installed by older Pichkoo versions that used a
@@ -1793,9 +1793,9 @@ def _find_legacy_hermes_units() -> list[tuple[str, Path, bool]]:
     return results
 
 
-def has_legacy_hermes_units() -> bool:
+def has_legacy_pichkoo_units() -> bool:
     """Return True when any legacy Pichkoo gateway unit files exist."""
-    return bool(_find_legacy_hermes_units())
+    return bool(_find_legacy_pichkoo_units())
 
 
 def print_legacy_unit_warning() -> None:
@@ -1804,7 +1804,7 @@ def print_legacy_unit_warning() -> None:
     Idempotent: prints nothing when no legacy units are detected. Safe to
     call from any status/install/setup path.
     """
-    legacy = _find_legacy_hermes_units()
+    legacy = _find_legacy_pichkoo_units()
     if not legacy:
         return
     print_warning("Legacy Pichkoo gateway unit(s) detected from an older install:")
@@ -1817,13 +1817,13 @@ def print_legacy_unit_warning() -> None:
     print_info("    pichkoo gateway migrate-legacy")
 
 
-def remove_legacy_hermes_units(
+def remove_legacy_pichkoo_units(
     interactive: bool = True,
     dry_run: bool = False,
 ) -> tuple[int, list[Path]]:
     """Stop, disable, and remove legacy Pichkoo gateway unit files.
 
-    Iterates over whatever ``_find_legacy_hermes_units()`` returns — which is
+    Iterates over whatever ``_find_legacy_pichkoo_units()`` returns — which is
     an explicit allowlist of legacy names (not a glob). Profile units and
     unrelated third-party services are never touched.
 
@@ -1837,7 +1837,7 @@ def remove_legacy_hermes_units(
         ``(removed_count, remaining_paths)`` — remaining includes units we
         couldn't remove (typically system-scope when not running as root).
     """
-    legacy = _find_legacy_hermes_units()
+    legacy = _find_legacy_pichkoo_units()
     if not legacy:
         print("No legacy Pichkoo gateway units found.")
         return 0, []
@@ -2263,30 +2263,30 @@ def _remap_path_for_user(path: str, target_home_dir: str) -> str:
         return str(p)
 
 
-def _hermes_home_for_target_user(target_home_dir: str) -> str:
+def _pichkoo_home_for_target_user(target_home_dir: str) -> str:
     """Remap the current PICHKOO_HOME to the equivalent under a target user's home.
 
-    When installing a system service via sudo, get_hermes_home() resolves to
+    When installing a system service via sudo, get_pichkoo_home() resolves to
     root's home.  This translates it to the target user's equivalent path:
       /root/.pichkoo                    → /home/alice/.pichkoo
       /root/.pichkoo/profiles/coder     → /home/alice/.pichkoo/profiles/coder
       /opt/custom-pichkoo               → /opt/custom-pichkoo  (kept as-is)
     """
-    current_hermes = get_hermes_home().resolve()
+    current_pichkoo = get_pichkoo_home().resolve()
     current_default = (Path.home() / ".pichkoo").resolve()
     target_default = Path(target_home_dir) / ".pichkoo"
 
     # Default ~/.pichkoo → remap to target user's default
-    if current_hermes == current_default:
+    if current_pichkoo == current_default:
         return str(target_default)
 
     # Profile or subdir of ~/.pichkoo → preserve the relative structure
     try:
-        relative = current_hermes.relative_to(current_default)
+        relative = current_pichkoo.relative_to(current_default)
         return str(target_default / relative)
     except ValueError:
         # Completely custom path (not under ~/.pichkoo) — keep as-is
-        return str(current_hermes)
+        return str(current_pichkoo)
 
 
 def _build_service_path_dirs(project_root: Path | None = None) -> list[str]:
@@ -2312,13 +2312,13 @@ def _build_service_path_dirs(project_root: Path | None = None) -> list[str]:
     if _is_dir(node_bin):
         candidates.append(str(node_bin))
 
-    hermes_home = get_hermes_home()
-    hermes_node = hermes_home / "node" / "bin"
-    if _is_dir(hermes_node):
-        candidates.append(str(hermes_node))
-    hermes_nm = hermes_home / "node_modules" / ".bin"
-    if _is_dir(hermes_nm):
-        candidates.append(str(hermes_nm))
+    pichkoo_home = get_pichkoo_home()
+    pichkoo_node = pichkoo_home / "node" / "bin"
+    if _is_dir(pichkoo_node):
+        candidates.append(str(pichkoo_node))
+    pichkoo_nm = pichkoo_home / "node_modules" / ".bin"
+    if _is_dir(pichkoo_nm):
+        candidates.append(str(pichkoo_nm))
 
     return candidates
 
@@ -2343,7 +2343,7 @@ def _stable_service_working_dir() -> str:
     cannot be resolved (it always can in practice).
     """
     try:
-        home = get_hermes_home()
+        home = get_pichkoo_home()
         if home and Path(home).is_dir():
             return str(Path(home).resolve())
     except Exception:
@@ -2383,8 +2383,8 @@ def generate_systemd_unit(system: bool = False, run_as_user: str | None = None) 
 
     if system:
         username, group_name, home_dir = _system_service_identity(run_as_user)
-        hermes_home = _hermes_home_for_target_user(home_dir)
-        profile_arg = _profile_arg(hermes_home)
+        pichkoo_home = _pichkoo_home_for_target_user(home_dir)
+        profile_arg = _profile_arg(pichkoo_home)
         # Remap all paths that may resolve under the calling user's home
         # (e.g. /root/) to the target user's home so the service can
         # actually access them.
@@ -2392,7 +2392,7 @@ def generate_systemd_unit(system: bool = False, run_as_user: str | None = None) 
         # Anchor cwd to the target user's PICHKOO_HOME (stable, always exists)
         # rather than a remapped source-checkout path that can rot. See
         # _stable_service_working_dir() for the full rationale.
-        working_dir = str(hermes_home) if hermes_home else _remap_path_for_user(working_dir, home_dir)
+        working_dir = str(pichkoo_home) if pichkoo_home else _remap_path_for_user(working_dir, home_dir)
         venv_dir = _remap_path_for_user(venv_dir, home_dir)
         path_entries = [_remap_path_for_user(p, home_dir) for p in path_entries]
         path_entries.extend(_build_user_local_paths(Path(home_dir), path_entries))
@@ -2416,7 +2416,7 @@ Environment="USER={username}"
 Environment="LOGNAME={username}"
 Environment="PATH={sane_path}"
 Environment="VIRTUAL_ENV={venv_dir}"
-Environment="PICHKOO_HOME={hermes_home}"
+Environment="PICHKOO_HOME={pichkoo_home}"
 Restart=always
 RestartSec=5
 RestartForceExitStatus={GATEWAY_SERVICE_RESTART_EXIT_CODE}
@@ -2431,8 +2431,8 @@ StandardError=journal
 WantedBy=multi-user.target
 """
 
-    hermes_home = str(get_hermes_home().resolve())
-    profile_arg = _profile_arg(hermes_home)
+    pichkoo_home = str(get_pichkoo_home().resolve())
+    profile_arg = _profile_arg(pichkoo_home)
     path_entries.extend(_build_user_local_paths(Path.home(), path_entries))
     path_entries.extend(_build_wsl_interop_paths(path_entries))
     path_entries.extend(common_bin_paths)
@@ -2449,7 +2449,7 @@ ExecStart={python_path} -m pichkoo_cli.main{f" {profile_arg}" if profile_arg els
 WorkingDirectory={working_dir}
 Environment="PATH={sane_path}"
 Environment="VIRTUAL_ENV={venv_dir}"
-Environment="PICHKOO_HOME={hermes_home}"
+Environment="PICHKOO_HOME={pichkoo_home}"
 Restart=always
 RestartSec=5
 RestartForceExitStatus={GATEWAY_SERVICE_RESTART_EXIT_CODE}
@@ -2544,7 +2544,7 @@ def refresh_systemd_unit_if_needed(system: bool = False) -> bool:
     # The user-scope unit path resolves under ``Path.home()``, which is NOT
     # sandboxed by the test conftest (only PICHKOO_HOME is). If a test
     # exercises ``run_gateway()`` with a pytest-tmp PICHKOO_HOME, the freshly
-    # generated unit bakes that ``/tmp/pytest-of-.../hermes_test`` path into
+    # generated unit bakes that ``/tmp/pytest-of-.../pichkoo_test`` path into
     # ``Environment="PICHKOO_HOME=..."``. Writing that to the developer's
     # real user systemd unit file silently breaks their gateway on the next
     # reboot (systemd loads the polluted env, the gateway looks at an empty
@@ -2556,8 +2556,8 @@ def refresh_systemd_unit_if_needed(system: bool = False) -> bool:
     # still works.
     if not system and (
         "/pytest-of-" in new_unit
-        or '/hermes_test"' in new_unit
-        or "/hermes_test/" in new_unit
+        or '/pichkoo_test"' in new_unit
+        or "/pichkoo_test/" in new_unit
     ):
         return False
 
@@ -2703,12 +2703,12 @@ def systemd_install(
     # flap-fight for the Telegram bot token on every gateway startup.
     # Only removes units matching _LEGACY_SERVICE_NAMES + our ExecStart
     # signature — profile units are never touched.
-    if has_legacy_hermes_units():
+    if has_legacy_pichkoo_units():
         print()
         print_legacy_unit_warning()
         print()
         if prompt_yes_no("Remove the legacy unit(s) before installing?", True):
-            remove_legacy_hermes_units(interactive=False)
+            remove_legacy_pichkoo_units(interactive=False)
             print()
 
     unit_path = get_systemd_unit_path(system=system)
@@ -2813,7 +2813,7 @@ def systemd_stop(system: bool = False):
     if system:
         _require_root_for_system_service("stop")
     _require_service_installed("stop", system=system)
-    _sync_hermes_home_from_systemd_unit(system=system)
+    _sync_pichkoo_home_from_systemd_unit(system=system)
     try:
         from gateway.status import get_running_pid, write_planned_stop_marker
 
@@ -2844,7 +2844,7 @@ def systemd_restart(system: bool = False):
         _preflight_user_systemd()
     _require_service_installed("restart", system=system)
     refresh_systemd_unit_if_needed(system=system)
-    _sync_hermes_home_from_systemd_unit(system=system)
+    _sync_pichkoo_home_from_systemd_unit(system=system)
     from gateway.status import get_running_pid
 
     pid = get_running_pid() or _systemd_main_pid(system=system)
@@ -2945,13 +2945,13 @@ def systemd_status(deep: bool = False, system: bool = False, full: bool = False)
         print(f"  Run: {'sudo ' if system else ''}pichkoo gateway install{scope_flag}")
         return
 
-    _sync_hermes_home_from_systemd_unit(system=system)
+    _sync_pichkoo_home_from_systemd_unit(system=system)
 
     if has_conflicting_systemd_units():
         print_systemd_scope_conflict_warning()
         print()
 
-    if has_legacy_hermes_units():
+    if has_legacy_pichkoo_units():
         print_legacy_unit_warning()
         print()
 
@@ -3127,7 +3127,7 @@ def _spawn_detached_gateway() -> bool:
     """
     from pichkoo_cli._subprocess_compat import windows_detach_popen_kwargs
 
-    log_dir = get_hermes_home() / "logs"
+    log_dir = get_pichkoo_home() / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     out_path = log_dir / "gateway.log"
     err_path = log_dir / "gateway.error.log"
@@ -3157,7 +3157,7 @@ def _launchd_fallback_to_detached(reason: str, *, exit_on_failure: bool = True) 
     launched, prints the manual workaround and (by default) exits non-zero so
     the failure surfaces instead of silently doing nothing.
     """
-    from pichkoo_constants import display_hermes_home as _dhh
+    from pichkoo_constants import display_pichkoo_home as _dhh
 
     print(f"⚠ launchd cannot manage the gateway on this macOS version ({reason}).")
     if _spawn_detached_gateway():
@@ -3182,11 +3182,11 @@ def generate_launchd_plist() -> str:
     # _stable_service_working_dir() for the rationale (same rot risk applies
     # to launchd's WorkingDirectory as to systemd's).
     working_dir = _stable_service_working_dir()
-    hermes_home = str(get_hermes_home().resolve())
-    log_dir = get_hermes_home() / "logs"
+    pichkoo_home = str(get_pichkoo_home().resolve())
+    log_dir = get_pichkoo_home() / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     label = get_launchd_label()
-    profile_arg = _profile_arg(hermes_home)
+    profile_arg = _profile_arg(pichkoo_home)
     # Build a sane PATH for the launchd plist.  launchd provides only a
     # minimal default (/usr/bin:/bin:/usr/sbin:/sbin) which misses Homebrew,
     # nvm, cargo, etc.  We prepend venv/bin and node_modules/.bin (matching
@@ -3248,7 +3248,7 @@ def generate_launchd_plist() -> str:
         <key>VIRTUAL_ENV</key>
         <string>{venv_dir}</string>
         <key>PICHKOO_HOME</key>
-        <string>{hermes_home}</string>
+        <string>{pichkoo_home}</string>
     </dict>
 
     <key>LimitLoadToSessionType</key>
@@ -3350,7 +3350,7 @@ def launchd_install(force: bool = False):
     print()
     print("Next steps:")
     print("  pichkoo gateway status             # Check status")
-    from pichkoo_constants import display_hermes_home as _dhh
+    from pichkoo_constants import display_pichkoo_home as _dhh
 
     print(f"  tail -f {_dhh()}/logs/gateway.log  # View logs")
 
@@ -3598,7 +3598,7 @@ def launchd_status(deep: bool = False):
         print("  Run: pichkoo gateway start")
 
     if deep:
-        log_file = get_hermes_home() / "logs" / "gateway.log"
+        log_file = get_pichkoo_home() / "logs" / "gateway.log"
         if log_file.exists():
             print()
             print("Recent logs:")
@@ -3747,7 +3747,7 @@ def run_gateway(verbose: int = 0, quiet: bool = False, replace: bool = False):
         if os.environ.get("PICHKOO_GATEWAY_EXIT_DIAG", "1") != "1":
             return
         try:
-            from pichkoo_constants import get_hermes_home as _ghh
+            from pichkoo_constants import get_pichkoo_home as _ghh
 
             log_dir = _ghh() / "logs"
             log_dir.mkdir(parents=True, exist_ok=True)
@@ -4498,7 +4498,7 @@ def _platform_status(platform: dict) -> str:
     val = get_env_value(token_var)
     if token_var == "WHATSAPP_ENABLED":
         if val and val.lower() == "true":
-            session_file = get_hermes_home() / "whatsapp" / "session" / "creds.json"
+            session_file = get_pichkoo_home() / "whatsapp" / "session" / "creds.json"
             if session_file.exists():
                 return "configured + paired"
             return "enabled, not paired"
@@ -5043,7 +5043,7 @@ def _setup_weixin():
     import asyncio
 
     try:
-        credentials = asyncio.run(qr_login(str(get_hermes_home())))
+        credentials = asyncio.run(qr_login(str(get_pichkoo_home())))
     except KeyboardInterrupt:
         print()
         print_warning("  Weixin setup cancelled.")
@@ -5743,7 +5743,7 @@ def gateway_setup():
         print_systemd_scope_conflict_warning()
         print()
 
-    if supports_systemd_services() and has_legacy_hermes_units():
+    if supports_systemd_services() and has_legacy_pichkoo_units():
         print_legacy_unit_warning()
         print()
 
@@ -5934,7 +5934,7 @@ def gateway_setup():
                     "  To enable systemd: add systemd=true to /etc/wsl.conf, then 'wsl --shutdown'"
                 )
             elif is_termux():
-                from pichkoo_constants import display_hermes_home as _dhh
+                from pichkoo_constants import display_pichkoo_home as _dhh
 
                 print_info("  Termux does not use systemd/launchd services.")
                 print_info("  Run in foreground: pichkoo gateway run")
@@ -6771,4 +6771,4 @@ def _gateway_command_inner(args):
         if not supports_systemd_services() and not is_macos():
             print("Legacy unit migration only applies to systemd-based Linux hosts.")
             return
-        remove_legacy_hermes_units(interactive=not yes, dry_run=dry_run)
+        remove_legacy_pichkoo_units(interactive=not yes, dry_run=dry_run)

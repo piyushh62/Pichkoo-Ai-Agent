@@ -12,7 +12,7 @@ import time as _time
 from pichkoo_cli.banner import cprint, _DIM, _RST
 from pichkoo_cli.config import save_env_value_secure
 from pichkoo_cli.secret_prompt import masked_secret_prompt
-from pichkoo_constants import display_hermes_home
+from pichkoo_constants import display_pichkoo_home
 
 
 def clarify_callback(cli, question, choices):
@@ -91,7 +91,7 @@ def prompt_for_secret(cli, var_name: str, prompt: str, metadata=None) -> dict:
             }
 
         stored = save_env_value_secure(var_name, value)
-        _dhh = display_hermes_home()
+        _dhh = display_pichkoo_home()
         cprint(f"\n{_DIM}  ✓ Stored secret in {_dhh}/.env as {var_name}{_RST}")
         return {
             **stored,
@@ -144,7 +144,7 @@ def prompt_for_secret(cli, var_name: str, prompt: str, metadata=None) -> dict:
                 }
 
             stored = save_env_value_secure(var_name, value)
-            _dhh = display_hermes_home()
+            _dhh = display_pichkoo_home()
             cprint(f"\n{_DIM}  ✓ Stored secret in {_dhh}/.env as {var_name}{_RST}")
             return {
                 **stored,

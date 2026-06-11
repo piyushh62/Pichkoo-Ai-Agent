@@ -17,7 +17,7 @@ from agent import shell_hooks
 
 @pytest.fixture(autouse=True)
 def _isolated_home(tmp_path, monkeypatch):
-    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path / "hermes_home"))
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path / "pichkoo_home"))
     monkeypatch.delenv("PICHKOO_ACCEPT_HOOKS", raising=False)
     shell_hooks.reset_for_tests()
     yield

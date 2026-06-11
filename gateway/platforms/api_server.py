@@ -62,7 +62,7 @@ from gateway.platforms.base import (
 logger = logging.getLogger(__name__)
 
 
-def _hermes_version() -> str:
+def _pichkoo_version() -> str:
     """Return the pichkoo-agent version string, or "dev" if it can't be resolved.
 
     Tries the installed package metadata first (authoritative for a pip/uv
@@ -378,8 +378,8 @@ class ResponseStore:
         self._max_size = max_size
         if db_path is None:
             try:
-                from pichkoo_cli.config import get_hermes_home
-                db_path = str(get_hermes_home() / "response_store.db")
+                from pichkoo_cli.config import get_pichkoo_home
+                db_path = str(get_pichkoo_home() / "response_store.db")
             except Exception:
                 db_path = ":memory:"
         self._db_path: Optional[str] = db_path if db_path != ":memory:" else None
@@ -1071,7 +1071,7 @@ class APIServerAdapter(BasePlatformAdapter):
     async def _handle_health(self, request: "web.Request") -> "web.Response":
         """GET /health — simple health check."""
         return web.json_response(
-            {"status": "ok", "platform": "pichkoo-agent", "version": _hermes_version()}
+            {"status": "ok", "platform": "pichkoo-agent", "version": _pichkoo_version()}
         )
 
     async def _handle_health_detailed(self, request: "web.Request") -> "web.Response":
@@ -1087,7 +1087,7 @@ class APIServerAdapter(BasePlatformAdapter):
         return web.json_response({
             "status": "ok",
             "platform": "pichkoo-agent",
-            "version": _hermes_version(),
+            "version": _pichkoo_version(),
             "gateway_state": runtime.get("gateway_state"),
             "platforms": runtime.get("platforms", {}),
             "active_agents": runtime.get("active_agents", 0),

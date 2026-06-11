@@ -245,7 +245,7 @@ class TestSystemdServiceRefresh:
         ``Environment=`` line. Without this guard, any test that drives
         ``run_gateway()`` end-to-end on a real Linux dev box silently
         rewrites the developer's installed gateway unit with a
-        ``/tmp/pytest-of-.../hermes_test`` PICHKOO_HOME — silently breaking
+        ``/tmp/pytest-of-.../pichkoo_test`` PICHKOO_HOME — silently breaking
         their gateway on the next boot. The guard sniffs the generated
         unit body for tmpdir markers and refuses the write. Tests that
         legitimately exercise the refresh flow patch
@@ -262,7 +262,7 @@ class TestSystemdServiceRefresh:
         polluted_unit = (
             "[Service]\n"
             'Environment="PICHKOO_HOME=/tmp/pytest-of-alice/pytest-42/'
-            'popen-gw0/test_x/hermes_test"\n'
+            'popen-gw0/test_x/pichkoo_test"\n'
         )
         monkeypatch.setattr(
             gateway_cli,
@@ -369,7 +369,7 @@ class TestGeneratedSystemdUnits:
             "_system_service_identity",
             lambda run_as_user=None: ("alice", "alice", "/home/alice"),
         )
-        monkeypatch.setattr(gateway_cli, "_hermes_home_for_target_user", lambda home: "/home/alice/.pichkoo")
+        monkeypatch.setattr(gateway_cli, "_pichkoo_home_for_target_user", lambda home: "/home/alice/.pichkoo")
         monkeypatch.setenv("PATH", "/usr/local/bin:/mnt/c/WINDOWS/system32")
         monkeypatch.setattr(gateway_cli.shutil, "which", lambda cmd: None)
 
@@ -1091,7 +1091,7 @@ class TestGatewaySystemServiceRouting:
         monkeypatch.setattr(gateway_cli, "_select_systemd_scope", lambda system=False: False)
         monkeypatch.setattr(gateway_cli, "get_systemd_unit_path", lambda system=False: unit)
         monkeypatch.setattr(gateway_cli, "has_conflicting_systemd_units", lambda: False)
-        monkeypatch.setattr(gateway_cli, "has_legacy_hermes_units", lambda: False)
+        monkeypatch.setattr(gateway_cli, "has_legacy_pichkoo_units", lambda: False)
         monkeypatch.setattr(gateway_cli, "systemd_unit_is_current", lambda system=False: True)
         monkeypatch.setattr(gateway_cli, "_runtime_health_lines", lambda: ["⚠ Last shutdown reason: Gateway restart requested"])
         monkeypatch.setattr(gateway_cli, "get_systemd_linger_status", lambda: (True, ""))
@@ -1375,7 +1375,7 @@ class TestSystemUnitPichkooHome:
         assert 'PICHKOO_HOME=/home/alice/.pichkoo/profiles/coder' in unit
         assert '/root/' not in unit
 
-    def test_system_unit_preserves_custom_hermes_home(self, monkeypatch):
+    def test_system_unit_preserves_custom_pichkoo_home(self, monkeypatch):
         # Custom PICHKOO_HOME not under any user's home — keep as-is
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
         monkeypatch.setenv("PICHKOO_HOME", "/opt/pichkoo-shared")
@@ -1396,39 +1396,39 @@ class TestSystemUnitPichkooHome:
         # User-scope units should still use the calling user's PICHKOO_HOME
         unit = gateway_cli.generate_systemd_unit(system=False)
 
-        hermes_home = str(gateway_cli.get_hermes_home().resolve())
-        assert f'PICHKOO_HOME={hermes_home}' in unit
+        pichkoo_home = str(gateway_cli.get_pichkoo_home().resolve())
+        assert f'PICHKOO_HOME={pichkoo_home}' in unit
 
 
 class TestPichkooHomeForTargetUser:
-    """Unit tests for _hermes_home_for_target_user()."""
+    """Unit tests for _pichkoo_home_for_target_user()."""
 
     def test_remaps_default_home(self, monkeypatch):
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
 
-        result = gateway_cli._hermes_home_for_target_user("/home/alice")
+        result = gateway_cli._pichkoo_home_for_target_user("/home/alice")
         assert result == "/home/alice/.pichkoo"
 
     def test_remaps_profile_path(self, monkeypatch):
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
         monkeypatch.setenv("PICHKOO_HOME", "/root/.pichkoo/profiles/coder")
 
-        result = gateway_cli._hermes_home_for_target_user("/home/alice")
+        result = gateway_cli._pichkoo_home_for_target_user("/home/alice")
         assert result == "/home/alice/.pichkoo/profiles/coder"
 
     def test_keeps_custom_path(self, monkeypatch):
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/root")))
         monkeypatch.setenv("PICHKOO_HOME", "/opt/pichkoo")
 
-        result = gateway_cli._hermes_home_for_target_user("/home/alice")
+        result = gateway_cli._pichkoo_home_for_target_user("/home/alice")
         assert result == "/opt/pichkoo"
 
     def test_noop_when_same_user(self, monkeypatch):
         monkeypatch.setattr(Path, "home", staticmethod(lambda: Path("/home/alice")))
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
 
-        result = gateway_cli._hermes_home_for_target_user("/home/alice")
+        result = gateway_cli._pichkoo_home_for_target_user("/home/alice")
         assert result == "/home/alice/.pichkoo"
 
 
@@ -1718,13 +1718,13 @@ class TestPreflightUserSystemd:
 class TestProfileArg:
     """Tests for _profile_arg — returns '--profile <name>' for named profiles."""
 
-    def test_default_hermes_home_returns_empty(self, tmp_path, monkeypatch):
+    def test_default_pichkoo_home_returns_empty(self, tmp_path, monkeypatch):
         """Default ~/.pichkoo should not produce a --profile flag."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
-        result = gateway_cli._profile_arg(str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
+        result = gateway_cli._profile_arg(str(pichkoo_home))
         assert result == ""
 
     def test_named_profile_returns_flag(self, tmp_path, monkeypatch):
@@ -1769,7 +1769,7 @@ class TestProfileArg:
         profile_dir.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(profile_dir))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: profile_dir)
         unit = gateway_cli.generate_systemd_unit(system=False)
         assert "--profile mybot" in unit
         assert "gateway run" in unit
@@ -1785,7 +1785,7 @@ class TestProfileArg:
         profile_dir.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(profile_dir))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: profile_dir)
         plist = gateway_cli.generate_launchd_plist()
         assert "<string>--profile</string>" in plist
         assert "<string>mybot</string>" in plist
@@ -1808,7 +1808,7 @@ class TestProfileArg:
 
         monkeypatch.setattr(Path, "home", lambda: profile_home)
         monkeypatch.setenv("PICHKOO_HOME", str(profile_dir))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: profile_dir)
         monkeypatch.setattr(pwd, "getpwuid", lambda uid: SimpleNamespace(pw_dir=str(machine_home)))
 
         plist_path = gateway_cli.get_launchd_plist_path()
@@ -1858,7 +1858,7 @@ class TestSystemUnitPathRemapping:
 
         monkeypatch.setattr(Path, "home", lambda: root_home)
         monkeypatch.setenv("PICHKOO_HOME", str(root_home / ".pichkoo"))
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: root_home / ".pichkoo")
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: root_home / ".pichkoo")
         monkeypatch.setattr(gateway_cli, "PROJECT_ROOT", project)
         monkeypatch.setattr(gateway_cli, "_detect_venv_dir", lambda: project / "venv")
         monkeypatch.setattr(gateway_cli, "get_python_path", lambda: str(venv_bin / "python"))
@@ -1970,7 +1970,7 @@ class TestDockerAwareGateway:
 
 
 class TestLegacyPichkooUnitDetection:
-    """Tests for _find_legacy_hermes_units / has_legacy_hermes_units.
+    """Tests for _find_legacy_pichkoo_units / has_legacy_pichkoo_units.
 
     These guard against the scenario that tripped Luis in April 2026: an
     older install left a ``pichkoo.service`` unit behind when the service was
@@ -2003,26 +2003,26 @@ class TestLegacyPichkooUnitDetection:
         )
         return user_dir, system_dir
 
-    def test_detects_legacy_hermes_service_in_user_scope(self, tmp_path, monkeypatch):
+    def test_detects_legacy_pichkoo_service_in_user_scope(self, tmp_path, monkeypatch):
         user_dir, _ = self._setup_search_paths(tmp_path, monkeypatch)
         legacy = user_dir / "pichkoo.service"
         legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        results = gateway_cli._find_legacy_hermes_units()
+        results = gateway_cli._find_legacy_pichkoo_units()
 
         assert len(results) == 1
         name, path, is_system = results[0]
         assert name == "pichkoo.service"
         assert path == legacy
         assert is_system is False
-        assert gateway_cli.has_legacy_hermes_units() is True
+        assert gateway_cli.has_legacy_pichkoo_units() is True
 
-    def test_detects_legacy_hermes_service_in_system_scope(self, tmp_path, monkeypatch):
+    def test_detects_legacy_pichkoo_service_in_system_scope(self, tmp_path, monkeypatch):
         _, system_dir = self._setup_search_paths(tmp_path, monkeypatch)
         legacy = system_dir / "pichkoo.service"
         legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        results = gateway_cli._find_legacy_hermes_units()
+        results = gateway_cli._find_legacy_pichkoo_units()
 
         assert len(results) == 1
         name, path, is_system = results[0]
@@ -2030,7 +2030,7 @@ class TestLegacyPichkooUnitDetection:
         assert path == legacy
         assert is_system is True
 
-    def test_ignores_profile_unit_hermes_gateway_coder(self, tmp_path, monkeypatch):
+    def test_ignores_profile_unit_pichkoo_gateway_coder(self, tmp_path, monkeypatch):
         """CRITICAL: profile units must NOT be flagged as legacy.
 
         Teknium's concern — ``pichkoo-gateway-coder.service`` is our standard
@@ -2050,12 +2050,12 @@ class TestLegacyPichkooUnitDetection:
                 self._OUR_UNIT_TEXT, encoding="utf-8"
             )
 
-        results = gateway_cli._find_legacy_hermes_units()
+        results = gateway_cli._find_legacy_pichkoo_units()
 
         assert results == []
-        assert gateway_cli.has_legacy_hermes_units() is False
+        assert gateway_cli.has_legacy_pichkoo_units() is False
 
-    def test_ignores_unrelated_hermes_service(self, tmp_path, monkeypatch):
+    def test_ignores_unrelated_pichkoo_service(self, tmp_path, monkeypatch):
         """Third-party ``pichkoo.service`` that isn't ours stays untouched.
 
         If a user has some other package named ``pichkoo`` installed as a
@@ -2068,16 +2068,16 @@ class TestLegacyPichkooUnitDetection:
             encoding="utf-8",
         )
 
-        results = gateway_cli._find_legacy_hermes_units()
+        results = gateway_cli._find_legacy_pichkoo_units()
 
         assert results == []
-        assert gateway_cli.has_legacy_hermes_units() is False
+        assert gateway_cli.has_legacy_pichkoo_units() is False
 
     def test_returns_empty_when_no_legacy_files_exist(self, tmp_path, monkeypatch):
         self._setup_search_paths(tmp_path, monkeypatch)
 
-        assert gateway_cli._find_legacy_hermes_units() == []
-        assert gateway_cli.has_legacy_hermes_units() is False
+        assert gateway_cli._find_legacy_pichkoo_units() == []
+        assert gateway_cli.has_legacy_pichkoo_units() is False
 
     def test_detects_both_scopes_simultaneously(self, tmp_path, monkeypatch):
         """When a user has BOTH user-scope and system-scope legacy units,
@@ -2086,7 +2086,7 @@ class TestLegacyPichkooUnitDetection:
         (user_dir / "pichkoo.service").write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
         (system_dir / "pichkoo.service").write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        results = gateway_cli._find_legacy_hermes_units()
+        results = gateway_cli._find_legacy_pichkoo_units()
 
         scopes = sorted(is_system for _, _, is_system in results)
         assert scopes == [False, True]
@@ -2114,7 +2114,7 @@ class TestLegacyPichkooUnitDetection:
                 f"[Unit]\nDescription=Old Pichkoo\n[Service]\n{execstart}\n",
                 encoding="utf-8",
             )
-            results = gateway_cli._find_legacy_hermes_units()
+            results = gateway_cli._find_legacy_pichkoo_units()
             assert len(results) == 1, f"Variant {i} not detected: {execstart!r}"
 
     def test_print_legacy_unit_warning_is_noop_when_empty(self, tmp_path, monkeypatch, capsys):
@@ -2152,12 +2152,12 @@ class TestLegacyPichkooUnitDetection:
         monkeypatch.setattr(gateway_cli.Path, "read_text", raising_read_text)
 
         # Should not raise
-        results = gateway_cli._find_legacy_hermes_units()
+        results = gateway_cli._find_legacy_pichkoo_units()
         assert results == []
 
 
 class TestRemoveLegacyPichkooUnits:
-    """Tests for remove_legacy_hermes_units (the migration action)."""
+    """Tests for remove_legacy_pichkoo_units (the migration action)."""
 
     _OUR_UNIT_TEXT = (
         "[Unit]\nDescription=Pichkoo Gateway\n[Service]\n"
@@ -2189,7 +2189,7 @@ class TestRemoveLegacyPichkooUnits:
     def test_returns_zero_when_no_legacy_units(self, tmp_path, monkeypatch, capsys):
         self._setup(tmp_path, monkeypatch)
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(interactive=False)
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(interactive=False)
 
         assert removed == 0
         assert remaining == []
@@ -2200,7 +2200,7 @@ class TestRemoveLegacyPichkooUnits:
         legacy = user_dir / "pichkoo.service"
         legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(
             interactive=False, dry_run=True
         )
 
@@ -2216,7 +2216,7 @@ class TestRemoveLegacyPichkooUnits:
         legacy = user_dir / "pichkoo.service"
         legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(interactive=False)
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(interactive=False)
 
         assert removed == 1
         assert remaining == []
@@ -2232,7 +2232,7 @@ class TestRemoveLegacyPichkooUnits:
         legacy = system_dir / "pichkoo.service"
         legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(interactive=False)
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(interactive=False)
 
         assert removed == 0
         assert remaining == [legacy]
@@ -2245,7 +2245,7 @@ class TestRemoveLegacyPichkooUnits:
         legacy = system_dir / "pichkoo.service"
         legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(interactive=False)
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(interactive=False)
 
         assert removed == 1
         assert remaining == []
@@ -2266,7 +2266,7 @@ class TestRemoveLegacyPichkooUnits:
         user_legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
         system_legacy.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(interactive=False)
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(interactive=False)
 
         assert removed == 2
         assert remaining == []
@@ -2285,7 +2285,7 @@ class TestRemoveLegacyPichkooUnits:
         default_unit = user_dir / "pichkoo-gateway.service"
         default_unit.write_text(self._OUR_UNIT_TEXT, encoding="utf-8")
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(interactive=False)
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(interactive=False)
 
         assert removed == 0
         assert remaining == []
@@ -2301,7 +2301,7 @@ class TestRemoveLegacyPichkooUnits:
 
         monkeypatch.setattr(gateway_cli, "prompt_yes_no", lambda *a, **k: False)
 
-        removed, remaining = gateway_cli.remove_legacy_hermes_units(interactive=True)
+        removed, remaining = gateway_cli.remove_legacy_pichkoo_units(interactive=True)
 
         assert removed == 0
         assert remaining == [legacy]
@@ -2349,7 +2349,7 @@ class TestMigrateLegacyCommand:
             called["dry_run"] = dry_run
             return 0, []
 
-        monkeypatch.setattr(gateway_cli, "remove_legacy_hermes_units", fake_remove)
+        monkeypatch.setattr(gateway_cli, "remove_legacy_pichkoo_units", fake_remove)
         monkeypatch.setattr(gateway_cli, "supports_systemd_services", lambda: True)
         monkeypatch.setattr(gateway_cli, "is_macos", lambda: False)
 
@@ -2387,7 +2387,7 @@ class TestGatewayStatusParser:
             called["dry_run"] = dry_run
             return 0, []
 
-        monkeypatch.setattr(gateway_cli, "remove_legacy_hermes_units", fake_remove)
+        monkeypatch.setattr(gateway_cli, "remove_legacy_pichkoo_units", fake_remove)
         monkeypatch.setattr(gateway_cli, "supports_systemd_services", lambda: True)
         monkeypatch.setattr(gateway_cli, "is_macos", lambda: False)
 
@@ -2428,9 +2428,9 @@ class TestSystemdInstallOffersLegacyRemoval:
             remove_called["interactive"] = interactive
             return 1, []
 
-        # has_legacy_hermes_units must return True
-        monkeypatch.setattr(gateway_cli, "has_legacy_hermes_units", lambda: True)
-        monkeypatch.setattr(gateway_cli, "remove_legacy_hermes_units", fake_remove)
+        # has_legacy_pichkoo_units must return True
+        monkeypatch.setattr(gateway_cli, "has_legacy_pichkoo_units", lambda: True)
+        monkeypatch.setattr(gateway_cli, "remove_legacy_pichkoo_units", fake_remove)
         monkeypatch.setattr(gateway_cli, "print_legacy_unit_warning", lambda: None)
         # Answer "yes" to the legacy-removal prompt
         monkeypatch.setattr(gateway_cli, "prompt_yes_no", lambda *a, **k: True)
@@ -2468,8 +2468,8 @@ class TestSystemdInstallOffersLegacyRemoval:
             remove_called["invoked"] = True
             return 0, []
 
-        monkeypatch.setattr(gateway_cli, "has_legacy_hermes_units", lambda: True)
-        monkeypatch.setattr(gateway_cli, "remove_legacy_hermes_units", fake_remove)
+        monkeypatch.setattr(gateway_cli, "has_legacy_pichkoo_units", lambda: True)
+        monkeypatch.setattr(gateway_cli, "remove_legacy_pichkoo_units", fake_remove)
         monkeypatch.setattr(gateway_cli, "print_legacy_unit_warning", lambda: None)
         monkeypatch.setattr(gateway_cli, "prompt_yes_no", lambda *a, **k: False)
 
@@ -2513,8 +2513,8 @@ class TestSystemdInstallOffersLegacyRemoval:
             remove_called["invoked"] = True
             return 0, []
 
-        monkeypatch.setattr(gateway_cli, "has_legacy_hermes_units", lambda: False)
-        monkeypatch.setattr(gateway_cli, "remove_legacy_hermes_units", fake_remove)
+        monkeypatch.setattr(gateway_cli, "has_legacy_pichkoo_units", lambda: False)
+        monkeypatch.setattr(gateway_cli, "remove_legacy_pichkoo_units", fake_remove)
         monkeypatch.setattr(gateway_cli, "prompt_yes_no", counting_prompt)
 
         unit_path = tmp_path / "pichkoo-gateway.service"
@@ -2713,22 +2713,22 @@ class TestServiceWorkingDirIsStable:
     deleted checkout can't crash-loop the unit on CHDIR (status=200).
     """
 
-    def test_stable_working_dir_uses_hermes_home(self, tmp_path, monkeypatch):
+    def test_stable_working_dir_uses_pichkoo_home(self, tmp_path, monkeypatch):
         home = tmp_path / ".pichkoo"
         home.mkdir()
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: home)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: home)
         assert Path(gateway_cli._stable_service_working_dir()) == home.resolve()
 
     def test_stable_working_dir_falls_back_to_project_root(self, tmp_path, monkeypatch):
         # PICHKOO_HOME points somewhere that does not exist -> fall back.
         missing = tmp_path / "does-not-exist" / ".pichkoo"
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: missing)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: missing)
         assert gateway_cli._stable_service_working_dir() == str(gateway_cli.PROJECT_ROOT)
 
-    def test_user_unit_workingdirectory_is_hermes_home_not_checkout(self, tmp_path, monkeypatch):
+    def test_user_unit_workingdirectory_is_pichkoo_home_not_checkout(self, tmp_path, monkeypatch):
         home = tmp_path / ".pichkoo"
         home.mkdir()
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: home)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: home)
         unit = gateway_cli.generate_systemd_unit(system=False)
         wd = [l for l in unit.splitlines() if l.startswith("WorkingDirectory=")]
         assert wd, "unit has no WorkingDirectory line"
@@ -2737,12 +2737,12 @@ class TestServiceWorkingDirIsStable:
         # The bug class: never pin cwd inside a transient worktree checkout.
         assert "/.worktrees/" not in value
 
-    def test_launchd_workingdirectory_is_hermes_home(self, tmp_path, monkeypatch):
+    def test_launchd_workingdirectory_is_pichkoo_home(self, tmp_path, monkeypatch):
         import re
 
         home = tmp_path / ".pichkoo"
         home.mkdir()
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: home)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: home)
         plist = gateway_cli.generate_launchd_plist()
         m = re.search(r"<key>WorkingDirectory</key>\s*<string>(.*?)</string>", plist)
         assert m, "plist has no WorkingDirectory entry"
@@ -2759,7 +2759,7 @@ class TestServiceWorkingDirIsStable:
         """
         home = tmp_path / ".pichkoo"
         home.mkdir()
-        monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: home)
+        monkeypatch.setattr(gateway_cli, "get_pichkoo_home", lambda: home)
         plist = gateway_cli.generate_launchd_plist()
 
         # Scalar <true/> must be present immediately after the KeepAlive key

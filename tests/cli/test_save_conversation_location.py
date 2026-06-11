@@ -1,6 +1,6 @@
 """Tests for /save — the conversation snapshot slash command.
 
-Regression: the old implementation wrote ``hermes_conversation_<ts>.json``
+Regression: the old implementation wrote ``pichkoo_conversation_<ts>.json``
 to the current working directory (CWD). Users who ran /save expected the
 file to be discoverable via ``pichkoo sessions browse``, but CWD-resident
 snapshots are not indexed in the state DB and are generally invisible.
@@ -20,15 +20,15 @@ import pytest
 
 
 @pytest.fixture
-def hermes_home(tmp_path, monkeypatch):
+def pichkoo_home(tmp_path, monkeypatch):
     home = tmp_path / ".pichkoo"
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     monkeypatch.setenv("PICHKOO_HOME", str(home))
-    # Clear any cached hermes_home computation
+    # Clear any cached pichkoo_home computation
     import pichkoo_constants
-    if hasattr(pichkoo_constants, "_hermes_home_cache"):
-        pichkoo_constants._hermes_home_cache = None
+    if hasattr(pichkoo_constants, "_pichkoo_home_cache"):
+        pichkoo_constants._pichkoo_home_cache = None
     return home
 
 
@@ -42,7 +42,7 @@ def _make_stub_cli(history):
     )
 
 
-def test_save_conversation_writes_under_hermes_home(hermes_home, tmp_path, monkeypatch, capsys):
+def test_save_conversation_writes_under_pichkoo_home(pichkoo_home, tmp_path, monkeypatch, capsys):
     """Snapshot must land under ~/.pichkoo/sessions/saved/, not CWD."""
     # Change CWD to a different directory to prove the file does NOT go there.
     work = tmp_path / "somewhere-else"
@@ -64,13 +64,13 @@ def test_save_conversation_writes_under_hermes_home(hermes_home, tmp_path, monke
     cli.PichkooCLI.save_conversation(stub)
 
     # File must NOT be in CWD
-    cwd_leak = list(work.glob("hermes_conversation_*.json"))
+    cwd_leak = list(work.glob("pichkoo_conversation_*.json"))
     assert not cwd_leak, f"snapshot leaked to CWD: {cwd_leak}"
 
     # File MUST be under ~/.pichkoo/sessions/saved/
-    saved_dir = hermes_home / "sessions" / "saved"
+    saved_dir = pichkoo_home / "sessions" / "saved"
     assert saved_dir.is_dir(), "expected saved/ subdirectory to be created"
-    files = list(saved_dir.glob("hermes_conversation_*.json"))
+    files = list(saved_dir.glob("pichkoo_conversation_*.json"))
     assert len(files) == 1, files
 
     payload = json.loads(files[0].read_text())
@@ -87,7 +87,7 @@ def test_save_conversation_writes_under_hermes_home(hermes_home, tmp_path, monke
     assert "pichkoo --resume 20260101_120000_abc123" in out, out
 
 
-def test_save_conversation_empty_history_does_nothing(hermes_home, capsys):
+def test_save_conversation_empty_history_does_nothing(pichkoo_home, capsys):
     for mod in [m for m in sys.modules if m.startswith("cli") or m == "pichkoo_constants"]:
         sys.modules.pop(mod, None)
     import cli
@@ -95,7 +95,7 @@ def test_save_conversation_empty_history_does_nothing(hermes_home, capsys):
     stub = _make_stub_cli([])
     cli.PichkooCLI.save_conversation(stub)
 
-    saved_dir = hermes_home / "sessions" / "saved"
+    saved_dir = pichkoo_home / "sessions" / "saved"
     assert not saved_dir.exists() or not list(saved_dir.iterdir())
     out = capsys.readouterr().out
     assert "No conversation to save" in out

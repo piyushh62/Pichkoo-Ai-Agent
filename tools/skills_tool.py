@@ -69,7 +69,7 @@ Usage:
 import json
 import logging
 
-from pichkoo_constants import get_hermes_home, display_hermes_home
+from pichkoo_constants import get_pichkoo_home, display_pichkoo_home
 import os
 import re
 from enum import Enum
@@ -87,7 +87,7 @@ logger = logging.getLogger(__name__)
 # All skills live in ~/.pichkoo/skills/ (seeded from bundled skills/ on install).
 # This is the single source of truth -- agent edits, hub installs, and bundled
 # skills all coexist here without polluting the git repo.
-PICHKOO_HOME = get_hermes_home()
+PICHKOO_HOME = get_pichkoo_home()
 SKILLS_DIR = PICHKOO_HOME / "skills"
 
 # Anthropic-recommended limits for progressive disclosure efficiency
@@ -137,7 +137,7 @@ def _skill_lookup_path_error(name: str) -> Optional[str]:
 
 def load_env() -> Dict[str, str]:
     """Load profile-scoped environment variables from PICHKOO_HOME/.env."""
-    env_path = get_hermes_home() / ".env"
+    env_path = get_pichkoo_home() / ".env"
     env_vars: Dict[str, str] = {}
     if not env_path.exists():
         return env_vars
@@ -457,7 +457,7 @@ def _gateway_setup_hint() -> str:
 
         return GATEWAY_SECRET_CAPTURE_UNSUPPORTED_MESSAGE
     except Exception:
-        return f"Secure secret entry is not available. Load this skill in the local CLI to be prompted, or add the key to {display_hermes_home()}/.env manually."
+        return f"Secure secret entry is not available. Load this skill in the local CLI to be prompted, or add the key to {display_pichkoo_home()}/.env manually."
 
 
 def _build_setup_note(
@@ -699,7 +699,7 @@ def skills_list(category: str = None, task_id: str = None) -> str:
                     "success": True,
                     "skills": [],
                     "categories": [],
-                    "message": f"No skills found. Skills directory created at {display_hermes_home()}/skills/",
+                    "message": f"No skills found. Skills directory created at {display_pichkoo_home()}/skills/",
                 },
                 ensure_ascii=False,
             )
@@ -1314,14 +1314,14 @@ def skill_view(
 
         # Read tags/related_skills with backward compat:
         # Check metadata.pichkoo.* first (agentskills.io convention), fall back to top-level
-        hermes_meta = {}
+        pichkoo_meta = {}
         metadata = frontmatter.get("metadata")
         if isinstance(metadata, dict):
-            hermes_meta = metadata.get("pichkoo", {}) or {}
+            pichkoo_meta = metadata.get("pichkoo", {}) or {}
 
-        tags = _parse_tags(hermes_meta.get("tags") or frontmatter.get("tags", ""))
+        tags = _parse_tags(pichkoo_meta.get("tags") or frontmatter.get("tags", ""))
         related_skills = _parse_tags(
-            hermes_meta.get("related_skills") or frontmatter.get("related_skills", "")
+            pichkoo_meta.get("related_skills") or frontmatter.get("related_skills", "")
         )
 
         # Build linked files structure for clear discovery

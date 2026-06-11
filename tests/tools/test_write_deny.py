@@ -33,16 +33,16 @@ class TestWriteDenyExactPaths:
         path = os.path.join(str(Path.home()), ".netrc")
         assert _is_write_denied(path) is True
 
-    def test_hermes_env(self):
+    def test_pichkoo_env(self):
         # ``.env`` under the active PICHKOO_HOME (profile-aware, not just
         # ``~/.pichkoo``) must be write-denied. The hermetic test conftest
-        # points PICHKOO_HOME at a tempdir — resolve via get_hermes_home()
+        # points PICHKOO_HOME at a tempdir — resolve via get_pichkoo_home()
         # to match the denylist.
-        from pichkoo_constants import get_hermes_home
-        path = str(get_hermes_home() / ".env")
+        from pichkoo_constants import get_pichkoo_home
+        path = str(get_pichkoo_home() / ".env")
         assert _is_write_denied(path) is True
 
-    def test_hermes_root_env_when_running_under_profile(self, tmp_path, monkeypatch):
+    def test_pichkoo_root_env_when_running_under_profile(self, tmp_path, monkeypatch):
         """Top-level ``<root>/.env`` stays write-denied even when running under
         a profile (#15981).
 
@@ -52,7 +52,7 @@ class TestWriteDenyExactPaths:
         could be silently overwritten by ``write_file`` while a profile was
         active.
         """
-        root = tmp_path / "hermes_root"
+        root = tmp_path / "pichkoo_root"
         profile_home = root / "profiles" / "coder"
         profile_home.mkdir(parents=True)
         global_env = root / ".env"
@@ -61,9 +61,9 @@ class TestWriteDenyExactPaths:
         monkeypatch.setenv("PICHKOO_HOME", str(profile_home))
 
         # Sanity check: PICHKOO_HOME does point to the profile dir, not the root.
-        from pichkoo_constants import get_hermes_home, get_default_hermes_root
-        assert get_hermes_home() == profile_home
-        assert get_default_hermes_root() == root
+        from pichkoo_constants import get_pichkoo_home, get_default_pichkoo_root
+        assert get_pichkoo_home() == profile_home
+        assert get_default_pichkoo_root() == root
 
         assert _is_write_denied(str(global_env)) is True
 
@@ -123,6 +123,6 @@ class TestWriteAllowed:
     def test_project_file(self):
         assert _is_write_denied("/home/user/project/main.py") is False
 
-    def test_hermes_config_not_env(self):
+    def test_pichkoo_config_not_env(self):
         path = os.path.join(str(Path.home()), ".pichkoo", "config.yaml")
         assert _is_write_denied(path) is False

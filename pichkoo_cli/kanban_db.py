@@ -224,7 +224,7 @@ _CTX_MAX_COMMENT_BYTES  = 2 * 1024   # 2 KB per comment
 
 DEFAULT_BOARD = "default"
 _CURRENT_BOARD_OVERRIDE: ContextVar[str | None] = ContextVar(
-    "hermes_kanban_current_board_override",
+    "pichkoo_kanban_current_board_override",
     default=None,
 )
 
@@ -268,7 +268,7 @@ def kanban_home() -> Path:
 
     1. ``PICHKOO_KANBAN_HOME`` env var when set and non-empty (explicit
        override for tests and unusual deployments).
-    2. ``get_default_hermes_root()``, which already returns ``<root>``
+    2. ``get_default_pichkoo_root()``, which already returns ``<root>``
        when ``PICHKOO_HOME`` is ``<root>/profiles/<name>``, and returns
        ``PICHKOO_HOME`` directly for Docker / custom deployments.
 
@@ -280,8 +280,8 @@ def kanban_home() -> Path:
     override = os.environ.get("PICHKOO_KANBAN_HOME", "").strip()
     if override:
         return Path(override).expanduser()
-    from pichkoo_constants import get_default_hermes_root
-    return get_default_hermes_root()
+    from pichkoo_constants import get_default_pichkoo_root
+    return get_default_pichkoo_root()
 
 
 def boards_root() -> Path:
@@ -6494,7 +6494,7 @@ def _rotate_worker_log(
         pass
 
 
-def _module_hermes_argv() -> list[str]:
+def _module_pichkoo_argv() -> list[str]:
     """Return the interpreter-bound Pichkoo CLI invocation."""
     # ``pichkoo_cli.main`` is the console-script target declared in
     # pyproject.toml, NOT a top-level ``pichkoo`` package — there is no
@@ -6502,7 +6502,7 @@ def _module_hermes_argv() -> list[str]:
     return [sys.executable, "-m", "pichkoo_cli.main"]
 
 
-def _absolute_hermes_path(path: str) -> str:
+def _absolute_pichkoo_path(path: str) -> str:
     """Return an absolute filesystem path for a resolved Pichkoo shim."""
     expanded = os.path.expanduser(path)
     return expanded if os.path.isabs(expanded) else os.path.abspath(expanded)
@@ -6556,7 +6556,7 @@ def _safe_which_no_cwd(command: str) -> Optional[str]:
     return None
 
 
-def _hermes_path_argv(path: str) -> list[str]:
+def _pichkoo_path_argv(path: str) -> list[str]:
     """Return argv for a resolved Pichkoo executable path.
 
     Windows batch shims (`.cmd` / `.bat`) are not safe as argv[0] for
@@ -6565,11 +6565,11 @@ def _hermes_path_argv(path: str) -> list[str]:
     executable is only a shell shim.
     """
     if _IS_WINDOWS and _is_windows_batch_shim(path):
-        return _module_hermes_argv()
-    return [_absolute_hermes_path(path)]
+        return _module_pichkoo_argv()
+    return [_absolute_pichkoo_path(path)]
 
 
-def _resolve_hermes_argv() -> list[str]:
+def _resolve_pichkoo_argv() -> list[str]:
     """Resolve the ``pichkoo`` invocation as argv parts for ``Popen``.
 
     Tries in order:
@@ -6589,7 +6589,7 @@ def _resolve_hermes_argv() -> list[str]:
        launchd jobs, detached processes, etc.). Goes through the running
        interpreter so the result is independent of ``$PATH``.
 
-    Mirrors ``gateway.run._resolve_hermes_bin`` for the same reason. Kept
+    Mirrors ``gateway.run._resolve_pichkoo_bin`` for the same reason. Kept
     local (not imported from gateway) because ``pichkoo_cli`` sits below
     ``gateway`` in the dependency order.
     """
@@ -6598,19 +6598,19 @@ def _resolve_hermes_argv() -> list[str]:
     env_bin = os.environ.get("PICHKOO_BIN", "").strip()
     if env_bin:
         if _looks_like_path(env_bin):
-            return _hermes_path_argv(env_bin)
+            return _pichkoo_path_argv(env_bin)
         resolved_env_bin = _safe_which_no_cwd(env_bin)
         if resolved_env_bin:
-            return _hermes_path_argv(resolved_env_bin)
-        return _module_hermes_argv()
+            return _pichkoo_path_argv(resolved_env_bin)
+        return _module_pichkoo_argv()
 
-    hermes_bin = _safe_which_no_cwd("pichkoo") if _IS_WINDOWS else shutil.which("pichkoo")
-    if hermes_bin:
-        return _hermes_path_argv(hermes_bin)
-    return _module_hermes_argv()
+    pichkoo_bin = _safe_which_no_cwd("pichkoo") if _IS_WINDOWS else shutil.which("pichkoo")
+    if pichkoo_bin:
+        return _pichkoo_path_argv(pichkoo_bin)
+    return _module_pichkoo_argv()
 
 
-def _kanban_worker_skill_available(hermes_home: Optional[str]) -> bool:
+def _kanban_worker_skill_available(pichkoo_home: Optional[str]) -> bool:
     """True if the bundled ``kanban-worker`` skill resolves for the home the
     spawned worker will run under.
 
@@ -6628,7 +6628,7 @@ def _kanban_worker_skill_available(hermes_home: Optional[str]) -> bool:
 
     # An unset PICHKOO_HOME means the worker falls back to the default root
     # home (``~/.pichkoo``), which ships the bundled skill.
-    base = _Path(hermes_home) if hermes_home else (_Path.home() / ".pichkoo")
+    base = _Path(pichkoo_home) if pichkoo_home else (_Path.home() / ".pichkoo")
     skills_root = base / "skills"
     if not skills_root.is_dir():
         return False
@@ -6709,7 +6709,7 @@ def _default_spawn(
     # config.  Without this, `env = dict(os.environ)` copies only the parent's
     # env, and when the child process starts `pichkoo -p <name>` the
     # _apply_profile_override() runs *before* pichkoo_constants is imported.
-    # If PICHKOO_HOME is absent from the child's env, get_hermes_home() falls
+    # If PICHKOO_HOME is absent from the child's env, get_pichkoo_home() falls
     # back to Path.home() / ".pichkoo" (the DEFAULT profile root), ignoring the
     # profile-specific config entirely.  Fixes profile-scoped fallback_providers
     # being invisible to kanban workers.
@@ -6754,7 +6754,7 @@ def _default_spawn(
     # Pin the shared board + workspaces root the dispatcher resolved, so
     # that even when the worker activates a profile (`pichkoo -p <name>`
     # rewrites PICHKOO_HOME), its kanban paths still match the
-    # dispatcher's. Belt-and-braces with the `get_default_hermes_root()`
+    # dispatcher's. Belt-and-braces with the `get_default_pichkoo_root()`
     # resolution in `kanban_home()` — symmetric resolution is the norm,
     # but unusual symlink / Docker layouts are caught here too.
     env["PICHKOO_KANBAN_DB"] = str(kanban_db_path(board=board))
@@ -6771,7 +6771,7 @@ def _default_spawn(
     env["PICHKOO_PROFILE"] = profile_arg
 
     cmd = [
-        *_resolve_hermes_argv(),
+        *_resolve_pichkoo_argv(),
         "-p", profile_arg,
         # Worker subprocesses switch to a profile-scoped PICHKOO_HOME above,
         # so they see that profile's shell-hook allowlist instead of the
@@ -7541,8 +7541,8 @@ def list_profiles_on_disk() -> list[str]:
     path).
     """
     try:
-        from pichkoo_constants import get_default_hermes_root
-        default_root = get_default_hermes_root()
+        from pichkoo_constants import get_default_pichkoo_root
+        default_root = get_default_pichkoo_root()
         profiles_dir = default_root / "profiles"
     except Exception:
         return []

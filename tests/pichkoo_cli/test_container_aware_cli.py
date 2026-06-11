@@ -24,20 +24,20 @@ from pichkoo_cli.config import (
 @pytest.fixture
 def container_env(tmp_path, monkeypatch):
     """Set up a fake PICHKOO_HOME with .container-mode file."""
-    hermes_home = tmp_path / ".pichkoo"
-    hermes_home.mkdir()
-    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    pichkoo_home = tmp_path / ".pichkoo"
+    pichkoo_home.mkdir()
+    monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
     monkeypatch.delenv("PICHKOO_DEV", raising=False)
 
-    container_mode = hermes_home / ".container-mode"
+    container_mode = pichkoo_home / ".container-mode"
     container_mode.write_text(
         "# Written by NixOS activation script. Do not edit manually.\n"
         "backend=podman\n"
         "container_name=pichkoo-agent\n"
         "exec_user=pichkoo\n"
-        "hermes_bin=/data/current-package/bin/pichkoo\n"
+        "pichkoo_bin=/data/current-package/bin/pichkoo\n"
     )
-    return hermes_home
+    return pichkoo_home
 
 
 def test_get_container_exec_info_returns_metadata(container_env):
@@ -49,7 +49,7 @@ def test_get_container_exec_info_returns_metadata(container_env):
     assert info["backend"] == "podman"
     assert info["container_name"] == "pichkoo-agent"
     assert info["exec_user"] == "pichkoo"
-    assert info["hermes_bin"] == "/data/current-package/bin/pichkoo"
+    assert info["pichkoo_bin"] == "/data/current-package/bin/pichkoo"
 
 
 def test_get_container_exec_info_none_inside_container(container_env):
@@ -62,9 +62,9 @@ def test_get_container_exec_info_none_inside_container(container_env):
 
 def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
     """Returns None when .container-mode doesn't exist (native mode)."""
-    hermes_home = tmp_path / ".pichkoo"
-    hermes_home.mkdir()
-    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    pichkoo_home = tmp_path / ".pichkoo"
+    pichkoo_home.mkdir()
+    monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
     monkeypatch.delenv("PICHKOO_DEV", raising=False)
 
     with patch("pichkoo_constants.is_container", return_value=False):
@@ -73,7 +73,7 @@ def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
     assert info is None
 
 
-def test_get_container_exec_info_skipped_when_hermes_dev(container_env, monkeypatch):
+def test_get_container_exec_info_skipped_when_pichkoo_dev(container_env, monkeypatch):
     """Returns None when PICHKOO_DEV=1 is set (dev mode bypass)."""
     monkeypatch.setenv("PICHKOO_DEV", "1")
 
@@ -83,7 +83,7 @@ def test_get_container_exec_info_skipped_when_hermes_dev(container_env, monkeypa
     assert info is None
 
 
-def test_get_container_exec_info_not_skipped_when_hermes_dev_zero(container_env, monkeypatch):
+def test_get_container_exec_info_not_skipped_when_pichkoo_dev_zero(container_env, monkeypatch):
     """PICHKOO_DEV=0 does NOT trigger bypass — only '1' does."""
     monkeypatch.setenv("PICHKOO_DEV", "0")
 
@@ -98,14 +98,14 @@ def test_get_container_exec_info_defaults():
     import tempfile
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        hermes_home = Path(tmpdir) / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / ".container-mode").write_text(
+        pichkoo_home = Path(tmpdir) / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / ".container-mode").write_text(
             "# minimal file with no keys\n"
         )
 
         with patch("pichkoo_constants.is_container", return_value=False), \
-             patch.dict(get_container_exec_info.__globals__, {"get_hermes_home": lambda: hermes_home}), \
+             patch.dict(get_container_exec_info.__globals__, {"get_pichkoo_home": lambda: pichkoo_home}), \
              patch.dict(os.environ, {}, clear=False):
             os.environ.pop("PICHKOO_DEV", None)
             info = get_container_exec_info()
@@ -114,7 +114,7 @@ def test_get_container_exec_info_defaults():
         assert info["backend"] == "docker"
         assert info["container_name"] == "pichkoo-agent"
         assert info["exec_user"] == "pichkoo"
-        assert info["hermes_bin"] == "/data/current-package/bin/pichkoo"
+        assert info["pichkoo_bin"] == "/data/current-package/bin/pichkoo"
 
 
 def test_get_container_exec_info_docker_backend(container_env):
@@ -123,7 +123,7 @@ def test_get_container_exec_info_docker_backend(container_env):
         "backend=docker\n"
         "container_name=pichkoo-custom\n"
         "exec_user=myuser\n"
-        "hermes_bin=/opt/pichkoo/bin/pichkoo\n"
+        "pichkoo_bin=/opt/pichkoo/bin/pichkoo\n"
     )
 
     with patch("pichkoo_constants.is_container", return_value=False):
@@ -132,7 +132,7 @@ def test_get_container_exec_info_docker_backend(container_env):
     assert info["backend"] == "docker"
     assert info["container_name"] == "pichkoo-custom"
     assert info["exec_user"] == "myuser"
-    assert info["hermes_bin"] == "/opt/pichkoo/bin/pichkoo"
+    assert info["pichkoo_bin"] == "/opt/pichkoo/bin/pichkoo"
 
 
 def test_get_container_exec_info_crashes_on_permission_error(container_env):
@@ -154,7 +154,7 @@ def docker_container_info():
         "backend": "docker",
         "container_name": "pichkoo-agent",
         "exec_user": "pichkoo",
-        "hermes_bin": "/data/current-package/bin/pichkoo",
+        "pichkoo_bin": "/data/current-package/bin/pichkoo",
     }
 
 
@@ -164,7 +164,7 @@ def podman_container_info():
         "backend": "podman",
         "container_name": "pichkoo-agent",
         "exec_user": "pichkoo",
-        "hermes_bin": "/data/current-package/bin/pichkoo",
+        "pichkoo_bin": "/data/current-package/bin/pichkoo",
     }
 
 

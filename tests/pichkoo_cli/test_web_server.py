@@ -32,7 +32,7 @@ _EXAMPLE_PLUGIN_FIXTURE = (
 
 
 @pytest.fixture
-def _install_example_plugin(_isolate_hermes_home):
+def _install_example_plugin(_isolate_pichkoo_home):
     """Drop the example-dashboard fixture into the per-test PICHKOO_HOME
     user-plugins directory and force the web_server's dashboard plugin
     cache + API mount to rediscover it.
@@ -52,10 +52,10 @@ def _install_example_plugin(_isolate_hermes_home):
     all). User plugins are first in the discovery search order, so
     laying down the fixture here is enough.
     """
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
     from pichkoo_cli import web_server
 
-    user_plugins_dir = get_hermes_home() / "plugins"
+    user_plugins_dir = get_pichkoo_home() / "plugins"
     user_plugins_dir.mkdir(parents=True, exist_ok=True)
     dst = user_plugins_dir / "example-dashboard"
     if dst.exists():
@@ -220,7 +220,7 @@ class TestWebServerEndpoints:
     """Test the FastAPI REST endpoints using Starlette TestClient."""
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home):
+    def _setup_test_client(self, monkeypatch, _isolate_pichkoo_home):
         """Create a TestClient and isolate the state DB under the test PICHKOO_HOME."""
         try:
             from starlette.testclient import TestClient
@@ -228,10 +228,10 @@ class TestWebServerEndpoints:
             pytest.skip("fastapi/starlette not installed")
 
         import pichkoo_state
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         from pichkoo_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(pichkoo_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(pichkoo_state, "DEFAULT_DB_PATH", get_pichkoo_home() / "state.db")
 
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -241,16 +241,16 @@ class TestWebServerEndpoints:
         assert resp.status_code == 200
         data = resp.json()
         assert "version" in data
-        assert "hermes_home" in data
+        assert "pichkoo_home" in data
         assert "active_sessions" in data
 
     # ── GET /api/media (remote image display) ───────────────────────────
 
     def test_get_media_serves_image_in_root(self):
         """An image under the gateway's images dir is returned as a data URL."""
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
-        img_dir = get_hermes_home() / "images"
+        img_dir = get_pichkoo_home() / "images"
         img_dir.mkdir(parents=True, exist_ok=True)
         img = img_dir / "shot.png"
         img.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 16)
@@ -268,9 +268,9 @@ class TestWebServerEndpoints:
         assert resp.status_code == 403
 
     def test_get_media_rejects_non_image_extension(self):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
-        img_dir = get_hermes_home() / "images"
+        img_dir = get_pichkoo_home() / "images"
         img_dir.mkdir(parents=True, exist_ok=True)
         env = img_dir / "leak.env"
         env.write_text("SECRET=1")
@@ -279,9 +279,9 @@ class TestWebServerEndpoints:
         assert resp.status_code == 415
 
     def test_get_media_404_for_missing_file(self):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
-        missing = get_hermes_home() / "images" / "nope.png"
+        missing = get_pichkoo_home() / "images" / "nope.png"
         resp = self.client.get("/api/media", params={"path": str(missing)})
         assert resp.status_code == 404
 
@@ -795,7 +795,7 @@ class TestWebServerEndpoints:
         resp = self.client.post("/api/audio/speak", json={"text": "   "})
         assert resp.status_code == 400
 
-    def test_update_hermes_returns_docker_guidance_without_spawning(self, monkeypatch):
+    def test_update_pichkoo_returns_docker_guidance_without_spawning(self, monkeypatch):
         import pichkoo_cli.web_server as web_server
 
         spawned = False
@@ -806,7 +806,7 @@ class TestWebServerEndpoints:
             raise AssertionError("docker update guard should not spawn pichkoo update")
 
         monkeypatch.setattr(web_server, "detect_install_method", lambda _root: "docker")
-        monkeypatch.setattr(web_server, "_spawn_hermes_action", fail_spawn)
+        monkeypatch.setattr(web_server, "_spawn_pichkoo_action", fail_spawn)
         web_server._ACTION_PROCS.pop("pichkoo-update", None)
         web_server._ACTION_RESULTS.pop("pichkoo-update", None)
 
@@ -829,7 +829,7 @@ class TestWebServerEndpoints:
         assert status_data["pid"] is None
         assert any("docker pull piyushh62/Pichkoo-AI-Agent:latest" in line for line in status_data["lines"])
 
-    def test_update_hermes_spawns_on_non_docker_install(self, monkeypatch):
+    def test_update_pichkoo_spawns_on_non_docker_install(self, monkeypatch):
         import pichkoo_cli.web_server as web_server
 
         class Proc:
@@ -845,7 +845,7 @@ class TestWebServerEndpoints:
             return Proc()
 
         monkeypatch.setattr(web_server, "detect_install_method", lambda _root: "git")
-        monkeypatch.setattr(web_server, "_spawn_hermes_action", fake_spawn)
+        monkeypatch.setattr(web_server, "_spawn_pichkoo_action", fake_spawn)
         web_server._ACTION_PROCS.pop("pichkoo-update", None)
         web_server._ACTION_RESULTS.pop("pichkoo-update", None)
 
@@ -1345,9 +1345,9 @@ class TestWebServerEndpoints:
             return {
                 "pairing_id": "pair123",
                 "poll_token": "poll-secret",
-                "suggested_username": "hermes_pair123_bot",
-                "deep_link": "https://t.me/newbot/PichkooSetupBot/hermes_pair123_bot",
-                "qr_payload": "https://t.me/newbot/PichkooSetupBot/hermes_pair123_bot",
+                "suggested_username": "pichkoo_pair123_bot",
+                "deep_link": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair123_bot",
+                "qr_payload": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair123_bot",
                 "expires_at": "2027-05-18T00:00:00.000Z",
             }
 
@@ -1383,9 +1383,9 @@ class TestWebServerEndpoints:
                 return {
                     "pairing_id": "pair-ready",
                     "poll_token": "poll-secret",
-                    "suggested_username": "hermes_pair_ready_bot",
-                    "deep_link": "https://t.me/newbot/PichkooSetupBot/hermes_pair_ready_bot",
-                    "qr_payload": "https://t.me/newbot/PichkooSetupBot/hermes_pair_ready_bot",
+                    "suggested_username": "pichkoo_pair_ready_bot",
+                    "deep_link": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_ready_bot",
+                    "qr_payload": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_ready_bot",
                     "expires_at": "2027-05-18T00:00:00.000Z",
                 }
             assert method == "GET"
@@ -1393,7 +1393,7 @@ class TestWebServerEndpoints:
             assert bearer_token == "poll-secret"
             return {
                 "status": "ready",
-                "bot_username": "hermes_pair_ready_bot",
+                "bot_username": "pichkoo_pair_ready_bot",
                 "owner_user_id": 123456789,
                 "token": "123456:SECRET",
             }
@@ -1409,7 +1409,7 @@ class TestWebServerEndpoints:
             restart_calls.append((subcommand, name))
             return FakeRestartProc()
 
-        monkeypatch.setattr(ws, "_spawn_hermes_action", fake_spawn_action)
+        monkeypatch.setattr(ws, "_spawn_pichkoo_action", fake_spawn_action)
 
         start = self.client.post("/api/messaging/telegram/onboarding/start", json={})
         assert start.status_code == 200
@@ -1430,7 +1430,7 @@ class TestWebServerEndpoints:
         assert applied_data == {
             "ok": True,
             "platform": "telegram",
-            "bot_username": "hermes_pair_ready_bot",
+            "bot_username": "pichkoo_pair_ready_bot",
             "needs_restart": False,
             "restart_started": True,
             "restart_action": "gateway-restart",
@@ -1456,9 +1456,9 @@ class TestWebServerEndpoints:
                 return {
                     "pairing_id": "pair-restart-fails",
                     "poll_token": "poll-secret",
-                    "suggested_username": "hermes_pair_restart_fails_bot",
-                    "deep_link": "https://t.me/newbot/PichkooSetupBot/hermes_pair_restart_fails_bot",
-                    "qr_payload": "https://t.me/newbot/PichkooSetupBot/hermes_pair_restart_fails_bot",
+                    "suggested_username": "pichkoo_pair_restart_fails_bot",
+                    "deep_link": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_restart_fails_bot",
+                    "qr_payload": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_restart_fails_bot",
                     "expires_at": "2027-05-18T00:00:00.000Z",
                 }
             assert method == "GET"
@@ -1466,7 +1466,7 @@ class TestWebServerEndpoints:
             assert bearer_token == "poll-secret"
             return {
                 "status": "ready",
-                "bot_username": "hermes_pair_restart_fails_bot",
+                "bot_username": "pichkoo_pair_restart_fails_bot",
                 "owner_user_id": 123456789,
                 "token": "123456:SECRET",
             }
@@ -1479,7 +1479,7 @@ class TestWebServerEndpoints:
             assert name == "gateway-restart"
             raise RuntimeError("supervisor unavailable")
 
-        monkeypatch.setattr(ws, "_spawn_hermes_action", fail_spawn_action)
+        monkeypatch.setattr(ws, "_spawn_pichkoo_action", fail_spawn_action)
 
         start = self.client.post("/api/messaging/telegram/onboarding/start", json={})
         assert start.status_code == 200
@@ -1520,14 +1520,14 @@ class TestWebServerEndpoints:
                 return {
                     "pairing_id": "pair-reuse",
                     "poll_token": "poll-secret",
-                    "suggested_username": "hermes_pair_reuse_bot",
-                    "deep_link": "https://t.me/newbot/PichkooSetupBot/hermes_pair_reuse_bot",
-                    "qr_payload": "https://t.me/newbot/PichkooSetupBot/hermes_pair_reuse_bot",
+                    "suggested_username": "pichkoo_pair_reuse_bot",
+                    "deep_link": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_reuse_bot",
+                    "qr_payload": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_reuse_bot",
                     "expires_at": "2027-05-18T00:00:00.000Z",
                 }
             return {
                 "status": "ready",
-                "bot_username": "hermes_pair_reuse_bot",
+                "bot_username": "pichkoo_pair_reuse_bot",
                 "owner_user_id": 123456789,
                 "token": "123456:SECRET",
             }
@@ -1545,7 +1545,7 @@ class TestWebServerEndpoints:
         def fail_spawn_action(subcommand, name):
             raise AssertionError("must not spawn a second concurrent restart")
 
-        monkeypatch.setattr(ws, "_spawn_hermes_action", fail_spawn_action)
+        monkeypatch.setattr(ws, "_spawn_pichkoo_action", fail_spawn_action)
 
         start = self.client.post("/api/messaging/telegram/onboarding/start", json={})
         assert start.status_code == 200
@@ -1573,9 +1573,9 @@ class TestWebServerEndpoints:
             return {
                 "pairing_id": "pair-waiting",
                 "poll_token": "poll-secret",
-                "suggested_username": "hermes_pair_waiting_bot",
-                "deep_link": "https://t.me/newbot/PichkooSetupBot/hermes_pair_waiting_bot",
-                "qr_payload": "https://t.me/newbot/PichkooSetupBot/hermes_pair_waiting_bot",
+                "suggested_username": "pichkoo_pair_waiting_bot",
+                "deep_link": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_waiting_bot",
+                "qr_payload": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_waiting_bot",
                 "expires_at": "2027-05-18T00:00:00.000Z",
             }
 
@@ -1602,9 +1602,9 @@ class TestWebServerEndpoints:
             return {
                 "pairing_id": "pair-cancel",
                 "poll_token": "poll-secret",
-                "suggested_username": "hermes_pair_cancel_bot",
-                "deep_link": "https://t.me/newbot/PichkooSetupBot/hermes_pair_cancel_bot",
-                "qr_payload": "https://t.me/newbot/PichkooSetupBot/hermes_pair_cancel_bot",
+                "suggested_username": "pichkoo_pair_cancel_bot",
+                "deep_link": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_cancel_bot",
+                "qr_payload": "https://t.me/newbot/PichkooSetupBot/pichkoo_pair_cancel_bot",
                 "expires_at": "2027-05-18T00:00:00.000Z",
             }
 
@@ -2217,17 +2217,17 @@ class TestNewEndpoints:
     """Tests for session detail, logs, cron, skills, tools, raw config, analytics."""
 
     @pytest.fixture(autouse=True)
-    def _setup(self, monkeypatch, _isolate_hermes_home):
+    def _setup(self, monkeypatch, _isolate_pichkoo_home):
         try:
             from starlette.testclient import TestClient
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
         import pichkoo_state
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         from pichkoo_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(pichkoo_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(pichkoo_state, "DEFAULT_DB_PATH", get_pichkoo_home() / "state.db")
 
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -2256,8 +2256,8 @@ class TestNewEndpoints:
     # --- Profiles ---
 
     def test_profiles_list_includes_default(self):
-        from pichkoo_constants import get_hermes_home
-        get_hermes_home().mkdir(parents=True, exist_ok=True)
+        from pichkoo_constants import get_pichkoo_home
+        get_pichkoo_home().mkdir(parents=True, exist_ok=True)
 
         resp = self.client.get("/api/profiles")
         assert resp.status_code == 200
@@ -2265,16 +2265,16 @@ class TestNewEndpoints:
         assert "default" in names
 
     def test_profiles_list_falls_back_when_profile_listing_fails(self, monkeypatch):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import pichkoo_cli.profiles as profiles_mod
 
-        hermes_home = get_hermes_home()
-        hermes_home.mkdir(parents=True, exist_ok=True)
-        (hermes_home / "config.yaml").write_text(
+        pichkoo_home = get_pichkoo_home()
+        pichkoo_home.mkdir(parents=True, exist_ok=True)
+        (pichkoo_home / "config.yaml").write_text(
             "model:\n  provider: openrouter\n  name: anthropic/claude-sonnet-4.6\n",
             encoding="utf-8",
         )
-        named = hermes_home / "profiles" / "multi-agent"
+        named = pichkoo_home / "profiles" / "multi-agent"
         named.mkdir(parents=True)
         (named / ".env").write_text("EXAMPLE=1\n", encoding="utf-8")
         (named / "skills" / "demo").mkdir(parents=True)
@@ -2320,19 +2320,19 @@ class TestNewEndpoints:
         assert "test-prof-2" not in names
 
     def test_profile_setup_command_uses_named_profile_wrapper(self):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
-        (get_hermes_home() / "profiles" / "coder").mkdir(parents=True)
+        (get_pichkoo_home() / "profiles" / "coder").mkdir(parents=True)
 
         resp = self.client.get("/api/profiles/coder/setup-command")
 
         assert resp.status_code == 200
         assert resp.json()["command"] == "coder setup"
 
-    def test_profile_setup_command_uses_hermes_for_default_profile(self):
-        from pichkoo_constants import get_hermes_home
+    def test_profile_setup_command_uses_pichkoo_for_default_profile(self):
+        from pichkoo_constants import get_pichkoo_home
 
-        get_hermes_home().mkdir(parents=True, exist_ok=True)
+        get_pichkoo_home().mkdir(parents=True, exist_ok=True)
 
         resp = self.client.get("/api/profiles/default/setup-command")
 
@@ -2357,11 +2357,11 @@ class TestNewEndpoints:
         assert wrapper_path.read_text() == '#!/bin/sh\nexec pichkoo -p writer "$@"\n'
 
     def test_profiles_create_with_clone_from_default_copies_default_skills(self, monkeypatch):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import pichkoo_cli.profiles as profiles_mod
 
         monkeypatch.setattr(profiles_mod, "create_wrapper_script", lambda name: None)
-        default_skill = get_hermes_home() / "skills" / "custom" / "new-skill"
+        default_skill = get_pichkoo_home() / "skills" / "custom" / "new-skill"
         default_skill.mkdir(parents=True)
         (default_skill / "SKILL.md").write_text("---\nname: new-skill\n---\n", encoding="utf-8")
 
@@ -2371,20 +2371,20 @@ class TestNewEndpoints:
         )
 
         assert resp.status_code == 200
-        cloned_skill = get_hermes_home() / "profiles" / "cloned" / "skills" / "custom" / "new-skill" / "SKILL.md"
+        cloned_skill = get_pichkoo_home() / "profiles" / "cloned" / "skills" / "custom" / "new-skill" / "SKILL.md"
         assert cloned_skill.exists()
         profiles = {p["name"]: p for p in self.client.get("/api/profiles").json()["profiles"]}
         assert profiles["cloned"]["skill_count"] == 1
 
     def test_profiles_create_with_clone_from_duplicates_source(self, monkeypatch):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import pichkoo_cli.profiles as profiles_mod
 
         monkeypatch.setattr(profiles_mod, "create_wrapper_script", lambda name: None)
 
         # Create a source profile and give it a distinctive skill.
         assert self.client.post("/api/profiles", json={"name": "source-prof"}).status_code == 200
-        source_skill = get_hermes_home() / "profiles" / "source-prof" / "skills" / "custom" / "src-skill"
+        source_skill = get_pichkoo_home() / "profiles" / "source-prof" / "skills" / "custom" / "src-skill"
         source_skill.mkdir(parents=True)
         (source_skill / "SKILL.md").write_text("---\nname: src-skill\n---\n", encoding="utf-8")
 
@@ -2396,12 +2396,12 @@ class TestNewEndpoints:
 
         assert resp.status_code == 200
         cloned_skill = (
-            get_hermes_home() / "profiles" / "source-prof-copy" / "skills" / "custom" / "src-skill" / "SKILL.md"
+            get_pichkoo_home() / "profiles" / "source-prof-copy" / "skills" / "custom" / "src-skill" / "SKILL.md"
         )
         assert cloned_skill.exists()
 
     def test_profiles_create_without_clone_seeds_bundled_skills(self, monkeypatch):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import pichkoo_cli.profiles as profiles_mod
 
         monkeypatch.setattr(profiles_mod, "create_wrapper_script", lambda name: None)
@@ -2420,16 +2420,16 @@ class TestNewEndpoints:
         )
 
         assert resp.status_code == 200
-        seeded_skill = get_hermes_home() / "profiles" / "fresh" / "skills" / "software-development" / "plan" / "SKILL.md"
+        seeded_skill = get_pichkoo_home() / "profiles" / "fresh" / "skills" / "software-development" / "plan" / "SKILL.md"
         assert seeded_skill.exists()
         profiles = {p["name"]: p for p in self.client.get("/api/profiles").json()["profiles"]}
         assert profiles["fresh"]["skill_count"] == 1
 
     def test_profile_open_terminal_uses_macos_terminal(self, monkeypatch):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import pichkoo_cli.web_server as web_server
 
-        (get_hermes_home() / "profiles" / "coder").mkdir(parents=True)
+        (get_pichkoo_home() / "profiles" / "coder").mkdir(parents=True)
         calls = []
         monkeypatch.setattr(web_server.sys, "platform", "darwin")
         monkeypatch.setattr(web_server.subprocess, "Popen", lambda args, **kwargs: calls.append(args))
@@ -2442,10 +2442,10 @@ class TestNewEndpoints:
         assert "coder setup" in " ".join(calls[0])
 
     def test_profile_open_terminal_uses_windows_cmd(self, monkeypatch):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import pichkoo_cli.web_server as web_server
 
-        (get_hermes_home() / "profiles" / "coder").mkdir(parents=True)
+        (get_pichkoo_home() / "profiles" / "coder").mkdir(parents=True)
         calls = []
         monkeypatch.setattr(web_server.sys, "platform", "win32")
         monkeypatch.setattr(web_server.subprocess, "Popen", lambda args, **kwargs: calls.append(args))
@@ -2496,8 +2496,8 @@ class TestNewEndpoints:
     # --- New profiles endpoints: active / description / model / describe-auto ---
 
     def test_profiles_active_defaults(self):
-        from pichkoo_constants import get_hermes_home
-        get_hermes_home().mkdir(parents=True, exist_ok=True)
+        from pichkoo_constants import get_pichkoo_home
+        get_pichkoo_home().mkdir(parents=True, exist_ok=True)
 
         resp = self.client.get("/api/profiles/active")
         assert resp.status_code == 200
@@ -2546,7 +2546,7 @@ class TestNewEndpoints:
         assert resp.status_code == 404
 
     def test_profile_model_round_trip(self, monkeypatch):
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import pichkoo_cli.profiles as profiles_mod
         monkeypatch.setattr(profiles_mod, "create_wrapper_script", lambda name: None)
 
@@ -2560,7 +2560,7 @@ class TestNewEndpoints:
         assert resp.json()["provider"] == "openrouter"
 
         import yaml
-        cfg_path = get_hermes_home() / "profiles" / "model-prof" / "config.yaml"
+        cfg_path = get_pichkoo_home() / "profiles" / "model-prof" / "config.yaml"
         cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
         assert cfg["model"]["provider"] == "openrouter"
         assert cfg["model"]["default"] == "anthropic/claude-sonnet-4.6"
@@ -3781,18 +3781,18 @@ class TestBulkDeleteSessionsEndpoint:
     """
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home):
+    def _setup_test_client(self, monkeypatch, _isolate_pichkoo_home):
         try:
             from starlette.testclient import TestClient
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
         import pichkoo_state
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         from pichkoo_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         monkeypatch.setattr(
-            pichkoo_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
+            pichkoo_state, "DEFAULT_DB_PATH", get_pichkoo_home() / "state.db"
         )
 
         self.client = TestClient(app)
@@ -3905,20 +3905,20 @@ class TestDeleteEmptySessionsEndpoint:
     """
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home):
+    def _setup_test_client(self, monkeypatch, _isolate_pichkoo_home):
         try:
             from starlette.testclient import TestClient
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
         import pichkoo_state
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         from pichkoo_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         # Pin the SessionDB to the isolated PICHKOO_HOME so each test
         # starts with a clean state.db.
         monkeypatch.setattr(
-            pichkoo_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
+            pichkoo_state, "DEFAULT_DB_PATH", get_pichkoo_home() / "state.db"
         )
 
         self.client = TestClient(app)
@@ -4034,7 +4034,7 @@ class TestPluginAPIAuth:
     """Tests that plugin API routes require the session token (issue #19533)."""
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home, _install_example_plugin):
+    def _setup_test_client(self, monkeypatch, _isolate_pichkoo_home, _install_example_plugin):
         """Create a TestClient without the session token header.
 
         Pulls in ``_install_example_plugin`` so ``test_plugin_route_allows_auth``
@@ -4048,10 +4048,10 @@ class TestPluginAPIAuth:
             pytest.skip("fastapi/starlette not installed")
 
         import pichkoo_state
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         from pichkoo_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(pichkoo_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(pichkoo_state, "DEFAULT_DB_PATH", get_pichkoo_home() / "state.db")
 
         self.client = TestClient(app)
         self.auth_client = TestClient(app)
@@ -4282,7 +4282,7 @@ skip_on_windows = pytest.mark.skipif(
 @skip_on_windows
 class TestPtyWebSocket:
     @pytest.fixture(autouse=True)
-    def _setup(self, monkeypatch, _isolate_hermes_home):
+    def _setup(self, monkeypatch, _isolate_pichkoo_home):
         from starlette.testclient import TestClient
 
         import pichkoo_cli.web_server as ws
@@ -4319,7 +4319,7 @@ class TestPtyWebSocket:
         assert env["PICHKOO_TUI_DISABLE_MOUSE"] == "1"
 
     def test_resolve_chat_argv_applies_terminal_backend_config(
-        self, monkeypatch, _isolate_hermes_home
+        self, monkeypatch, _isolate_pichkoo_home
     ):
         import pichkoo_cli.main as main_mod
 
@@ -4652,7 +4652,7 @@ class TestDashboardPluginStaticAssetAllowlist:
     """
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home, _install_example_plugin):
+    def _setup_test_client(self, monkeypatch, _isolate_pichkoo_home, _install_example_plugin):
         """Create a TestClient and install the example-dashboard fixture.
 
         The static-asset allowlist tests need a plugin to point at —
@@ -4755,7 +4755,7 @@ class TestValidateProviderCredential:
     """Live-probe credential validation (/api/providers/validate)."""
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home):
+    def _setup_test_client(self, monkeypatch, _isolate_pichkoo_home):
         try:
             from starlette.testclient import TestClient
         except ImportError:
@@ -4811,7 +4811,7 @@ class TestDesktopCronTicker:
 
         return TestClient(app)
 
-    def test_ticker_runs_when_desktop(self, monkeypatch, _isolate_hermes_home):
+    def test_ticker_runs_when_desktop(self, monkeypatch, _isolate_pichkoo_home):
         import threading
         import cron.scheduler as sched
 
@@ -4822,7 +4822,7 @@ class TestDesktopCronTicker:
         with self._client():
             assert called.wait(3.0), "expected cron tick under PICHKOO_DESKTOP=1"
 
-    def test_ticker_skipped_without_desktop(self, monkeypatch, _isolate_hermes_home):
+    def test_ticker_skipped_without_desktop(self, monkeypatch, _isolate_pichkoo_home):
         import threading
         import cron.scheduler as sched
 

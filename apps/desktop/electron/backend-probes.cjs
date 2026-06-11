@@ -2,7 +2,7 @@
  * backend-probes.cjs
  *
  * Cheap "does this candidate backend actually work" checks used by
- * resolveHermesBackend (main.cjs). The resolver walks a ladder of
+ * resolvePichkooBackend (main.cjs). The resolver walks a ladder of
  * candidates -- bootstrap marker, `pichkoo` on PATH, system Python with
  * pichkoo_cli installed -- and historically returned the first candidate
  * whose binary existed on disk. That assumption breaks when a user has
@@ -23,7 +23,7 @@
  *   - 5s timeout (a hung interpreter beats forever, but we still give
  *     slow disks / cold caches room to breathe)
  *   - stdio ignored (we only care about exit code; stdout/stderr are
- *     not surfaced to the user, just to recentHermesLog for forensics
+ *     not surfaced to the user, just to recentPichkooLog for forensics
  *     via the caller's catch block if it chooses)
  *   - any throw -> false (never propagate -- resolver wants a boolean)
  *
@@ -40,7 +40,7 @@ const PROBE_TIMEOUT_MS = 5000
  * Return true iff `python -c "import pichkoo_cli"` exits 0.
  *
  * Used to gate the "fallback to system Python with pichkoo_cli installed"
- * rung of resolveHermesBackend. Without this, a system Python 3.11-3.13
+ * rung of resolvePichkooBackend. Without this, a system Python 3.11-3.13
  * registered in PEP 514 makes findSystemPython() succeed regardless of
  * whether pichkoo_cli has actually been pip-installed into its
  * site-packages -- and the resolver returns a backend that immediately
@@ -49,7 +49,7 @@ const PROBE_TIMEOUT_MS = 5000
  * @param {string} pythonPath - Absolute path to a python.exe / python.
  * @returns {boolean}
  */
-function canImportHermesCli(pythonPath) {
+function canImportPichkooCli(pythonPath) {
   if (!pythonPath) return false
   try {
     execFileSync(pythonPath, ['-c', 'import pichkoo_cli'], {
@@ -64,7 +64,7 @@ function canImportHermesCli(pythonPath) {
 }
 
 /**
- * Return true iff `<hermesCommand> --version` exits 0.
+ * Return true iff `<pichkooCommand> --version` exits 0.
  *
  * Used to gate the "existing `pichkoo` on PATH" rung. Without this, a
  * stale pichkoo.cmd shim left behind by an uninstalled pip install (or
@@ -75,19 +75,19 @@ function canImportHermesCli(pythonPath) {
  * here -- `--version` is the cheapest "is this binary alive" smoke
  * test that every pichkoo_cli entry-point has supported since 0.1.
  *
- * @param {string} hermesCommand - Resolved absolute path to a pichkoo
+ * @param {string} pichkooCommand - Resolved absolute path to a pichkoo
  *   executable (or an interpreter+script wrapper).
  * @param {object} [opts]
  * @param {boolean} [opts.shell] - Whether to run through a shell. For
  *   .cmd/.bat shims on Windows execFileSync needs shell:true to find
  *   the cmd interpreter; mirrors the same flag isCommandScript() drives
- *   in resolveHermesBackend.
+ *   in resolvePichkooBackend.
  * @returns {boolean}
  */
-function verifyHermesCli(hermesCommand, opts = {}) {
-  if (!hermesCommand) return false
+function verifyPichkooCli(pichkooCommand, opts = {}) {
+  if (!pichkooCommand) return false
   try {
-    execFileSync(hermesCommand, ['--version'], {
+    execFileSync(pichkooCommand, ['--version'], {
       stdio: 'ignore',
       timeout: PROBE_TIMEOUT_MS,
       shell: Boolean(opts.shell),
@@ -100,7 +100,7 @@ function verifyHermesCli(hermesCommand, opts = {}) {
 }
 
 module.exports = {
-  canImportHermesCli,
-  verifyHermesCli,
+  canImportPichkooCli,
+  verifyPichkooCli,
   PROBE_TIMEOUT_MS
 }

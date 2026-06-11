@@ -27,7 +27,7 @@
 
 /* Installer-only additions: a fade-in animation and a warm radial glow
    for the welcome screen. Everything else inherits from the desktop. */
-@keyframes hermes-fade-in {
+@keyframes pichkoo-fade-in {
   from {
     opacity: 0;
     transform: translateY(4px);
@@ -38,11 +38,11 @@
   }
 }
 
-.hermes-fade-in {
-  animation: hermes-fade-in 0.45s ease-out both;
+.pichkoo-fade-in {
+  animation: pichkoo-fade-in 0.45s ease-out both;
 }
 
-.hermes-glow {
+.pichkoo-glow {
   background: radial-gradient(
     ellipse at center,
     color-mix(in srgb, var(--ui-warm) 18%, transparent) 0%,

@@ -15,7 +15,7 @@ def _write_config(home, body: str) -> None:
 
 @pytest.fixture
 def gateway_home(monkeypatch, tmp_path):
-    monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
+    monkeypatch.setattr(gateway_run, "_pichkoo_home", tmp_path)
     monkeypatch.delenv("PICHKOO_PREFILL_MESSAGES_FILE", raising=False)
     monkeypatch.delenv("PICHKOO_EPHEMERAL_SYSTEM_PROMPT", raising=False)
     monkeypatch.delenv("PICHKOO_GATEWAY_BUSY_INPUT_MODE", raising=False)

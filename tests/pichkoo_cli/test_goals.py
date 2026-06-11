@@ -14,7 +14,7 @@ import pytest
 
 
 @pytest.fixture
-def hermes_home(tmp_path, monkeypatch):
+def pichkoo_home(tmp_path, monkeypatch):
     """Isolated PICHKOO_HOME so SessionDB.state_meta writes don't clobber the real one."""
     from pathlib import Path
 
@@ -182,7 +182,7 @@ class TestJudgeGoal:
 
 
 class TestGoalManager:
-    def test_no_goal_initial(self, hermes_home):
+    def test_no_goal_initial(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
 
         mgr = GoalManager(session_id="test-sid-1")
@@ -191,7 +191,7 @@ class TestGoalManager:
         assert not mgr.has_goal()
         assert "No active goal" in mgr.status_line()
 
-    def test_set_then_status(self, hermes_home):
+    def test_set_then_status(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
 
         mgr = GoalManager(session_id="test-sid-2", default_max_turns=5)
@@ -204,7 +204,7 @@ class TestGoalManager:
         assert "active" in mgr.status_line().lower()
         assert "port the thing" in mgr.status_line()
 
-    def test_set_rejects_empty(self, hermes_home):
+    def test_set_rejects_empty(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
 
         mgr = GoalManager(session_id="test-sid-3")
@@ -213,7 +213,7 @@ class TestGoalManager:
         with pytest.raises(ValueError):
             mgr.set("   ")
 
-    def test_pause_and_resume(self, hermes_home):
+    def test_pause_and_resume(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
 
         mgr = GoalManager(session_id="test-sid-4")
@@ -227,7 +227,7 @@ class TestGoalManager:
         assert mgr.state.status == "active"
         assert mgr.is_active()
 
-    def test_clear(self, hermes_home):
+    def test_clear(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
 
         mgr = GoalManager(session_id="test-sid-5")
@@ -236,7 +236,7 @@ class TestGoalManager:
         assert mgr.state is None
         assert not mgr.is_active()
 
-    def test_persistence_across_managers(self, hermes_home):
+    def test_persistence_across_managers(self, pichkoo_home):
         """Key invariant: a second manager on the same session sees the goal.
 
         This is what makes /resume work — each session rebinds its
@@ -252,7 +252,7 @@ class TestGoalManager:
         assert mgr2.state.goal == "do the thing"
         assert mgr2.is_active()
 
-    def test_evaluate_after_turn_done(self, hermes_home):
+    def test_evaluate_after_turn_done(self, pichkoo_home):
         """Judge says done → status=done, no continuation."""
         from pichkoo_cli import goals
         from pichkoo_cli.goals import GoalManager
@@ -269,7 +269,7 @@ class TestGoalManager:
         assert mgr.state.status == "done"
         assert mgr.state.turns_used == 1
 
-    def test_evaluate_after_turn_continue_under_budget(self, hermes_home):
+    def test_evaluate_after_turn_continue_under_budget(self, pichkoo_home):
         from pichkoo_cli import goals
         from pichkoo_cli.goals import GoalManager
 
@@ -286,7 +286,7 @@ class TestGoalManager:
         assert mgr.state.status == "active"
         assert mgr.state.turns_used == 1
 
-    def test_evaluate_after_turn_budget_exhausted(self, hermes_home):
+    def test_evaluate_after_turn_budget_exhausted(self, pichkoo_home):
         """When turn budget hits ceiling, auto-pause instead of continuing."""
         from pichkoo_cli import goals
         from pichkoo_cli.goals import GoalManager
@@ -307,7 +307,7 @@ class TestGoalManager:
             assert mgr.state.turns_used == 2
             assert "budget" in (mgr.state.paused_reason or "").lower()
 
-    def test_evaluate_after_turn_inactive(self, hermes_home):
+    def test_evaluate_after_turn_inactive(self, pichkoo_home):
         """evaluate_after_turn is a no-op when goal isn't active."""
         from pichkoo_cli.goals import GoalManager
 
@@ -322,7 +322,7 @@ class TestGoalManager:
         assert d2["verdict"] == "inactive"
         assert d2["should_continue"] is False
 
-    def test_continuation_prompt_shape(self, hermes_home):
+    def test_continuation_prompt_shape(self, pichkoo_home):
         """The continuation prompt must include the goal text verbatim —
         and must be safe to inject as a user-role message (prompt-cache
         invariants: no system-prompt mutation)."""
@@ -425,7 +425,7 @@ class TestJudgeParseFailureAutoPause:
         assert verdict == "continue"
         assert parse_failed is True
 
-    def test_auto_pause_after_three_consecutive_parse_failures(self, hermes_home):
+    def test_auto_pause_after_three_consecutive_parse_failures(self, pichkoo_home):
         """N=3 consecutive parse failures → auto-pause with config pointer."""
         from pichkoo_cli import goals
         from pichkoo_cli.goals import GoalManager, DEFAULT_MAX_CONSECUTIVE_PARSE_FAILURES
@@ -454,7 +454,7 @@ class TestJudgeParseFailureAutoPause:
             assert "goal_judge" in d3["message"]
             assert "config.yaml" in d3["message"]
 
-    def test_parse_failure_counter_resets_on_good_reply(self, hermes_home):
+    def test_parse_failure_counter_resets_on_good_reply(self, pichkoo_home):
         """A single good judge reply resets the counter — transient flakes don't pause."""
         from pichkoo_cli import goals
         from pichkoo_cli.goals import GoalManager
@@ -478,7 +478,7 @@ class TestJudgeParseFailureAutoPause:
             assert d["should_continue"] is True
             assert mgr.state.consecutive_parse_failures == 0
 
-    def test_parse_failure_counter_not_incremented_by_api_errors(self, hermes_home):
+    def test_parse_failure_counter_not_incremented_by_api_errors(self, pichkoo_home):
         """API/transport errors must NOT count toward the auto-pause threshold."""
         from pichkoo_cli import goals
         from pichkoo_cli.goals import GoalManager
@@ -496,7 +496,7 @@ class TestJudgeParseFailureAutoPause:
             assert mgr.state.status == "active"
 
     def test_consecutive_parse_failures_persists_across_goalmanager_reloads(
-        self, hermes_home
+        self, pichkoo_home
     ):
         """The counter must be durable so cross-session resumes see it."""
         from pichkoo_cli import goals
@@ -548,7 +548,7 @@ class TestGoalStateSubgoalsBackcompat:
 
 
 class TestGoalManagerSubgoals:
-    def test_add_subgoal(self, hermes_home):
+    def test_add_subgoal(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sub-add")
         mgr.set("main goal")
@@ -556,14 +556,14 @@ class TestGoalManagerSubgoals:
         assert text == "use bullet points"
         assert mgr.state.subgoals == ["use bullet points"]
 
-    def test_add_subgoal_requires_active_goal(self, hermes_home):
+    def test_add_subgoal_requires_active_goal(self, pichkoo_home):
         import pytest
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sub-noactive")
         with pytest.raises(RuntimeError):
             mgr.add_subgoal("oops")
 
-    def test_add_empty_subgoal_rejected(self, hermes_home):
+    def test_add_empty_subgoal_rejected(self, pichkoo_home):
         import pytest
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sub-empty")
@@ -571,7 +571,7 @@ class TestGoalManagerSubgoals:
         with pytest.raises(ValueError):
             mgr.add_subgoal("   ")
 
-    def test_remove_subgoal(self, hermes_home):
+    def test_remove_subgoal(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sub-remove")
         mgr.set("g")
@@ -582,7 +582,7 @@ class TestGoalManagerSubgoals:
         assert removed == "second"
         assert mgr.state.subgoals == ["first", "third"]
 
-    def test_remove_subgoal_out_of_range(self, hermes_home):
+    def test_remove_subgoal_out_of_range(self, pichkoo_home):
         import pytest
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sub-oob")
@@ -593,7 +593,7 @@ class TestGoalManagerSubgoals:
         with pytest.raises(IndexError):
             mgr.remove_subgoal(0)
 
-    def test_clear_subgoals(self, hermes_home):
+    def test_clear_subgoals(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sub-clear")
         mgr.set("g")
@@ -603,7 +603,7 @@ class TestGoalManagerSubgoals:
         assert prev == 2
         assert mgr.state.subgoals == []
 
-    def test_subgoals_persist_across_reloads(self, hermes_home):
+    def test_subgoals_persist_across_reloads(self, pichkoo_home):
         """Subgoals stored in SessionDB survive a fresh GoalManager."""
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sub-persist")
@@ -616,7 +616,7 @@ class TestGoalManagerSubgoals:
 
 
 class TestContinuationPromptWithSubgoals:
-    def test_empty_subgoals_uses_original_template(self, hermes_home):
+    def test_empty_subgoals_uses_original_template(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="cp-empty")
         mgr.set("ship the feature")
@@ -625,7 +625,7 @@ class TestContinuationPromptWithSubgoals:
         assert "ship the feature" in prompt
         assert "Additional criteria" not in prompt
 
-    def test_with_subgoals_includes_them(self, hermes_home):
+    def test_with_subgoals_includes_them(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="cp-with")
         mgr.set("ship the feature")
@@ -640,7 +640,7 @@ class TestContinuationPromptWithSubgoals:
 
 
 class TestJudgeGoalWithSubgoals:
-    def test_judge_uses_subgoals_template_when_provided(self, hermes_home):
+    def test_judge_uses_subgoals_template_when_provided(self, pichkoo_home):
         """judge_goal switches templates when subgoals is non-empty.
 
         We don't actually call the model — we patch the aux client to
@@ -688,7 +688,7 @@ class TestJudgeGoalWithSubgoals:
         assert "every additional criterion" in user_msg
         assert verdict == "done"
 
-    def test_judge_uses_original_template_when_no_subgoals(self, hermes_home):
+    def test_judge_uses_original_template_when_no_subgoals(self, pichkoo_home):
         from unittest.mock import patch
         from pichkoo_cli import goals
 
@@ -721,7 +721,7 @@ class TestJudgeGoalWithSubgoals:
 
 
 class TestStatusLineSubgoalCount:
-    def test_status_line_no_subgoals(self, hermes_home):
+    def test_status_line_no_subgoals(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sl-empty")
         mgr.set("ship it")
@@ -729,7 +729,7 @@ class TestStatusLineSubgoalCount:
         assert "ship it" in line
         assert "subgoal" not in line.lower()
 
-    def test_status_line_with_subgoals(self, hermes_home):
+    def test_status_line_with_subgoals(self, pichkoo_home):
         from pichkoo_cli.goals import GoalManager
         mgr = GoalManager(session_id="sl-with")
         mgr.set("ship it")

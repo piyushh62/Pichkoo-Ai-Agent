@@ -132,7 +132,7 @@ def _set_reasoning_effort(config: Dict[str, Any], effort: str) -> None:
 from pichkoo_cli.config import (
     cfg_get,
     DEFAULT_CONFIG,
-    get_hermes_home,
+    get_pichkoo_home,
     get_config_path,
     get_env_path,
     load_config,
@@ -140,9 +140,9 @@ from pichkoo_cli.config import (
     save_env_value,
     remove_env_value,
     get_env_value,
-    ensure_hermes_home,
+    ensure_pichkoo_home,
 )
-# display_hermes_home imported lazily at call sites (stale-module safety during pichkoo update)
+# display_pichkoo_home imported lazily at call sites (stale-module safety during pichkoo update)
 
 from pichkoo_cli.colors import Colors, color
 
@@ -353,7 +353,7 @@ def _prompt_api_key(var: dict):
         print_warning("  Skipped (configure later with 'pichkoo setup')")
 
 
-def _print_setup_summary(config: dict, hermes_home):
+def _print_setup_summary(config: dict, pichkoo_home):
     """Print the setup completion summary."""
     # Tool availability summary
     print()
@@ -573,7 +573,7 @@ def _print_setup_summary(config: dict, hermes_home):
         print_warning(
             "Some tools are disabled. Run 'pichkoo setup tools' to configure them,"
         )
-        from pichkoo_constants import display_hermes_home as _dhh
+        from pichkoo_constants import display_pichkoo_home as _dhh
         print_warning(f"or edit {_dhh()}/.env directly to add the missing API keys.")
         print()
 
@@ -597,13 +597,13 @@ def _print_setup_summary(config: dict, hermes_home):
     print()
 
     # Show file locations prominently
-    from pichkoo_constants import display_hermes_home as _dhh
+    from pichkoo_constants import display_pichkoo_home as _dhh
     print(color(f"📁 All your files are in {_dhh()}/:", Colors.CYAN, Colors.BOLD))
     print()
     print(f"   {color('Settings:', Colors.YELLOW)}  {get_config_path()}")
     print(f"   {color('API Keys:', Colors.YELLOW)}  {get_env_path()}")
     print(
-        f"   {color('Data:', Colors.YELLOW)}      {hermes_home}/cron/, sessions/, logs/"
+        f"   {color('Data:', Colors.YELLOW)}      {pichkoo_home}/cron/, sessions/, logs/"
     )
     print()
 
@@ -1035,7 +1035,7 @@ def _setup_tts_provider(config: dict):
                     save_env_value("XAI_API_KEY", api_key)
                     print_success("xAI TTS API key saved")
                 else:
-                    from pichkoo_constants import display_hermes_home as _dhh
+                    from pichkoo_constants import display_pichkoo_home as _dhh
                     print_warning(
                         "No xAI API key provided for TTS. Configure XAI_API_KEY "
                         f"via pichkoo setup model or {_dhh()}/.env to use xAI TTS. "
@@ -1655,9 +1655,9 @@ def _setup_telegram_auto_result():
 
     profile_name: str | None = None
     try:
-        hermes_home = str(get_hermes_home())
-        if "/profiles/" in hermes_home:
-            profile_name = hermes_home.rstrip("/").rsplit("/", 1)[-1]
+        pichkoo_home = str(get_pichkoo_home())
+        if "/profiles/" in pichkoo_home:
+            profile_name = pichkoo_home.rstrip("/").rsplit("/", 1)[-1]
     except Exception:
         pass
 
@@ -1875,13 +1875,13 @@ def _write_slack_manifest_and_instruct():
     """
     try:
         from pichkoo_cli.slack_cli import _build_full_manifest
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
         manifest = _build_full_manifest(
             bot_name="Pichkoo",
             bot_description="Your Pichkoo agent on Slack",
         )
-        target = Path(get_hermes_home()) / "slack-manifest.json"
+        target = Path(get_pichkoo_home()) / "slack-manifest.json"
         target.parent.mkdir(parents=True, exist_ok=True)
         import json as _json
         target.write_text(
@@ -2128,7 +2128,7 @@ def _setup_webhooks():
     save_env_value("WEBHOOK_ENABLED", "true")
     print()
     print_success("Webhooks enabled! Next steps:")
-    from pichkoo_constants import display_hermes_home as _dhh
+    from pichkoo_constants import display_pichkoo_home as _dhh
     print_info(f"   1. Define webhook routes in {_dhh()}/config.yaml")
     print_info("   2. Point your service (GitHub, GitLab, etc.) at:")
     print_info("      http://your-server:8644/webhooks/<route-name>")
@@ -2231,7 +2231,7 @@ def setup_gateway(config: dict):
             _is_service_running,
             supports_systemd_services,
             has_conflicting_systemd_units,
-            has_legacy_hermes_units,
+            has_legacy_pichkoo_units,
             install_linux_gateway_from_setup,
             print_systemd_scope_conflict_warning,
             print_legacy_unit_warning,
@@ -2256,7 +2256,7 @@ def setup_gateway(config: dict):
             print_systemd_scope_conflict_warning()
             print()
 
-        if supports_systemd and has_legacy_hermes_units():
+        if supports_systemd and has_legacy_pichkoo_units():
             print_legacy_unit_warning()
             print()
 
@@ -2548,12 +2548,12 @@ _OPENCLAW_SCRIPT = (
     / "migration"
     / "openclaw-migration"
     / "scripts"
-    / "openclaw_to_hermes.py"
+    / "openclaw_to_pichkoo.py"
 )
 
 
 def _load_openclaw_migration_module():
-    """Load the openclaw_to_hermes migration script as a module.
+    """Load the openclaw_to_pichkoo migration script as a module.
 
     Returns the loaded module, or None if the script can't be loaded.
     """
@@ -2561,7 +2561,7 @@ def _load_openclaw_migration_module():
         return None
 
     spec = importlib.util.spec_from_file_location(
-        "openclaw_to_hermes", _OPENCLAW_SCRIPT
+        "openclaw_to_pichkoo", _OPENCLAW_SCRIPT
     )
     if spec is None or spec.loader is None:
         return None
@@ -2660,7 +2660,7 @@ def _print_migration_preview(report: dict):
         print()
 
 
-def _offer_openclaw_migration(hermes_home: Path) -> bool:
+def _offer_openclaw_migration(pichkoo_home: Path) -> bool:
     """Detect ~/.openclaw and offer to migrate during first-time setup.
 
     Runs a dry-run first to show the user exactly what would be imported,
@@ -2708,7 +2708,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
         selected = mod.resolve_selected_options(None, None, preset="full")
         dry_migrator = mod.Migrator(
             source_root=openclaw_dir.resolve(),
-            target_root=hermes_home.resolve(),
+            target_root=pichkoo_home.resolve(),
             execute=False,  # dry-run — no files modified
             workspace_target=None,
             overwrite=True,  # show everything including conflicts
@@ -2753,7 +2753,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
     try:
         migrator = mod.Migrator(
             source_root=openclaw_dir.resolve(),
-            target_root=hermes_home.resolve(),
+            target_root=pichkoo_home.resolve(),
             execute=True,
             workspace_target=None,
             overwrite=False,  # preserve existing Pichkoo config
@@ -2907,7 +2907,7 @@ def run_setup_wizard(args):
     if is_managed():
         managed_error("run setup wizard")
         return
-    ensure_hermes_home()
+    ensure_pichkoo_home()
 
     reset_requested = bool(getattr(args, "reset", False))
     if reset_requested:
@@ -2918,7 +2918,7 @@ def run_setup_wizard(args):
     quick_requested = bool(getattr(args, "quick", False))
 
     config = load_config()
-    hermes_home = get_hermes_home()
+    pichkoo_home = get_pichkoo_home()
 
     # Back up existing config before setup modifies it (#3522)
     config_path = get_config_path()
@@ -3034,7 +3034,7 @@ def run_setup_wizard(args):
         # missing items" flow (useful after a partial OpenClaw migration
         # or when a required API key got cleared).
         if quick_requested:
-            _run_quick_setup(config, hermes_home)
+            _run_quick_setup(config, pichkoo_home)
             return
 
         print()
@@ -3059,7 +3059,7 @@ def run_setup_wizard(args):
             print()
 
         # Offer OpenClaw migration before configuration begins
-        migration_ran = _offer_openclaw_migration(hermes_home)
+        migration_ran = _offer_openclaw_migration(pichkoo_home)
         if migration_ran:
             config = load_config()
 
@@ -3073,14 +3073,14 @@ def run_setup_wizard(args):
         )
 
         if setup_mode == 0:
-            _run_first_time_quick_setup(config, hermes_home, is_existing)
+            _run_first_time_quick_setup(config, pichkoo_home, is_existing)
             return
 
     # ── Full Setup — run all sections ──
     print_header("Configuration Location")
     print_info(f"Config file:  {get_config_path()}")
     print_info(f"Secrets file: {get_env_path()}")
-    print_info(f"Data folder:  {hermes_home}")
+    print_info(f"Data folder:  {pichkoo_home}")
     print_info(f"Install dir:  {PROJECT_ROOT}")
     print()
     print_info("You can edit these files directly or use 'pichkoo config edit'")
@@ -3119,10 +3119,10 @@ def run_setup_wizard(args):
         print_info(f"Previous config backed up to: {_backup_path}")
         print_info("If setup changed a value you customized, restore it with:")
         print_info(f"  cp {_backup_path} {config_path}")
-    _print_setup_summary(config, hermes_home)
+    _print_setup_summary(config, pichkoo_home)
 
 
-def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
+def _run_first_time_quick_setup(config: dict, pichkoo_home, is_existing: bool):
     """Streamlined first-time setup via Nous Portal: OAuth, model, terminal & messaging.
 
     Routes straight to the Nous Portal provider — runs the device-code OAuth
@@ -3192,10 +3192,10 @@ def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
         print_info("  Connect Telegram/Discord:  pichkoo setup gateway")
     print()
 
-    _print_setup_summary(config, hermes_home)
+    _print_setup_summary(config, pichkoo_home)
 
 
-def _run_quick_setup(config: dict, hermes_home):
+def _run_quick_setup(config: dict, pichkoo_home):
     """Quick setup — only configure items that are missing."""
     from pichkoo_cli.config import (
         get_missing_env_vars,
@@ -3358,4 +3358,4 @@ def _run_quick_setup(config: dict, hermes_home):
         save_config(config)
 
     # Jump to summary
-    _print_setup_summary(config, hermes_home)
+    _print_setup_summary(config, pichkoo_home)

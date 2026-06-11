@@ -713,16 +713,16 @@ class PichkooACPAgent(acp.Agent):
     def _provenance_meta(
         self,
         acp_session_id: str,
-        current_hermes_session_id: str,
-        previous_hermes_session_id: Optional[str] = None,
+        current_pichkoo_session_id: str,
+        previous_pichkoo_session_id: Optional[str] = None,
     ) -> Optional[dict]:
         """Best-effort ``_meta.pichkoo.sessionProvenance`` for an ACP session."""
         try:
             return session_provenance_meta(
                 self.session_manager._get_db(),
                 acp_session_id,
-                current_hermes_session_id,
-                previous_hermes_session_id=previous_hermes_session_id,
+                current_pichkoo_session_id,
+                previous_pichkoo_session_id=previous_pichkoo_session_id,
             )
         except Exception:
             logger.debug(
@@ -734,13 +734,13 @@ class PichkooACPAgent(acp.Agent):
         self,
         session_id: str,
         *,
-        current_hermes_session_id: Optional[str] = None,
-        previous_hermes_session_id: Optional[str] = None,
+        current_pichkoo_session_id: Optional[str] = None,
+        previous_pichkoo_session_id: Optional[str] = None,
     ) -> None:
         """Send ACP native session metadata after Pichkoo changes it.
 
         When the internal Pichkoo head rotated (e.g. compression-driven session
-        split during a turn), pass ``previous_hermes_session_id`` so the
+        split during a turn), pass ``previous_pichkoo_session_id`` so the
         attached ``_meta.pichkoo.sessionProvenance`` flags the rotation reason.
         """
         if not self._conn:
@@ -761,8 +761,8 @@ class PichkooACPAgent(acp.Agent):
         updated_at = datetime.now(timezone.utc).isoformat()
         meta = self._provenance_meta(
             session_id,
-            current_hermes_session_id or session_id,
-            previous_hermes_session_id,
+            current_pichkoo_session_id or session_id,
+            previous_pichkoo_session_id,
         )
         update = SessionInfoUpdate(
             session_update="session_info_update",
@@ -1545,7 +1545,7 @@ class PichkooACPAgent(acp.Agent):
             # can detect a compression-driven session rotation afterwards. The
             # ACP `session_id` stays the stable client handle; agent.session_id
             # is the live internal head that compression may rotate.
-            pre_turn_hermes_id = getattr(state.agent, "session_id", None)
+            pre_turn_pichkoo_id = getattr(state.agent, "session_id", None)
             # Wrap the executor call in a fresh copy of the current context so
             # concurrent ACP sessions on the shared ThreadPoolExecutor don't
             # stomp on each other's ContextVar writes (PICHKOO_SESSION_KEY in
@@ -1568,18 +1568,18 @@ class PichkooACPAgent(acp.Agent):
         # DB head moved during the turn, emit a session_info_update carrying
         # _meta.pichkoo.sessionProvenance so ACP clients can render the boundary
         # and keep old/new ids in lineage. The ACP session_id is unchanged.
-        post_turn_hermes_id = getattr(state.agent, "session_id", None)
+        post_turn_pichkoo_id = getattr(state.agent, "session_id", None)
         if (
             conn
-            and post_turn_hermes_id
-            and pre_turn_hermes_id
-            and post_turn_hermes_id != pre_turn_hermes_id
+            and post_turn_pichkoo_id
+            and pre_turn_pichkoo_id
+            and post_turn_pichkoo_id != pre_turn_pichkoo_id
         ):
             try:
                 await self._send_session_info_update(
                     session_id,
-                    current_hermes_session_id=post_turn_hermes_id,
-                    previous_hermes_session_id=pre_turn_hermes_id,
+                    current_pichkoo_session_id=post_turn_pichkoo_id,
+                    previous_pichkoo_session_id=pre_turn_pichkoo_id,
                 )
             except Exception:
                 logger.debug(

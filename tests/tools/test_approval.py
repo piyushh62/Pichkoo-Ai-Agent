@@ -9,7 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import patch as mock_patch
 
 import tools.approval as approval_module
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 from tools.approval import (
     _get_approval_mode,
     _smart_approve,
@@ -364,17 +364,17 @@ class TestTeePattern:
         assert dangerous is True
         assert key is not None
 
-    def test_tee_hermes_env(self):
+    def test_tee_pichkoo_env(self):
         dangerous, key, desc = detect_dangerous_command("echo x | tee ~/.pichkoo/.env")
         assert dangerous is True
         assert key is not None
 
-    def test_tee_custom_hermes_home_env(self):
+    def test_tee_custom_pichkoo_home_env(self):
         dangerous, key, desc = detect_dangerous_command("echo x | tee $PICHKOO_HOME/.env")
         assert dangerous is True
         assert key is not None
 
-    def test_tee_quoted_custom_hermes_home_env(self):
+    def test_tee_quoted_custom_pichkoo_home_env(self):
         dangerous, key, desc = detect_dangerous_command('echo x | tee "$PICHKOO_HOME/.env"')
         assert dangerous is True
         assert key is not None
@@ -425,23 +425,23 @@ class TestPichkooConfigWriteProtection:
         dangerous, key, desc = detect_dangerous_command("sed --in-place 's/manual/off/' ~/.pichkoo/config.yaml")
         assert dangerous is True
 
-    def test_sed_in_place_absolute_hermes_home_config(self):
-        config_path = get_hermes_home() / "config.yaml"
+    def test_sed_in_place_absolute_pichkoo_home_config(self):
+        config_path = get_pichkoo_home() / "config.yaml"
         dangerous, key, desc = detect_dangerous_command(
             f"sed -i 's/manual/off/' {config_path}"
         )
         assert dangerous is True
         assert "pichkoo config" in desc.lower() or "in-place" in desc.lower()
 
-    def test_sed_in_place_absolute_hermes_home_env(self):
-        env_path = get_hermes_home() / ".env"
+    def test_sed_in_place_absolute_pichkoo_home_env(self):
+        env_path = get_pichkoo_home() / ".env"
         dangerous, key, desc = detect_dangerous_command(
             f"sed -i 's/API_KEY=.*/API_KEY=x/' {env_path}"
         )
         assert dangerous is True
         assert "pichkoo config" in desc.lower() or "in-place" in desc.lower()
 
-    def test_custom_hermes_home(self):
+    def test_custom_pichkoo_home(self):
         dangerous, key, desc = detect_dangerous_command("echo x | tee $PICHKOO_HOME/config.yaml")
         assert dangerous is True
 
@@ -454,8 +454,8 @@ class TestPichkooConfigWriteProtection:
         assert dangerous is True
         assert "in-place" in desc.lower() or "perl" in desc.lower()
 
-    def test_perl_in_place_absolute_hermes_home_config(self):
-        config_path = get_hermes_home() / "config.yaml"
+    def test_perl_in_place_absolute_pichkoo_home_config(self):
+        config_path = get_pichkoo_home() / "config.yaml"
         dangerous, key, desc = detect_dangerous_command(
             f"perl -i -pe 's/approvals.mode: on/approvals.mode: off/' {config_path}"
         )
@@ -468,8 +468,8 @@ class TestPichkooConfigWriteProtection:
         )
         assert dangerous is True
 
-    def test_ruby_in_place_absolute_hermes_home_env(self):
-        env_path = get_hermes_home() / ".env"
+    def test_ruby_in_place_absolute_pichkoo_home_env(self):
+        env_path = get_pichkoo_home() / ".env"
         dangerous, key, desc = detect_dangerous_command(
             f"ruby -i -pe 'gsub(/API_KEY=.*/, \"API_KEY=x\")' {env_path}"
         )
@@ -550,7 +550,7 @@ class TestFindExecFullPathRm:
 class TestSensitiveRedirectPattern:
     """Detect shell redirection writes to sensitive user-managed paths."""
 
-    def test_redirect_to_custom_hermes_home_env(self):
+    def test_redirect_to_custom_pichkoo_home_env(self):
         dangerous, key, desc = detect_dangerous_command("echo x > $PICHKOO_HOME/.env")
         assert dangerous is True
         assert key is not None
@@ -780,14 +780,14 @@ class TestGatewayProtection:
         assert dangerous is True
         assert "stop/restart" in desc
 
-    def test_pkill_hermes_detected(self):
+    def test_pkill_pichkoo_detected(self):
         """pkill targeting pichkoo/gateway processes must be caught."""
         cmd = 'pkill -f "cli.py --gateway"'
         dangerous, key, desc = detect_dangerous_command(cmd)
         assert dangerous is True
         assert "self-termination" in desc
 
-    def test_killall_hermes_detected(self):
+    def test_killall_pichkoo_detected(self):
         cmd = "killall pichkoo"
         dangerous, key, desc = detect_dangerous_command(cmd)
         assert dangerous is True
@@ -946,7 +946,7 @@ class TestPgrepKillExpansion:
         dangerous, _, _ = detect_dangerous_command(cmd)
         assert dangerous is True
 
-    def test_pkill_hermes_still_detected(self):
+    def test_pkill_pichkoo_still_detected(self):
         """Existing pkill pattern must not regress."""
         cmd = "pkill -9 pichkoo"
         dangerous, _, _ = detect_dangerous_command(cmd)

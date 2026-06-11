@@ -223,7 +223,7 @@ pichkoo-agent/
 ├── toolsets.py           # Toolset definitions, _PICHKOO_CORE_TOOLS list
 ├── cli.py                # PichkooCLI class — interactive CLI orchestrator (~11k LOC)
 ├── pichkoo_state.py       # SessionDB — SQLite session store (FTS5 search)
-├── pichkoo_constants.py   # get_hermes_home(), display_hermes_home() — profile-aware paths
+├── pichkoo_constants.py   # get_pichkoo_home(), display_pichkoo_home() — profile-aware paths
 ├── pichkoo_logging.py     # setup_logging() — agent.log / errors.log / gateway.log (profile-aware)
 ├── batch_runner.py       # Parallel batch processing
 ├── agent/                # Agent internals (provider adapters, memory, caching, compression, etc.)
@@ -260,7 +260,7 @@ pichkoo-agent/
 
 **User config:** `~/.pichkoo/config.yaml` (settings), `~/.pichkoo/.env` (API keys only).
 **Logs:** `~/.pichkoo/logs/` — `agent.log` (INFO+), `errors.log` (WARNING+),
-`gateway.log` when running the gateway. Profile-aware via `get_hermes_home()`.
+`gateway.log` when running the gateway. Profile-aware via `get_pichkoo_home()`.
 Browse with `pichkoo logs [--follow] [--level ...] [--session ...]`.
 
 ## TypeScript Style
@@ -537,9 +537,9 @@ Auto-discovery: any `tools/*.py` file with a top-level `registry.register()` cal
 
 The registry handles schema collection, dispatch, availability checking, and error wrapping. All handlers MUST return a JSON string.
 
-**Path references in tool schemas**: If the schema description mentions file paths (e.g. default output directories), use `display_hermes_home()` to make them profile-aware. The schema is generated at import time, which is after `_apply_profile_override()` sets `PICHKOO_HOME`.
+**Path references in tool schemas**: If the schema description mentions file paths (e.g. default output directories), use `display_pichkoo_home()` to make them profile-aware. The schema is generated at import time, which is after `_apply_profile_override()` sets `PICHKOO_HOME`.
 
-**State files**: If a tool stores persistent state (caches, logs, checkpoints), use `get_hermes_home()` for the base directory — never `Path.home() / ".pichkoo"`. This ensures each profile gets its own state.
+**State files**: If a tool stores persistent state (caches, logs, checkpoints), use `get_pichkoo_home()` for the base directory — never `Path.home() / ".pichkoo"`. This ensures each profile gets its own state.
 
 **Agent-level tools** (todo, memory): intercepted by `run_agent.py` before `handle_function_call()`. See `tools/todo_tool.py` for the pattern.
 
@@ -756,7 +756,7 @@ holographic, openviking, retaindb**.
 Each provider implements the `MemoryProvider` ABC (see `agent/memory_provider.py`)
 and is orchestrated by `agent/memory_manager.py`. Lifecycle hooks include
 `sync_turn(turn_messages)`, `prefetch(query)`, `shutdown()`, and optional
-`post_setup(hermes_home, config)` for setup-wizard integration.
+`post_setup(pichkoo_home, config)` for setup-wizard integration.
 
 **CLI commands via `plugins/memory/<name>/cli.py`:** if a memory plugin
 defines `register_cli(subparser)`, `discover_plugin_cli_commands()` finds
@@ -1131,39 +1131,39 @@ Pichkoo supports **profiles** — multiple fully isolated instances, each with i
 `PICHKOO_HOME` directory (config, API keys, memory, sessions, skills, gateway, etc.).
 
 The core mechanism: `_apply_profile_override()` in `pichkoo_cli/main.py` sets
-`PICHKOO_HOME` before any module imports. All `get_hermes_home()` references
+`PICHKOO_HOME` before any module imports. All `get_pichkoo_home()` references
 automatically scope to the active profile.
 
 ### Rules for profile-safe code
 
-1. **Use `get_hermes_home()` for all PICHKOO_HOME paths.** Import from `pichkoo_constants`.
+1. **Use `get_pichkoo_home()` for all PICHKOO_HOME paths.** Import from `pichkoo_constants`.
    NEVER hardcode `~/.pichkoo` or `Path.home() / ".pichkoo"` in code that reads/writes state.
    ```python
    # GOOD
-   from pichkoo_constants import get_hermes_home
-   config_path = get_hermes_home() / "config.yaml"
+   from pichkoo_constants import get_pichkoo_home
+   config_path = get_pichkoo_home() / "config.yaml"
 
    # BAD — breaks profiles
    config_path = Path.home() / ".pichkoo" / "config.yaml"
    ```
 
-2. **Use `display_hermes_home()` for user-facing messages.** Import from `pichkoo_constants`.
+2. **Use `display_pichkoo_home()` for user-facing messages.** Import from `pichkoo_constants`.
    This returns `~/.pichkoo` for default or `~/.pichkoo/profiles/<name>` for profiles.
    ```python
    # GOOD
-   from pichkoo_constants import display_hermes_home
-   print(f"Config saved to {display_hermes_home()}/config.yaml")
+   from pichkoo_constants import display_pichkoo_home
+   print(f"Config saved to {display_pichkoo_home()}/config.yaml")
 
    # BAD — shows wrong path for profiles
    print("Config saved to ~/.pichkoo/config.yaml")
    ```
 
-3. **Module-level constants are fine** — they cache `get_hermes_home()` at import time,
-   which is AFTER `_apply_profile_override()` sets the env var. Just use `get_hermes_home()`,
+3. **Module-level constants are fine** — they cache `get_pichkoo_home()` at import time,
+   which is AFTER `_apply_profile_override()` sets the env var. Just use `get_pichkoo_home()`,
    not `Path.home() / ".pichkoo"`.
 
 4. **Tests that mock `Path.home()` must also set `PICHKOO_HOME`** — since code now uses
-   `get_hermes_home()` (reads env var), not `Path.home() / ".pichkoo"`:
+   `get_pichkoo_home()` (reads env var), not `Path.home() / ".pichkoo"`:
    ```python
    with patch.object(Path, "home", return_value=tmp_path), \
         patch.dict(os.environ, {"PICHKOO_HOME": str(tmp_path / ".pichkoo")}):
@@ -1177,14 +1177,14 @@ automatically scope to the active profile.
    See `gateway/platforms/telegram.py` for the canonical pattern.
 
 6. **Profile operations are HOME-anchored, not PICHKOO_HOME-anchored** — `_get_profiles_root()`
-   returns `Path.home() / ".pichkoo" / "profiles"`, NOT `get_hermes_home() / "profiles"`.
+   returns `Path.home() / ".pichkoo" / "profiles"`, NOT `get_pichkoo_home() / "profiles"`.
    This is intentional — it lets `pichkoo -p coder profile list` see all profiles regardless
    of which one is active.
 
 ## Known Pitfalls
 
 ### DO NOT hardcode `~/.pichkoo` paths
-Use `get_hermes_home()` from `pichkoo_constants` for code paths. Use `display_hermes_home()`
+Use `get_pichkoo_home()` from `pichkoo_constants` for code paths. Use `display_pichkoo_home()`
 for user-facing print/log messages. Hardcoding `~/.pichkoo` breaks profiles — each profile
 has its own `PICHKOO_HOME` directory. This was the source of 5 bugs fixed in PR #3575.
 
@@ -1229,10 +1229,10 @@ unused module into a live code path, E2E test the real resolution chain
 with actual imports (not mocks) against a temp `PICHKOO_HOME`.
 
 ### Tests must not write to `~/.pichkoo/`
-The `_isolate_hermes_home` autouse fixture in `tests/conftest.py` redirects `PICHKOO_HOME` to a temp dir. Never hardcode `~/.pichkoo/` paths in tests.
+The `_isolate_pichkoo_home` autouse fixture in `tests/conftest.py` redirects `PICHKOO_HOME` to a temp dir. Never hardcode `~/.pichkoo/` paths in tests.
 
 **Profile tests**: When testing profile features, also mock `Path.home()` so that
-`_get_profiles_root()` and `_get_default_hermes_home()` resolve within the temp dir.
+`_get_profiles_root()` and `_get_default_pichkoo_home()` resolve within the temp dir.
 Use the pattern from `tests/pichkoo_cli/test_profiles.py`:
 ```python
 @pytest.fixture

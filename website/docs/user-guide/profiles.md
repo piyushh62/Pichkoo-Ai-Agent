@@ -249,7 +249,7 @@ Add the line to your `~/.bashrc` or `~/.zshrc` for persistent completion. Comple
 
 ## How it works
 
-Profiles use the `PICHKOO_HOME` environment variable. When you run `coder chat`, the wrapper script sets `PICHKOO_HOME=~/.pichkoo/profiles/coder` before launching pichkoo. Since 119+ files in the codebase resolve paths via `get_hermes_home()`, Pichkoo state automatically scopes to the profile's directory — config, sessions, memory, skills, state database, gateway PID, logs, and cron jobs.
+Profiles use the `PICHKOO_HOME` environment variable. When you run `coder chat`, the wrapper script sets `PICHKOO_HOME=~/.pichkoo/profiles/coder` before launching pichkoo. Since 119+ files in the codebase resolve paths via `get_pichkoo_home()`, Pichkoo state automatically scopes to the profile's directory — config, sessions, memory, skills, state database, gateway PID, logs, and cron jobs.
 
 This is separate from terminal working directory. Tool execution starts from `terminal.cwd` (or the launch directory when `cwd: "."` on the local backend), not automatically from `PICHKOO_HOME`.
 

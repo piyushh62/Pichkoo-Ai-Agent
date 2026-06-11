@@ -62,7 +62,7 @@ from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 
 
 def _launch_cwd_for_session(source: str) -> Optional[str]:
@@ -103,15 +103,15 @@ from agent.process_bootstrap import (
 from agent.iteration_budget import IterationBudget
 
 
-from pichkoo_cli.env_loader import load_hermes_dotenv
+from pichkoo_cli.env_loader import load_pichkoo_dotenv
 from pichkoo_cli.timeouts import (
     get_provider_request_timeout,
     get_provider_stale_timeout,
 )
 
-_hermes_home = get_hermes_home()
+_pichkoo_home = get_pichkoo_home()
 _project_env = Path(__file__).parent / '.env'
-_loaded_env_paths = load_hermes_dotenv(hermes_home=_hermes_home, project_env=_project_env)
+_loaded_env_paths = load_pichkoo_dotenv(pichkoo_home=_pichkoo_home, project_env=_project_env)
 if _loaded_env_paths:
     for _env_path in _loaded_env_paths:
         logger.info("Loaded environment variables from %s", _env_path)

@@ -40,7 +40,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 
 from pichkoo_cli.colors import Colors, color
 
@@ -62,9 +62,9 @@ def log_warn(msg: str):
 # ---------------------------------------------------------------------------
 
 
-def _agent_root(hermes_home: Path) -> Path:
+def _agent_root(pichkoo_home: Path) -> Path:
     """The agent checkout root — same layout install.sh / install.ps1 use."""
-    return hermes_home / "pichkoo-agent"
+    return pichkoo_home / "pichkoo-agent"
 
 
 def desktop_userdata_dir() -> Path:
@@ -87,14 +87,14 @@ def desktop_userdata_dir() -> Path:
     return base / "Pichkoo"
 
 
-def source_built_gui_artifacts(hermes_home: Path) -> "list[Path]":
+def source_built_gui_artifacts(pichkoo_home: Path) -> "list[Path]":
     """GUI build artifacts produced by ``pichkoo desktop`` inside the checkout.
 
     These are removable on a GUI uninstall without harming the agent: the
     Python agent runs from ``pichkoo-agent/`` source + ``venv/`` and never
     needs the Electron build output or node_modules.
     """
-    agent_root = _agent_root(hermes_home)
+    agent_root = _agent_root(pichkoo_home)
     desktop_dir = agent_root / "apps" / "desktop"
     return [
         desktop_dir / "dist",
@@ -104,7 +104,7 @@ def source_built_gui_artifacts(hermes_home: Path) -> "list[Path]":
         # desktop workspace, ~200MB). The agent does not use any npm package,
         # so this is GUI tooling — safe to drop on a GUI uninstall.
         agent_root / "node_modules",
-        hermes_home / "desktop-build-stamp.json",
+        pichkoo_home / "desktop-build-stamp.json",
     ]
 
 
@@ -151,14 +151,14 @@ def packaged_gui_app_paths() -> "list[Path]":
     return paths
 
 
-def agent_is_installed(hermes_home: Path) -> bool:
+def agent_is_installed(pichkoo_home: Path) -> bool:
     """Return True when a usable Python agent install exists under PICHKOO_HOME.
 
     Used by the desktop UI to decide which uninstall options to offer: if the
     agent isn't present (a future "lite" GUI-only client), the "remove agent"
     options are hidden.
     """
-    agent_root = _agent_root(hermes_home)
+    agent_root = _agent_root(pichkoo_home)
     # A real install has the package source + a venv. Either signal alone is
     # enough — a source checkout without a venv is still "the agent is here".
     if (agent_root / "pichkoo_cli").is_dir():
@@ -168,9 +168,9 @@ def agent_is_installed(hermes_home: Path) -> bool:
     return False
 
 
-def gui_is_installed(hermes_home: Path) -> bool:
+def gui_is_installed(pichkoo_home: Path) -> bool:
     """Return True when any desktop GUI artifact exists (built or packaged)."""
-    for p in source_built_gui_artifacts(hermes_home):
+    for p in source_built_gui_artifacts(pichkoo_home):
         if p.exists():
             return True
     for p in packaged_gui_app_paths():
@@ -181,21 +181,21 @@ def gui_is_installed(hermes_home: Path) -> bool:
     return False
 
 
-def gui_install_summary(hermes_home: "Path | None" = None) -> dict:
+def gui_install_summary(pichkoo_home: "Path | None" = None) -> dict:
     """Structured snapshot of what's installed, for the desktop UI to render.
 
     Returns JSON-serializable primitives so the Electron main process can
     forward it to the renderer via IPC (paths as strings, booleans for the
     high-level questions the UI gates options on).
     """
-    home: Path = hermes_home if hermes_home is not None else get_hermes_home()
+    home: Path = pichkoo_home if pichkoo_home is not None else get_pichkoo_home()
 
     source_artifacts = [p for p in source_built_gui_artifacts(home) if p.exists()]
     packaged = [p for p in packaged_gui_app_paths() if p.exists()]
     userdata = desktop_userdata_dir()
 
     return {
-        "hermes_home": str(home),
+        "pichkoo_home": str(home),
         "agent_installed": agent_is_installed(home),
         "gui_installed": gui_is_installed(home),
         "source_built_artifacts": [str(p) for p in source_artifacts],
@@ -225,7 +225,7 @@ def _remove_path(path: Path) -> bool:
     return False
 
 
-def uninstall_gui(hermes_home: "Path | None" = None, *, remove_userdata: bool = True) -> "list[Path]":
+def uninstall_gui(pichkoo_home: "Path | None" = None, *, remove_userdata: bool = True) -> "list[Path]":
     """Remove the desktop GUI's artifacts, leaving the agent + user data intact.
 
     Removes:
@@ -239,7 +239,7 @@ def uninstall_gui(hermes_home: "Path | None" = None, *, remove_userdata: bool = 
 
     Returns the list of paths actually removed.
     """
-    home: Path = hermes_home if hermes_home is not None else get_hermes_home()
+    home: Path = pichkoo_home if pichkoo_home is not None else get_pichkoo_home()
 
     removed: list[Path] = []
 

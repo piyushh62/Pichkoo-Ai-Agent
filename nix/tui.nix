@@ -1,13 +1,13 @@
-# nix/tui.nix — Hermes TUI (Ink/React) compiled with tsc and bundled
-{ pkgs, hermesNpmLib, ... }:
+# nix/tui.nix — Pichkoo TUI (Ink/React) compiled with tsc and bundled
+{ pkgs, pichkooNpmLib, ... }:
 let
-  npm = hermesNpmLib.mkNpmPassthru { folder = "ui-tui"; attr = "tui"; pname = "hermes-tui"; };
+  npm = pichkooNpmLib.mkNpmPassthru { folder = "ui-tui"; attr = "tui"; pname = "pichkoo-tui"; };
 
   packageJson = builtins.fromJSON (builtins.readFile (npm.src + "/ui-tui/package.json"));
   version = packageJson.version;
 in
 pkgs.buildNpmPackage (npm // {
-  pname = "hermes-tui";
+  pname = "pichkoo-tui";
   inherit version;
 
   doCheck = false;
@@ -21,12 +21,12 @@ pkgs.buildNpmPackage (npm // {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/lib/hermes-tui
+    mkdir -p $out/lib/pichkoo-tui
     # esbuild writes to ui-tui/dist/ from the source root (no cd).
-    cp -r ui-tui/dist $out/lib/hermes-tui/dist
+    cp -r ui-tui/dist $out/lib/pichkoo-tui/dist
 
     # package.json kept for "type": "module" resolution on `node dist/entry.js`.
-    cp ui-tui/package.json $out/lib/hermes-tui/
+    cp ui-tui/package.json $out/lib/pichkoo-tui/
 
     runHook postInstall
   '';

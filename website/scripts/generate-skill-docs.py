@@ -341,9 +341,9 @@ def render_skill_page(
     # Heuristic nicer title from name
     display_name = name.replace("-", " ").replace("_", " ").title()
 
-    hermes_meta = (fm.get("metadata") or {}).get("pichkoo") or {}
-    tags = hermes_meta.get("tags") or []
-    related = hermes_meta.get("related_skills") or []
+    pichkoo_meta = (fm.get("metadata") or {}).get("pichkoo") or {}
+    tags = pichkoo_meta.get("tags") or []
+    related = pichkoo_meta.get("related_skills") or []
     platforms = fm.get("platforms")
     version = fm.get("version")
     author = fm.get("author")

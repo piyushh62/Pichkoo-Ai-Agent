@@ -208,7 +208,7 @@ scripts/run_tests.sh
 - 📚 [Skills Hub](https://agentskills.io)
 - 🐛 [Issues](https://github.com/piyushh62/Pichkoo-AI-Agent/issues)
 - 🔌 [computer-use-linux](https://github.com/avifenesh/computer-use-linux) — Linux desktop-control MCP server for Pichkoo and other MCP hosts, with AT-SPI accessibility trees, Wayland/X11 input, screenshots, and compositor window targeting.
-- 🔌 [PichkooClaw](https://github.com/AaronWong1999/hermesclaw) — Community WeChat bridge: Run Pichkoo AI Agent and OpenClaw on the same WeChat account.
+- 🔌 [PichkooClaw](https://github.com/AaronWong1999/pichkooclaw) — Community WeChat bridge: Run Pichkoo AI Agent and OpenClaw on the same WeChat account.
 
 ---
 

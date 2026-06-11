@@ -166,7 +166,7 @@ class TestBranchCommandCLI:
 
         assert cli_instance._resumed is True
 
-    def test_branch_rotates_hermes_session_id_env_and_context(self, cli_instance, session_db):
+    def test_branch_rotates_pichkoo_session_id_env_and_context(self, cli_instance, session_db):
         """Branching must update process-local session-id readers too."""
         from cli import PichkooCLI
         from gateway.session_context import _UNSET, _VAR_MAP, get_session_env

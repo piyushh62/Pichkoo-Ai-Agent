@@ -10,8 +10,8 @@ import yaml
 from pichkoo_cli.config import (
     DEFAULT_CONFIG,
     check_config_version,
-    get_hermes_home,
-    ensure_hermes_home,
+    get_pichkoo_home,
+    ensure_pichkoo_home,
     get_compatible_custom_providers,
     load_config,
     load_env,
@@ -29,19 +29,19 @@ class TestGetPichkooHome:
     def test_default_path(self):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("PICHKOO_HOME", None)
-            home = get_hermes_home()
+            home = get_pichkoo_home()
             assert home == Path.home() / ".pichkoo"
 
     def test_env_override(self):
         with patch.dict(os.environ, {"PICHKOO_HOME": "/custom/path"}):
-            home = get_hermes_home()
+            home = get_pichkoo_home()
             assert home == Path("/custom/path")
 
 
 class TestEnsurePichkooHome:
     def test_creates_subdirs(self, tmp_path):
         with patch.dict(os.environ, {"PICHKOO_HOME": str(tmp_path)}):
-            ensure_hermes_home()
+            ensure_pichkoo_home()
             assert (tmp_path / "cron").is_dir()
             assert (tmp_path / "sessions").is_dir()
             assert (tmp_path / "logs").is_dir()
@@ -49,7 +49,7 @@ class TestEnsurePichkooHome:
 
     def test_creates_default_soul_md_if_missing(self, tmp_path):
         with patch.dict(os.environ, {"PICHKOO_HOME": str(tmp_path)}):
-            ensure_hermes_home()
+            ensure_pichkoo_home()
             soul_path = tmp_path / "SOUL.md"
             assert soul_path.exists()
             assert soul_path.read_text(encoding="utf-8").strip() != ""
@@ -58,7 +58,7 @@ class TestEnsurePichkooHome:
         with patch.dict(os.environ, {"PICHKOO_HOME": str(tmp_path)}):
             soul_path = tmp_path / "SOUL.md"
             soul_path.write_text("custom soul", encoding="utf-8")
-            ensure_hermes_home()
+            ensure_pichkoo_home()
             assert soul_path.read_text(encoding="utf-8") == "custom soul"
 
 
@@ -1001,9 +1001,9 @@ class TestEnvWriteDenylist:
     """
 
     @pytest.fixture(autouse=True)
-    def _hermes_home(self, tmp_path, monkeypatch):
+    def _pichkoo_home(self, tmp_path, monkeypatch):
         monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
-        ensure_hermes_home()
+        ensure_pichkoo_home()
 
     @pytest.mark.parametrize(
         "denied_key",
@@ -1052,7 +1052,7 @@ class TestEnvWriteDenylist:
             "PICHKOO_MAX_ITERATIONS",
         ],
     )
-    def test_hermes_integration_keys_still_writable(self, allowed_key):
+    def test_pichkoo_integration_keys_still_writable(self, allowed_key):
         """``PICHKOO_*`` overall is NOT blocked — only the four runtime
         location names (HOME/PROFILE/CONFIG/ENV) are. Integration
         credentials following the ``PICHKOO_*`` convention must keep

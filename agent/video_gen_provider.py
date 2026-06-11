@@ -203,9 +203,9 @@ class VideoGenProvider(abc.ABC):
 
 def _videos_cache_dir() -> Path:
     """Return ``$PICHKOO_HOME/cache/videos/``, creating parents as needed."""
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 
-    path = get_hermes_home() / "cache" / "videos"
+    path = get_pichkoo_home() / "cache" / "videos"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

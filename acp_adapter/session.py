@@ -8,7 +8,7 @@ history.
 """
 from __future__ import annotations
 
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 
 import copy
 import json
@@ -407,14 +407,14 @@ class SessionManager:
         Note: we resolve ``PICHKOO_HOME`` dynamically rather than relying on
         the module-level ``DEFAULT_DB_PATH`` constant, because that constant
         is evaluated at import time and won't reflect env-var changes made
-        later (e.g. by the test fixture ``_isolate_hermes_home``).
+        later (e.g. by the test fixture ``_isolate_pichkoo_home``).
         """
         if self._db_instance is not None:
             return self._db_instance
         try:
             from pichkoo_state import SessionDB
-            hermes_home = get_hermes_home()
-            self._db_instance = SessionDB(db_path=hermes_home / "state.db")
+            pichkoo_home = get_pichkoo_home()
+            self._db_instance = SessionDB(db_path=pichkoo_home / "state.db")
             return self._db_instance
         except Exception:
             logger.debug("SessionDB unavailable for ACP persistence", exc_info=True)

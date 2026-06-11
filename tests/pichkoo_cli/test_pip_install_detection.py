@@ -4,7 +4,7 @@ from unittest.mock import patch
 def test_pip_install_detected_when_no_git_dir(tmp_path):
     """When PROJECT_ROOT has no .git, detect as pip install."""
     with patch("pichkoo_cli.config.get_managed_system", return_value=None), \
-         patch("pichkoo_cli.config.get_hermes_home", return_value=tmp_path):
+         patch("pichkoo_cli.config.get_pichkoo_home", return_value=tmp_path):
         from pichkoo_cli.config import detect_install_method
         method = detect_install_method(project_root=tmp_path)
         assert method == "pip"
@@ -14,7 +14,7 @@ def test_git_install_detected_when_git_dir_exists(tmp_path):
     """When PROJECT_ROOT has .git, detect as git install."""
     (tmp_path / ".git").mkdir()
     with patch("pichkoo_cli.config.get_managed_system", return_value=None), \
-         patch("pichkoo_cli.config.get_hermes_home", return_value=tmp_path):
+         patch("pichkoo_cli.config.get_pichkoo_home", return_value=tmp_path):
         from pichkoo_cli.config import detect_install_method
         method = detect_install_method(project_root=tmp_path)
         assert method == "git"
@@ -24,7 +24,7 @@ def test_managed_install_takes_precedence(tmp_path):
     """When PICHKOO_MANAGED is set, that takes precedence over git detection."""
     (tmp_path / ".git").mkdir()
     with patch("pichkoo_cli.config.get_managed_system", return_value="NixOS"), \
-         patch("pichkoo_cli.config.get_hermes_home", return_value=tmp_path):
+         patch("pichkoo_cli.config.get_pichkoo_home", return_value=tmp_path):
         from pichkoo_cli.config import detect_install_method
         method = detect_install_method(project_root=tmp_path)
         assert method == "nixos"
@@ -43,7 +43,7 @@ def test_stamp_file_takes_precedence(tmp_path):
     (tmp_path / ".git").mkdir()
     (tmp_path / ".install_method").write_text("docker\n")
     with patch("pichkoo_cli.config.get_managed_system", return_value=None), \
-         patch("pichkoo_cli.config.get_hermes_home", return_value=tmp_path):
+         patch("pichkoo_cli.config.get_pichkoo_home", return_value=tmp_path):
         from pichkoo_cli.config import detect_install_method
         assert detect_install_method(project_root=tmp_path) == "docker"
 
@@ -61,7 +61,7 @@ def test_container_without_stamp_is_not_docker(tmp_path):
     """
     (tmp_path / ".git").mkdir()
     with patch("pichkoo_cli.config.get_managed_system", return_value=None), \
-         patch("pichkoo_cli.config.get_hermes_home", return_value=tmp_path), \
+         patch("pichkoo_cli.config.get_pichkoo_home", return_value=tmp_path), \
          patch("pichkoo_constants.is_container", return_value=True):
         from pichkoo_cli.config import detect_install_method
         assert detect_install_method(project_root=tmp_path) == "git"
@@ -70,7 +70,7 @@ def test_container_without_stamp_is_not_docker(tmp_path):
 def test_container_pip_install_without_stamp_is_pip(tmp_path):
     """Container + no .git + no stamp -> pip, not docker (issue #34397)."""
     with patch("pichkoo_cli.config.get_managed_system", return_value=None), \
-         patch("pichkoo_cli.config.get_hermes_home", return_value=tmp_path), \
+         patch("pichkoo_cli.config.get_pichkoo_home", return_value=tmp_path), \
          patch("pichkoo_constants.is_container", return_value=True):
         from pichkoo_cli.config import detect_install_method
         assert detect_install_method(project_root=tmp_path) == "pip"
@@ -91,8 +91,8 @@ def test_banner_warns_on_pip_install(tmp_path):
     hh.mkdir()
     (hh / ".install_method").write_text("pip\n")
 
-    with patch("pichkoo_cli.config.get_hermes_home", return_value=hh), \
-         patch("pichkoo_constants.get_hermes_home", return_value=hh):
+    with patch("pichkoo_cli.config.get_pichkoo_home", return_value=hh), \
+         patch("pichkoo_constants.get_pichkoo_home", return_value=hh):
         buf = io.StringIO()
         # Wide console so the warning isn't wrapped across lines in the panel.
         console = Console(file=buf, width=400, force_terminal=False, color_system=None)
@@ -117,8 +117,8 @@ def test_banner_no_pip_warning_on_git_install(tmp_path):
     hh.mkdir()
     (hh / ".install_method").write_text("git\n")
 
-    with patch("pichkoo_cli.config.get_hermes_home", return_value=hh), \
-         patch("pichkoo_constants.get_hermes_home", return_value=hh):
+    with patch("pichkoo_cli.config.get_pichkoo_home", return_value=hh), \
+         patch("pichkoo_constants.get_pichkoo_home", return_value=hh):
         buf = io.StringIO()
         console = Console(file=buf, width=400, force_terminal=False, color_system=None)
         banner.build_welcome_banner(

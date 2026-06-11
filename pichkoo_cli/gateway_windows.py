@@ -277,9 +277,9 @@ def get_task_script_path() -> Path:
     Pichkoo installs stay self-contained).
     """
     _assert_windows()
-    from pichkoo_cli.config import get_hermes_home
+    from pichkoo_cli.config import get_pichkoo_home
 
-    script_dir = Path(get_hermes_home()) / "gateway-service"
+    script_dir = Path(get_pichkoo_home()) / "gateway-service"
     script_dir.mkdir(parents=True, exist_ok=True)
     return script_dir / f"{_sanitize_filename(get_task_name())}.cmd"
 
@@ -320,10 +320,10 @@ def _stable_gateway_working_dir(project_root: Path) -> str:
     after a transient checkout or worktree is moved away. Fall back to the
     source checkout only if ``PICHKOO_HOME`` cannot be resolved yet.
     """
-    from pichkoo_cli.config import get_hermes_home
+    from pichkoo_cli.config import get_pichkoo_home
 
     try:
-        home = get_hermes_home()
+        home = get_pichkoo_home()
         if home and Path(home).is_dir():
             return str(Path(home).resolve())
     except Exception:
@@ -338,7 +338,7 @@ def _stable_gateway_working_dir(project_root: Path) -> str:
 def _build_gateway_cmd_script(
     python_path: str,
     working_dir: str,
-    hermes_home: str,
+    pichkoo_home: str,
     profile_arg: str,
 ) -> str:
     """Build the ``gateway.cmd`` wrapper content (CRLF-terminated).
@@ -355,7 +355,7 @@ def _build_gateway_cmd_script(
     """
     lines = ["@echo off", f"rem {_TASK_DESCRIPTION}"]
     lines.append(f"cd /d {_quote_cmd_script_arg(working_dir)}")
-    lines.append(f'set "PICHKOO_HOME={hermes_home}"')
+    lines.append(f'set "PICHKOO_HOME={pichkoo_home}"')
     lines.append('set "PYTHONIOENCODING=utf-8"')
     lines.append('set "PICHKOO_GATEWAY_DETACHED=1"')
     # VIRTUAL_ENV lets the gateway's own python detection find the venv
@@ -408,7 +408,7 @@ def _write_task_script() -> Path:
     """Generate and write the gateway.cmd wrapper. Return its absolute path."""
     _assert_windows()
     # Local imports to avoid circular-init at module load time.
-    from pichkoo_cli.config import get_hermes_home
+    from pichkoo_cli.config import get_pichkoo_home
     from pichkoo_cli.gateway import (
         PROJECT_ROOT,
         _profile_arg,
@@ -417,10 +417,10 @@ def _write_task_script() -> Path:
 
     python_path = get_python_path()
     working_dir = _stable_gateway_working_dir(PROJECT_ROOT)
-    hermes_home = str(Path(get_hermes_home()).resolve())
-    profile_arg = _profile_arg(hermes_home)
+    pichkoo_home = str(Path(get_pichkoo_home()).resolve())
+    profile_arg = _profile_arg(pichkoo_home)
 
-    content = _build_gateway_cmd_script(python_path, working_dir, hermes_home, profile_arg)
+    content = _build_gateway_cmd_script(python_path, working_dir, pichkoo_home, profile_arg)
     script_path = get_task_script_path()
     tmp = script_path.with_suffix(".tmp")
     tmp.write_text(content, encoding="utf-8", newline="")
@@ -577,7 +577,7 @@ def _build_gateway_argv() -> tuple[list[str], str, dict[str, str]]:
     layer in between.
     """
     _assert_windows()
-    from pichkoo_cli.config import get_hermes_home
+    from pichkoo_cli.config import get_pichkoo_home
     from pichkoo_cli.gateway import (
         PROJECT_ROOT,
         _profile_arg,
@@ -587,8 +587,8 @@ def _build_gateway_argv() -> tuple[list[str], str, dict[str, str]]:
     python_exe, venv_dir, extra_pythonpath = _resolve_detached_python(get_python_path())
     project_root = str(PROJECT_ROOT)
     working_dir = _stable_gateway_working_dir(PROJECT_ROOT)
-    hermes_home = str(Path(get_hermes_home()).resolve())
-    profile_arg = _profile_arg(hermes_home)
+    pichkoo_home = str(Path(get_pichkoo_home()).resolve())
+    profile_arg = _profile_arg(pichkoo_home)
 
     argv = [python_exe, "-m", "pichkoo_cli.main"]
     if profile_arg:
@@ -596,7 +596,7 @@ def _build_gateway_argv() -> tuple[list[str], str, dict[str, str]]:
     argv.extend(["gateway", "run"])
 
     env_overlay = {
-        "PICHKOO_HOME": hermes_home,
+        "PICHKOO_HOME": pichkoo_home,
         "PYTHONIOENCODING": "utf-8",
         "PICHKOO_GATEWAY_DETACHED": "1",
         "VIRTUAL_ENV": str(venv_dir),
@@ -643,9 +643,9 @@ def _spawn_detached(script_path: Path | None = None) -> int:
     # logging module writes to gateway.log through a FileHandler, so the
     # real gateway logs still land there — this just captures anything
     # that goes to print() or native stderr.
-    from pichkoo_cli.config import get_hermes_home
+    from pichkoo_cli.config import get_pichkoo_home
 
-    log_dir = Path(get_hermes_home()) / "logs"
+    log_dir = Path(get_pichkoo_home()) / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     stray_log = log_dir / "gateway-stdio.log"
 
@@ -896,19 +896,19 @@ def _report_gateway_start(via: str) -> None:
     else:
         print(f"⚠ Launched gateway via {via}, but no process detected after 6s.")
         print("  Check the log for startup errors:")
-        from pichkoo_cli.config import get_hermes_home
-        print(f"    type {Path(get_hermes_home()).resolve()}\\logs\\gateway.log")
-        print(f"    type {Path(get_hermes_home()).resolve()}\\logs\\gateway-stdio.log")
+        from pichkoo_cli.config import get_pichkoo_home
+        print(f"    type {Path(get_pichkoo_home()).resolve()}\\logs\\gateway.log")
+        print(f"    type {Path(get_pichkoo_home()).resolve()}\\logs\\gateway-stdio.log")
 
 
 def _print_next_steps() -> None:
-    from pichkoo_cli.config import get_hermes_home
+    from pichkoo_cli.config import get_pichkoo_home
 
-    hermes_home = Path(get_hermes_home()).resolve()
+    pichkoo_home = Path(get_pichkoo_home()).resolve()
     print()
     print("Next steps:")
     print("  pichkoo gateway status                      # Check status")
-    print(f"  type {hermes_home}\\logs\\gateway.log       # View logs")
+    print(f"  type {pichkoo_home}\\logs\\gateway.log       # View logs")
 
 
 def uninstall() -> None:
@@ -1021,9 +1021,9 @@ def _print_deep_probes() -> None:
     import json
     from datetime import datetime, timezone
 
-    from pichkoo_cli.config import get_hermes_home
+    from pichkoo_cli.config import get_pichkoo_home
 
-    home = Path(get_hermes_home()).resolve()
+    home = Path(get_pichkoo_home()).resolve()
     pid_path = home / "gateway.pid"
     lock_path = home / "gateway.lock"
     state_path = home / "gateway_state.json"

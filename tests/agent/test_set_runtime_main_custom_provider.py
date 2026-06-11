@@ -159,15 +159,15 @@ class TestResolveAutoCustomEndToEnd:
         for var in ("OPENROUTER_API_KEY", "NOUS_API_KEY", "OPENAI_API_KEY",
                     "OPENAI_BASE_URL"):
             monkeypatch.delenv(var, raising=False)
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text(
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text(
             "model:\n"
             "  default: glm-5.1\n"
             "  provider: 'custom:ephemeral'\n"
             "  base_url: ''\n"
         )
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
         mod.clear_runtime_main()
         try:
@@ -198,9 +198,9 @@ class TestResolveAutoCustomEndToEnd:
         for var in ("OPENROUTER_API_KEY", "NOUS_API_KEY", "OPENAI_API_KEY",
                     "OPENAI_BASE_URL"):
             monkeypatch.delenv(var, raising=False)
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text(
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text(
             "model:\n"
             "  default: glm-5.1\n"
             "  provider: 'custom:openclaw'\n"
@@ -211,7 +211,7 @@ class TestResolveAutoCustomEndToEnd:
             "    model: glm-5.1\n"
             "    api_key: cfg-key\n"
         )
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
         # No live base_url carried — resolution must come from config alone,
         # via the named-custom branch in resolve_provider_client.

@@ -6,10 +6,10 @@ Hermetic-test invariants enforced here (see AGENTS.md for rationale):
    (ending in _API_KEY, _TOKEN, _SECRET, _PASSWORD, _CREDENTIALS, etc.)
    are unset before every test. Local developer keys cannot leak in.
 2. **Isolated PICHKOO_HOME.** PICHKOO_HOME points to a per-test tempdir so
-   code reading ``~/.pichkoo/*`` via ``get_hermes_home()`` can't see the
+   code reading ``~/.pichkoo/*`` via ``get_pichkoo_home()`` can't see the
    real one. (We do NOT also redirect HOME — that broke subprocesses in
    CI. Code using ``Path.home() / ".pichkoo"`` instead of the canonical
-   ``get_hermes_home()`` is a bug to fix at the callsite.)
+   ``get_pichkoo_home()`` is a bug to fix at the callsite.)
 3. **Deterministic runtime.** TZ=UTC, LANG=C.UTF-8, PYTHONHASHSEED=0.
 4. **No PICHKOO_SESSION_* inheritance** — the agent's current gateway
    session must not leak into tests.
@@ -342,22 +342,22 @@ def _hermetic_environment(tmp_path, monkeypatch):
         monkeypatch.delenv(name, raising=False)
 
     # 3. Redirect PICHKOO_HOME to a per-test tempdir. Code that reads
-    #    ``~/.pichkoo/*`` via ``get_hermes_home()`` now gets the tempdir.
+    #    ``~/.pichkoo/*`` via ``get_pichkoo_home()`` now gets the tempdir.
     #
     #    NOTE: We do NOT also redirect HOME. Doing so broke CI because
     #    some tests (and their transitive deps) spawn subprocesses that
     #    inherit HOME and expect it to be stable. If a test genuinely
     #    needs HOME isolated, it should set it explicitly in its own
     #    fixture. Any code in the codebase reading ``~/.pichkoo/*`` via
-    #    ``Path.home() / ".pichkoo"`` instead of ``get_hermes_home()``
+    #    ``Path.home() / ".pichkoo"`` instead of ``get_pichkoo_home()``
     #    is a bug to fix at the callsite.
-    fake_hermes_home = tmp_path / "hermes_test"
-    fake_hermes_home.mkdir()
-    (fake_hermes_home / "sessions").mkdir()
-    (fake_hermes_home / "cron").mkdir()
-    (fake_hermes_home / "memories").mkdir()
-    (fake_hermes_home / "skills").mkdir()
-    monkeypatch.setenv("PICHKOO_HOME", str(fake_hermes_home))
+    fake_pichkoo_home = tmp_path / "pichkoo_test"
+    fake_pichkoo_home.mkdir()
+    (fake_pichkoo_home / "sessions").mkdir()
+    (fake_pichkoo_home / "cron").mkdir()
+    (fake_pichkoo_home / "memories").mkdir()
+    (fake_pichkoo_home / "skills").mkdir()
+    monkeypatch.setenv("PICHKOO_HOME", str(fake_pichkoo_home))
 
     # 4. Deterministic locale / timezone / hashseed. CI runs in UTC with
     #    C.UTF-8 locale; local dev often doesn't. Pin everything.
@@ -396,7 +396,7 @@ def _hermetic_environment(tmp_path, monkeypatch):
 # Backward-compat alias — old tests reference this fixture name. Keep it
 # as a no-op wrapper so imports don't break.
 @pytest.fixture(autouse=True)
-def _isolate_hermes_home(_hermetic_environment):
+def _isolate_pichkoo_home(_hermetic_environment):
     """Alias preserved for any test that yields this name explicitly."""
     return None
 
@@ -675,7 +675,7 @@ def _live_system_guard(request, monkeypatch):
                 return ""
         return str(cmd)
 
-    def _matches_hermes_gateway(cmd_str: str) -> bool:
+    def _matches_pichkoo_gateway(cmd_str: str) -> bool:
         low = cmd_str.lower()
         return any(tok in low for tok in _PICHKOO_TOKENS)
 
@@ -683,7 +683,7 @@ def _live_system_guard(request, monkeypatch):
         cmd_str = _cmd_to_string(cmd)
         if "systemctl" not in cmd_str:
             return False
-        if not _matches_hermes_gateway(cmd_str):
+        if not _matches_pichkoo_gateway(cmd_str):
             return False
         try:
             tokens = _shlex.split(cmd_str)

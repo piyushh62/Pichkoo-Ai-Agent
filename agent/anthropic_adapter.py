@@ -21,7 +21,7 @@ import subprocess
 from pathlib import Path
 from urllib.parse import urlparse
 
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 from typing import Any, Dict, List, Optional, Tuple
 from utils import base_url_host_matches, normalize_proxy_env_vars
 
@@ -1251,7 +1251,7 @@ _OAUTH_CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
 _OAUTH_TOKEN_URL = "https://console.anthropic.com/v1/oauth/token"
 _OAUTH_REDIRECT_URI = "https://console.anthropic.com/oauth/code/callback"
 _OAUTH_SCOPES = "org:create_api_key user:profile user:inference"
-_PICHKOO_OAUTH_FILE = get_hermes_home() / ".anthropic_oauth.json"
+_PICHKOO_OAUTH_FILE = get_pichkoo_home() / ".anthropic_oauth.json"
 
 
 def _generate_pkce() -> tuple:
@@ -1267,7 +1267,7 @@ def _generate_pkce() -> tuple:
     return verifier, challenge
 
 
-def run_hermes_oauth_login_pure() -> Optional[Dict[str, Any]]:
+def run_pichkoo_oauth_login_pure() -> Optional[Dict[str, Any]]:
     """Run Pichkoo-native OAuth PKCE flow and return credential state."""
     import secrets
     import time
@@ -1378,7 +1378,7 @@ def run_hermes_oauth_login_pure() -> Optional[Dict[str, Any]]:
     }
 
 
-def read_hermes_oauth_credentials() -> Optional[Dict[str, Any]]:
+def read_pichkoo_oauth_credentials() -> Optional[Dict[str, Any]]:
     """Read Pichkoo-managed OAuth credentials from ~/.pichkoo/.anthropic_oauth.json."""
     if _PICHKOO_OAUTH_FILE.exists():
         try:

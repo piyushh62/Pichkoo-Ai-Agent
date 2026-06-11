@@ -25,12 +25,12 @@ import pytest
 # ---------------------------------------------------------------------------
 
 @pytest.fixture(autouse=True)
-def _isolate_hermes_home(tmp_path, monkeypatch):
+def _isolate_pichkoo_home(tmp_path, monkeypatch):
     """Redirect PICHKOO_HOME to a temp directory."""
     monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
     try:
         import pichkoo_constants
-        monkeypatch.setattr(pichkoo_constants, "get_hermes_home", lambda: tmp_path)
+        monkeypatch.setattr(pichkoo_constants, "get_pichkoo_home", lambda: tmp_path)
     except (ImportError, AttributeError):
         pass
     return tmp_path

@@ -56,12 +56,12 @@ test('mode predicates classify what each mode removes', () => {
 
 test('resolveRemovableAppPath finds the .app bundle on macOS', () => {
   assert.equal(
-    resolveRemovableAppPath('/Applications/Hermes.app/Contents/MacOS/Hermes', 'darwin'),
-    '/Applications/Hermes.app'
+    resolveRemovableAppPath('/Applications/Pichkoo.app/Contents/MacOS/Pichkoo', 'darwin'),
+    '/Applications/Pichkoo.app'
   )
   assert.equal(
-    resolveRemovableAppPath('/Users/x/Applications/Hermes.app/Contents/MacOS/Hermes', 'darwin'),
-    '/Users/x/Applications/Hermes.app'
+    resolveRemovableAppPath('/Users/x/Applications/Pichkoo.app/Contents/MacOS/Pichkoo', 'darwin'),
+    '/Users/x/Applications/Pichkoo.app'
   )
 })
 
@@ -80,23 +80,23 @@ test('resolveRemovableAppPath: dev-run .app resolves (safety is shouldRemoveAppB
 
 test('resolveRemovableAppPath finds the install dir on Windows', () => {
   assert.equal(
-    resolveRemovableAppPath('C:\\Users\\x\\AppData\\Local\\Programs\\Hermes\\Hermes.exe', 'win32'),
-    'C:\\Users\\x\\AppData\\Local\\Programs\\Hermes'
+    resolveRemovableAppPath('C:\\Users\\x\\AppData\\Local\\Programs\\Pichkoo\\Pichkoo.exe', 'win32'),
+    'C:\\Users\\x\\AppData\\Local\\Programs\\Pichkoo'
   )
   assert.equal(
-    resolveRemovableAppPath('C:\\Users\\x\\AppData\\Local\\pichkoo-desktop\\Hermes.exe', 'win32'),
+    resolveRemovableAppPath('C:\\Users\\x\\AppData\\Local\\pichkoo-desktop\\Pichkoo.exe', 'win32'),
     'C:\\Users\\x\\AppData\\Local\\pichkoo-desktop'
   )
 })
 
 test('resolveRemovableAppPath returns null for an unrecognized Windows dir', () => {
-  assert.equal(resolveRemovableAppPath('C:\\Temp\\foo\\Hermes.exe', 'win32'), null)
+  assert.equal(resolveRemovableAppPath('C:\\Temp\\foo\\Pichkoo.exe', 'win32'), null)
 })
 
 test('resolveRemovableAppPath uses APPIMAGE on Linux when set', () => {
   assert.equal(
-    resolveRemovableAppPath('/tmp/.mount_HermesXXXX/pichkoo', 'linux', { APPIMAGE: '/home/x/Apps/Hermes.AppImage' }),
-    '/home/x/Apps/Hermes.AppImage'
+    resolveRemovableAppPath('/tmp/.mount_PichkooXXXX/pichkoo', 'linux', { APPIMAGE: '/home/x/Apps/Pichkoo.AppImage' }),
+    '/home/x/Apps/Pichkoo.AppImage'
   )
 })
 
@@ -117,8 +117,8 @@ test('resolveRemovableAppPath returns null for an empty exe path', () => {
 // --- shouldRemoveAppBundle ---
 
 test('shouldRemoveAppBundle requires packaged AND a resolved path', () => {
-  assert.equal(shouldRemoveAppBundle(true, '/Applications/Hermes.app'), true)
-  assert.equal(shouldRemoveAppBundle(false, '/Applications/Hermes.app'), false)
+  assert.equal(shouldRemoveAppBundle(true, '/Applications/Pichkoo.app'), true)
+  assert.equal(shouldRemoveAppBundle(false, '/Applications/Pichkoo.app'), false)
   assert.equal(shouldRemoveAppBundle(true, null), false)
   assert.equal(shouldRemoveAppBundle(false, null), false)
 })
@@ -133,7 +133,7 @@ test('buildPosixCleanupScript waits for the PID, runs the uninstall module, remo
     agentRoot: '/home/x/.pichkoo/pichkoo-agent',
     uninstallArgs: ['-m', 'pichkoo_cli.uninstall', '--mode', 'gui'],
     appPath: '/opt/pichkoo/linux-unpacked',
-    hermesHome: '/home/x/.pichkoo'
+    pichkooHome: '/home/x/.pichkoo'
   })
   assert.match(script, /^#!\/bin\/bash/)
   assert.match(script, /pid=4321/)
@@ -153,7 +153,7 @@ test('buildPosixCleanupScript exports PYTHONPATH when pythonPath is set (lite/fu
     agentRoot: '/home/x/.pichkoo/pichkoo-agent',
     uninstallArgs: ['-m', 'pichkoo_cli.uninstall', '--mode', 'full'],
     appPath: null,
-    hermesHome: '/home/x/.pichkoo'
+    pichkooHome: '/home/x/.pichkoo'
   })
   // System python + source on PYTHONPATH so import pichkoo_cli works while the
   // venv is torn down.
@@ -169,7 +169,7 @@ test('buildPosixCleanupScript omits PYTHONPATH when pythonPath is null (gui)', (
     agentRoot: '/a',
     uninstallArgs: ['-m', 'pichkoo_cli.uninstall', '--mode', 'gui'],
     appPath: null,
-    hermesHome: '/h'
+    pichkooHome: '/h'
   })
   assert.doesNotMatch(script, /export PYTHONPATH/)
 })
@@ -182,7 +182,7 @@ test('buildPosixCleanupScript omits the bundle rm when appPath is null', () => {
     agentRoot: '/a',
     uninstallArgs: ['-m', 'pichkoo_cli.uninstall', '--mode', 'lite'],
     appPath: null,
-    hermesHome: '/h'
+    pichkooHome: '/h'
   })
   assert.doesNotMatch(script, /rm -rf '\//)
   // Still runs the uninstall.
@@ -197,7 +197,7 @@ test('buildPosixCleanupScript single-quote-escapes paths with apostrophes', () =
     agentRoot: '/a',
     uninstallArgs: ['-m', 'pichkoo_cli.uninstall', '--mode', 'gui'],
     appPath: null,
-    hermesHome: '/h'
+    pichkooHome: '/h'
   })
   // The apostrophe is closed-escaped-reopened so the shell sees the literal.
   assert.match(script, /'\/home\/o'\\''brien\/python'/)
@@ -212,8 +212,8 @@ test('buildWindowsCleanupScript waits (bounded) for PID, runs uninstall, rmdir b
     pythonPath: 'C:\\pichkoo',
     agentRoot: 'C:\\pichkoo',
     uninstallArgs: ['-m', 'pichkoo_cli.uninstall', '--mode', 'full'],
-    appPath: 'C:\\Users\\x\\AppData\\Local\\Programs\\Hermes',
-    hermesHome: 'C:\\Users\\x\\AppData\\Local\\pichkoo'
+    appPath: 'C:\\Users\\x\\AppData\\Local\\Programs\\Pichkoo',
+    pichkooHome: 'C:\\Users\\x\\AppData\\Local\\pichkoo'
   })
   assert.match(script, /@echo off/)
   assert.match(script, /set "PID=9988"/)
@@ -226,7 +226,7 @@ test('buildWindowsCleanupScript waits (bounded) for PID, runs uninstall, rmdir b
   assert.doesNotMatch(script, /find "%PID%"/) // the old substring-prone form is gone
   // Removal is a retry loop (Windows releases dir handles lazily).
   assert.match(script, /:rmloop/)
-  assert.match(script, /rmdir \/s \/q "C:\\Users\\x\\AppData\\Local\\Programs\\Hermes" >nul 2>&1/)
+  assert.match(script, /rmdir \/s \/q "C:\\Users\\x\\AppData\\Local\\Programs\\Pichkoo" >nul 2>&1/)
   assert.match(script, /if %tries% geq 10 goto rmdone/)
   assert.match(script, /del "%~f0"/)
 })
@@ -239,7 +239,7 @@ test('buildWindowsCleanupScript omits PYTHONPATH + rmdir when not needed (gui, n
     agentRoot: 'C:\\h',
     uninstallArgs: ['-m', 'pichkoo_cli.uninstall', '--mode', 'gui'],
     appPath: null,
-    hermesHome: 'C:\\h'
+    pichkooHome: 'C:\\h'
   })
   assert.doesNotMatch(script, /rmdir/)
   assert.doesNotMatch(script, /set "PYTHONPATH=/)

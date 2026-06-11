@@ -26,7 +26,7 @@ def test_format_managed_message_homebrew(monkeypatch):
     assert "brew upgrade pichkoo-agent" in message
 
 
-def test_recommended_update_command_defaults_to_hermes_update(monkeypatch):
+def test_recommended_update_command_defaults_to_pichkoo_update(monkeypatch):
     monkeypatch.delenv("PICHKOO_MANAGED", raising=False)
 
     # Also short-circuit the .managed marker path — CI runners may have an

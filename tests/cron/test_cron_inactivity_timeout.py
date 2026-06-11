@@ -304,10 +304,10 @@ class TestSysPathOrdering:
     def test_pichkoo_time_importable(self):
         """pichkoo_time should be importable when cron.scheduler loads."""
         # This import would fail if sys.path.insert comes after the import
-        from cron.scheduler import _hermes_now
-        assert callable(_hermes_now)
+        from cron.scheduler import _pichkoo_now
+        assert callable(_pichkoo_now)
 
     def test_pichkoo_constants_importable(self):
         """pichkoo_constants should be importable from cron context."""
-        from pichkoo_constants import get_hermes_home
-        assert callable(get_hermes_home)
+        from pichkoo_constants import get_pichkoo_home
+        assert callable(get_pichkoo_home)

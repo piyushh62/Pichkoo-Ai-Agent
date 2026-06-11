@@ -27,7 +27,7 @@ from rich import box as rich_box
 from rich.markup import escape as _escape
 from rich.panel import Panel
 
-from pichkoo_constants import display_hermes_home, is_termux as _is_termux_environment
+from pichkoo_constants import display_pichkoo_home, is_termux as _is_termux_environment
 from pichkoo_cli.browser_connect import (
     DEFAULT_BROWSER_CDP_URL,
     is_browser_debug_ready,
@@ -150,7 +150,7 @@ class CLICommandsMixin:
             create_quick_snapshot, list_quick_snapshots,
             restore_quick_snapshot, prune_quick_snapshots,
         )
-        from pichkoo_constants import display_hermes_home
+        from pichkoo_constants import display_pichkoo_home
 
         parts = command.split()
         subcmd = parts[1].lower() if len(parts) > 1 else "list"
@@ -161,7 +161,7 @@ class CLICommandsMixin:
                 print("  No state snapshots yet.")
                 print("  Create one: /snapshot create [label]")
                 return
-            print(f"  State snapshots ({display_hermes_home()}/state-snapshots/):\n")
+            print(f"  State snapshots ({display_pichkoo_home()}/state-snapshots/):\n")
             print(f"  {'#':>3}  {'ID':<35} {'Files':>5} {'Size':>10} {'Label'}")
             print(f"  {'─'*3}  {'─'*35} {'─'*5} {'─'*10} {'─'*20}")
             for i, s in enumerate(snaps, 1):
@@ -436,10 +436,10 @@ class CLICommandsMixin:
 
     def _handle_profile_command(self):
         """Display active profile name and home directory."""
-        from pichkoo_constants import display_hermes_home
+        from pichkoo_constants import display_pichkoo_home
         from pichkoo_cli.profiles import get_active_profile_name
 
-        display = display_hermes_home()
+        display = display_pichkoo_home()
         profile_name = get_active_profile_name()
 
         print()
@@ -1903,7 +1903,7 @@ class CLICommandsMixin:
                 source = f" ({s['source']})" if s["source"] == "user" else ""
                 print(f"   {marker} {s['name']}{source} — {s['description']}")
             print("\n  Usage: /skin <name>")
-            print(f"  Custom skins: drop a YAML file in {display_hermes_home()}/skins/\n")
+            print(f"  Custom skins: drop a YAML file in {display_pichkoo_home()}/skins/\n")
             return
 
         new_skin = parts[1].strip().lower()

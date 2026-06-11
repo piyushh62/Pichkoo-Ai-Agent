@@ -1337,8 +1337,8 @@ class TelegramAdapter(BasePlatformAdapter):
     ) -> None:
         """Save a newly created thread_id back into config.yaml so it persists across restarts."""
         try:
-            from pichkoo_constants import get_hermes_home
-            config_path = get_hermes_home() / "config.yaml"
+            from pichkoo_constants import get_pichkoo_home
+            config_path = get_pichkoo_home() / "config.yaml"
             if not config_path.exists():
                 logger.warning("[%s] Config file not found at %s, cannot persist thread_id", self.name, config_path)
                 return
@@ -3664,8 +3664,8 @@ class TelegramAdapter(BasePlatformAdapter):
             pass  # non-fatal if edit fails
         # Write the response file
         try:
-            from pichkoo_constants import get_hermes_home
-            home = get_hermes_home()
+            from pichkoo_constants import get_pichkoo_home
+            home = get_pichkoo_home()
             response_path = home / ".update_response"
             tmp = response_path.with_suffix(".tmp")
             tmp.write_text(answer)
@@ -4852,7 +4852,7 @@ class TelegramAdapter(BasePlatformAdapter):
         # Telegram parses mentions server-side and emits MessageEntity objects
         # (type=mention for @username, type=text_mention for @FirstName targeting
         # a user without a public username). Those entities are authoritative:
-        # raw substring matches like "foo@hermes_bot.example" are not mentions
+        # raw substring matches like "foo@pichkoo_bot.example" are not mentions
         # (bug #12545). Entities also correctly handle @handles inside URLs, code
         # blocks, and quoted text, where a regex scan would over-match.
         for source_text, entities in _iter_sources():
@@ -5856,8 +5856,8 @@ class TelegramAdapter(BasePlatformAdapter):
         recognized without a gateway restart.
         """
         try:
-            from pichkoo_constants import get_hermes_home
-            config_path = get_hermes_home() / "config.yaml"
+            from pichkoo_constants import get_pichkoo_home
+            config_path = get_pichkoo_home() / "config.yaml"
             if not config_path.exists():
                 return
 

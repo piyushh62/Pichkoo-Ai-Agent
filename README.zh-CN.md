@@ -191,7 +191,7 @@ python -m pytest tests/ -q
 - 📚 [技能中心](https://agentskills.io)
 - 🐛 [问题反馈](https://github.com/piyushh62/Pichkoo-AI-Agent/issues)
 - 💡 [讨论区](https://github.com/piyushh62/Pichkoo-AI-Agent/discussions)
-- 🔌 [PichkooClaw](https://github.com/AaronWong1999/hermesclaw) — 社区微信桥接：在同一微信账号上运行 Pichkoo AI Agent 和 OpenClaw。
+- 🔌 [PichkooClaw](https://github.com/AaronWong1999/pichkooclaw) — 社区微信桥接：在同一微信账号上运行 Pichkoo AI Agent 和 OpenClaw。
 
 ---
 

@@ -164,7 +164,7 @@ export function formatRefValue(value: string): string {
   return value
 }
 
-export const hermesDirectiveFormatter: Unstable_DirectiveFormatter = {
+export const pichkooDirectiveFormatter: Unstable_DirectiveFormatter = {
   serialize(item: Unstable_TriggerItem): string {
     const metadata = item.metadata as { rawText?: unknown; insertId?: unknown } | undefined
     const rawText = typeof metadata?.rawText === 'string' ? metadata.rawText : null
@@ -288,7 +288,7 @@ function shortLabel(type: PichkooRefType, id: string): string {
  */
 export function DirectiveContent({ text }: { text: string }) {
   const { cleanedText, images } = useMemo(() => extractEmbeddedImages(text ?? ''), [text])
-  const segments = useMemo(() => hermesDirectiveFormatter.parse(cleanedText), [cleanedText])
+  const segments = useMemo(() => pichkooDirectiveFormatter.parse(cleanedText), [cleanedText])
 
   return (
     <span className="whitespace-pre-line" data-slot="aui_directive-text">
@@ -342,9 +342,9 @@ const DirectiveImage: FC<{ id: string; label: string }> = ({ id, label }) => {
     // Remote gateway: the image lives on the gateway's disk, not ours — fetch
     // it over the authenticated API. Local: read it straight off this disk.
     const load =
-      window.hermesDesktop && isRemoteGateway()
+      window.pichkooDesktop && isRemoteGateway()
         ? gatewayMediaDataUrl(id)
-        : window.hermesDesktop?.readFileDataUrl(id)
+        : window.pichkooDesktop?.readFileDataUrl(id)
 
     void Promise.resolve(load)
       .then(url => alive && url && setSrc(url))

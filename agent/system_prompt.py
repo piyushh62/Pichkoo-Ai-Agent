@@ -326,8 +326,8 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
         except Exception:
             pass
 
-    from pichkoo_time import now as _hermes_now
-    now = _hermes_now()
+    from pichkoo_time import now as _pichkoo_now
+    now = _pichkoo_now()
     # Date-only (not minute-precision) so the system prompt is byte-stable
     # for the full day.  Minute-precision changes invalidate prefix-cache KV
     # on every rebuild path (compression boundary, fresh-agent gateway turns,

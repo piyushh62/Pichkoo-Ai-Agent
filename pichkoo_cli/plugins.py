@@ -46,7 +46,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 from utils import env_var_enabled
 from pichkoo_cli.config import cfg_get
 from pichkoo_cli.middleware import OBSERVER_SCHEMA_VERSION, VALID_MIDDLEWARE
@@ -171,7 +171,7 @@ VALID_HOOKS: Set[str] = {
 
 ENTRY_POINTS_GROUP = "pichkoo_ai_agent.plugins"
 
-_NS_PARENT = "hermes_plugins"
+_NS_PARENT = "pichkoo_plugins"
 
 
 def _env_enabled(name: str) -> bool:
@@ -1102,7 +1102,7 @@ class PluginManager:
         manifests.extend(bundled_platforms)
 
         # 2. User plugins (~/.pichkoo/plugins/)
-        user_dir = get_hermes_home() / "plugins"
+        user_dir = get_pichkoo_home() / "plugins"
         logger.debug("Scanning user plugins: %s", user_dir)
         user_manifests = self._scan_directory(user_dir, source="user")
         logger.debug("  user: %d manifest(s)", len(user_manifests))
@@ -1512,11 +1512,11 @@ class PluginManager:
         self._plugins[manifest.key or manifest.name] = loaded
 
     def _load_directory_module(self, manifest: PluginManifest) -> types.ModuleType:
-        """Import a directory-based plugin as ``hermes_plugins.<slug>``.
+        """Import a directory-based plugin as ``pichkoo_plugins.<slug>``.
 
         The module slug is derived from ``manifest.key`` so category-namespaced
         plugins (``image_gen/openai``) import as
-        ``hermes_plugins.image_gen__openai`` without colliding with any
+        ``pichkoo_plugins.image_gen__openai`` without colliding with any
         future ``tts/openai``.
         """
         plugin_dir = Path(manifest.path)  # type: ignore[arg-type]

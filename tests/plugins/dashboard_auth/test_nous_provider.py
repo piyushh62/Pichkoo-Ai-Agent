@@ -442,8 +442,8 @@ class TestStartLogin:
         result = provider.start_login(
             redirect_uri="https://pichkoo.fly.dev/auth/callback"
         )
-        assert "hermes_session_pkce" in result.cookie_payload
-        pkce = result.cookie_payload["hermes_session_pkce"]
+        assert "pichkoo_session_pkce" in result.cookie_payload
+        pkce = result.cookie_payload["pichkoo_session_pkce"]
         # Shape: ``state=…;verifier=…`` (matches stub-provider convention so
         # the auth-route layer's parser works uniformly across providers).
         parts = dict(seg.split("=", 1) for seg in pkce.split(";") if "=" in seg)
@@ -457,7 +457,7 @@ class TestStartLogin:
         )
         parsed = urllib.parse.urlparse(result.redirect_url)
         params = dict(urllib.parse.parse_qsl(parsed.query))
-        pkce = result.cookie_payload["hermes_session_pkce"]
+        pkce = result.cookie_payload["pichkoo_session_pkce"]
         parts = dict(seg.split("=", 1) for seg in pkce.split(";") if "=" in seg)
         assert parts["state"] == params["state"]
 
@@ -467,7 +467,7 @@ class TestStartLogin:
         )
         parsed = urllib.parse.urlparse(result.redirect_url)
         params = dict(urllib.parse.parse_qsl(parsed.query))
-        pkce = result.cookie_payload["hermes_session_pkce"]
+        pkce = result.cookie_payload["pichkoo_session_pkce"]
         parts = dict(seg.split("=", 1) for seg in pkce.split(";") if "=" in seg)
         verifier = parts["verifier"]
         expected_challenge = (
@@ -486,8 +486,8 @@ class TestStartLogin:
         b = provider.start_login(
             redirect_uri="https://pichkoo.fly.dev/auth/callback"
         )
-        assert a.cookie_payload["hermes_session_pkce"] != b.cookie_payload[
-            "hermes_session_pkce"
+        assert a.cookie_payload["pichkoo_session_pkce"] != b.cookie_payload[
+            "pichkoo_session_pkce"
         ]
 
     def test_rejects_non_http_scheme(self, provider):

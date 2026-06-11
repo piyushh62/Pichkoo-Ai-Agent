@@ -58,7 +58,7 @@ export HOME=/opt/data
 # Save the Docker -w (or default) working directory before init
 # scripts cd to /opt/data, so the container starts in the
 # directory the user requested.
-_hermes_orig_cwd="${HERMES_ORIG_CWD:-$PWD}"
+_pichkoo_orig_cwd="${HERMES_ORIG_CWD:-$PWD}"
 
 cd /opt/data
 # shellcheck disable=SC1091
@@ -67,7 +67,7 @@ cd /opt/data
 # Restore the original working directory before handing off to
 # the user's command so `pichkoo chat` starts in the Docker -w
 # directory, not /opt/data.
-cd "$_hermes_orig_cwd"
+cd "$_pichkoo_orig_cwd"
 
 if [ $# -eq 0 ]; then
     drop pichkoo
@@ -78,5 +78,5 @@ if command -v "$1" >/dev/null 2>&1; then
     drop "$@"
 fi
 
-# Hermes subcommand pass-through.
+# Pichkoo subcommand pass-through.
 drop pichkoo "$@"

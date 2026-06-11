@@ -22,7 +22,7 @@ def _restore_stdout():
 @pytest.fixture()
 def server():
     with patch.dict("sys.modules", {
-        "pichkoo_constants": MagicMock(get_hermes_home=MagicMock(return_value="/tmp/hermes_test")),
+        "pichkoo_constants": MagicMock(get_pichkoo_home=MagicMock(return_value="/tmp/pichkoo_test")),
         "pichkoo_cli.env_loader": MagicMock(),
         "pichkoo_cli.banner": MagicMock(),
         "pichkoo_state": MagicMock(),
@@ -750,12 +750,12 @@ def test_make_agent_accepts_list_system_prompt(server, monkeypatch):
 
 
 def test_config_load_missing(server, tmp_path):
-    server._hermes_home = tmp_path
+    server._pichkoo_home = tmp_path
     assert server._load_cfg() == {}
 
 
 def test_config_roundtrip(server, tmp_path):
-    server._hermes_home = tmp_path
+    server._pichkoo_home = tmp_path
     server._save_cfg({"model": "test/model"})
     assert server._load_cfg()["model"] == "test/model"
 

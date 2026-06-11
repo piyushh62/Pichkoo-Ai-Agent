@@ -29,7 +29,7 @@ from pichkoo_cli.profiles import (
     export_profile,
     import_profile,
     _get_profiles_root,
-    _get_default_hermes_home,
+    _get_default_pichkoo_home,
     seed_profile_skills,
     has_bundled_skills_opt_out,
     NO_BUNDLED_SKILLS_MARKER,
@@ -45,7 +45,7 @@ def profile_env(tmp_path, monkeypatch):
     """Set up an isolated environment for profile tests.
 
     * Path.home() -> tmp_path  (so _get_profiles_root() = tmp_path/.pichkoo/profiles)
-    * PICHKOO_HOME  -> tmp_path/.pichkoo  (so get_hermes_home() agrees)
+    * PICHKOO_HOME  -> tmp_path/.pichkoo  (so get_pichkoo_home() agrees)
     * Creates the bare-minimum ~/.pichkoo directory.
     """
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -129,7 +129,7 @@ class TestValidateProfileName:
 class TestGetProfileDir:
     """Tests for get_profile_dir()."""
 
-    def test_default_returns_hermes_home(self, profile_env):
+    def test_default_returns_pichkoo_home(self, profile_env):
         tmp_path = profile_env
         result = get_profile_dir("default")
         assert result == tmp_path / ".pichkoo"
@@ -533,7 +533,7 @@ class TestActiveProfile:
 class TestGetActiveProfileName:
     """Tests for get_active_profile_name()."""
 
-    def test_default_hermes_home_returns_default(self, profile_env):
+    def test_default_pichkoo_home_returns_default(self, profile_env):
         # PICHKOO_HOME points to tmp_path/.pichkoo which is the default
         assert get_active_profile_name() == "default"
 
@@ -633,7 +633,7 @@ class TestAliasCollision:
         wrapper_dir = profile_env / ".local" / "bin"
         wrapper_dir.mkdir(parents=True, exist_ok=True)
         bat_path = wrapper_dir / "mybot.bat"
-        bat_path.write_text("@echo off\r\nhermes -p mybot %*\r\n")
+        bat_path.write_text("@echo off\r\npichkoo -p mybot %*\r\n")
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
                 returncode=0, stdout=str(bat_path),
@@ -823,8 +823,8 @@ class TestRenameProfile:
 
         cfg = json.loads(honcho_path.read_text())
         assert "pichkoo.ssi_health" not in cfg["hosts"]
-        assert cfg["hosts"]["hermes_heimdall"]["aiPeer"] == "ssi_health"
-        assert cfg["hosts"]["hermes_heimdall"]["peerName"] == "user-peer"
+        assert cfg["hosts"]["pichkoo_heimdall"]["aiPeer"] == "ssi_health"
+        assert cfg["hosts"]["pichkoo_heimdall"]["peerName"] == "user-peer"
 
     def test_pins_ai_peer_when_absent_on_honcho_host_rename(self, profile_env):
         tmp_path = profile_env
@@ -841,8 +841,8 @@ class TestRenameProfile:
 
         cfg = json.loads(honcho_path.read_text())
         assert "pichkoo.ssi_health" not in cfg["hosts"]
-        assert cfg["hosts"]["hermes_heimdall"]["aiPeer"] == "ssi_health"
-        assert cfg["hosts"]["hermes_heimdall"]["workspace"] == "pichkoo"
+        assert cfg["hosts"]["pichkoo_heimdall"]["aiPeer"] == "ssi_health"
+        assert cfg["hosts"]["pichkoo_heimdall"]["workspace"] == "pichkoo"
 
     def test_does_not_overwrite_existing_honcho_host_on_rename(self, profile_env):
         tmp_path = profile_env
@@ -851,7 +851,7 @@ class TestRenameProfile:
         honcho_path.write_text(json.dumps({
             "hosts": {
                 "pichkoo.ssi_health": {"aiPeer": "ssi_health"},
-                "hermes_heimdall": {"aiPeer": "heimdall"},
+                "pichkoo_heimdall": {"aiPeer": "heimdall"},
             }
         }))
 
@@ -860,7 +860,7 @@ class TestRenameProfile:
 
         cfg = json.loads(honcho_path.read_text())
         assert cfg["hosts"]["pichkoo.ssi_health"]["aiPeer"] == "ssi_health"
-        assert cfg["hosts"]["hermes_heimdall"]["aiPeer"] == "heimdall"
+        assert cfg["hosts"]["pichkoo_heimdall"]["aiPeer"] == "heimdall"
 
     def test_default_raises_value_error(self, profile_env):
         with pytest.raises(ValueError, match="default"):
@@ -1063,7 +1063,7 @@ class TestExportImport:
             (sub / "marker.txt").write_text("excluded")
 
         for f in ("state.db", "gateway.pid", "gateway_state.json",
-                  "processes.json", "errors.log", ".hermes_history",
+                  "processes.json", "errors.log", ".pichkoo_history",
                   "active_profile", ".update_check", "auth.lock"):
             (default_dir / f).write_text("excluded")
 
@@ -1090,7 +1090,7 @@ class TestExportImport:
         excluded_files = [
             "default/state.db", "default/gateway.pid",
             "default/gateway_state.json", "default/processes.json",
-            "default/errors.log", "default/.hermes_history",
+            "default/errors.log", "default/.pichkoo_history",
             "default/active_profile", "default/.update_check",
             "default/auth.lock",
         ]
@@ -1192,16 +1192,16 @@ class TestProfileIsolation:
 # ===================================================================
 
 class TestInternalHelpers:
-    """Tests for _get_profiles_root() and _get_default_hermes_home()."""
+    """Tests for _get_profiles_root() and _get_default_pichkoo_home()."""
 
     def test_profiles_root_under_home(self, profile_env):
         tmp_path = profile_env
         root = _get_profiles_root()
         assert root == tmp_path / ".pichkoo" / "profiles"
 
-    def test_default_hermes_home(self, profile_env):
+    def test_default_pichkoo_home(self, profile_env):
         tmp_path = profile_env
-        home = _get_default_hermes_home()
+        home = _get_default_pichkoo_home()
         assert home == tmp_path / ".pichkoo"
 
     def test_profiles_root_docker_deployment(self, tmp_path, monkeypatch):
@@ -1213,13 +1213,13 @@ class TestInternalHelpers:
         root = _get_profiles_root()
         assert root == docker_home / "profiles"
 
-    def test_default_hermes_home_docker(self, tmp_path, monkeypatch):
-        """In Docker, _get_default_hermes_home() returns PICHKOO_HOME itself."""
+    def test_default_pichkoo_home_docker(self, tmp_path, monkeypatch):
+        """In Docker, _get_default_pichkoo_home() returns PICHKOO_HOME itself."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(docker_home))
-        home = _get_default_hermes_home()
+        home = _get_default_pichkoo_home()
         assert home == docker_home
 
     def test_profiles_root_profile_mode(self, tmp_path, monkeypatch):

@@ -185,7 +185,7 @@ class TestGetDisabledSkillNames:
         result = get_disabled_skill_names()
         assert result == {"discord-skill"}
 
-    def test_hermes_platform_takes_precedence(self, tmp_path, monkeypatch):
+    def test_pichkoo_platform_takes_precedence(self, tmp_path, monkeypatch):
         """PICHKOO_PLATFORM should win over PICHKOO_SESSION_PLATFORM."""
         config = tmp_path / "config.yaml"
         config.write_text(

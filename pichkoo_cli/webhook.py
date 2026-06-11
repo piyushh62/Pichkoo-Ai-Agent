@@ -19,7 +19,7 @@ import time
 from pathlib import Path
 from typing import Dict
 
-from pichkoo_constants import display_hermes_home
+from pichkoo_constants import display_pichkoo_home
 from utils import atomic_replace
 from pichkoo_cli.config import cfg_get
 
@@ -28,13 +28,13 @@ _SUBSCRIPTIONS_FILENAME = "webhook_subscriptions.json"
 _SUBSCRIPTIONS_FILE_MODE = 0o600
 
 
-def _hermes_home() -> Path:
-    from pichkoo_constants import get_hermes_home
-    return get_hermes_home()
+def _pichkoo_home() -> Path:
+    from pichkoo_constants import get_pichkoo_home
+    return get_pichkoo_home()
 
 
 def _subscriptions_path() -> Path:
-    return _hermes_home() / _SUBSCRIPTIONS_FILENAME
+    return _pichkoo_home() / _SUBSCRIPTIONS_FILENAME
 
 
 def _load_subscriptions() -> Dict[str, dict]:
@@ -103,7 +103,7 @@ def _get_webhook_base_url() -> str:
 
 
 def _setup_hint() -> str:
-    _dhh = display_hermes_home()
+    _dhh = display_pichkoo_home()
     return f"""
   Webhook platform is not enabled. To set it up:
 

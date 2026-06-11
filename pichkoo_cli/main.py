@@ -370,17 +370,17 @@ def _apply_profile_override() -> None:
     # still read active_profile — the user may have switched profiles via
     # `pichkoo profile use` and the gateway should honour that choice.
     # See issue #22502.
-    hermes_home_env = os.environ.get("PICHKOO_HOME", "")
-    if profile_name is None and hermes_home_env:
-        if Path(hermes_home_env).parent.name == "profiles":
+    pichkoo_home_env = os.environ.get("PICHKOO_HOME", "")
+    if profile_name is None and pichkoo_home_env:
+        if Path(pichkoo_home_env).parent.name == "profiles":
             return
 
     # 2. If no flag, check active_profile in the pichkoo root
     if profile_name is None:
         try:
-            from pichkoo_constants import get_default_hermes_root
+            from pichkoo_constants import get_default_pichkoo_root
 
-            active_path = get_default_hermes_root() / "active_profile"
+            active_path = get_default_pichkoo_root() / "active_profile"
             if active_path.exists():
                 name = active_path.read_text().strip()
                 if name and name != "default":
@@ -394,7 +394,7 @@ def _apply_profile_override() -> None:
         try:
             from pichkoo_cli.profiles import resolve_profile_env
 
-            hermes_home = resolve_profile_env(profile_name)
+            pichkoo_home = resolve_profile_env(profile_name)
         except (ValueError, FileNotFoundError) as exc:
             print(f"Error: {exc}", file=sys.stderr)
             sys.exit(1)
@@ -405,7 +405,7 @@ def _apply_profile_override() -> None:
                 file=sys.stderr,
             )
             return
-        os.environ["PICHKOO_HOME"] = hermes_home
+        os.environ["PICHKOO_HOME"] = pichkoo_home
         # Strip the flag from argv so argparse doesn't choke
         if consume > 0:
             for i, arg in enumerate(argv):
@@ -423,10 +423,10 @@ _apply_profile_override()
 
 # Load .env from ~/.pichkoo/.env first, then project root as dev fallback.
 # User-managed env files should override stale shell exports on restart.
-from pichkoo_cli.config import get_hermes_home
-from pichkoo_cli.env_loader import load_hermes_dotenv
+from pichkoo_cli.config import get_pichkoo_home
+from pichkoo_cli.env_loader import load_pichkoo_dotenv
 
-load_hermes_dotenv(project_env=PROJECT_ROOT / ".env")
+load_pichkoo_dotenv(project_env=PROJECT_ROOT / ".env")
 
 # Bridge security.redact_secrets from config.yaml → PICHKOO_REDACT_SECRETS env
 # var BEFORE pichkoo_logging imports agent.redact (which snapshots the flag at
@@ -441,7 +441,7 @@ _FORCE_IPV4_EARLY = False
 try:
     import yaml as _yaml_early
 
-    _cfg_path = get_hermes_home() / "config.yaml"
+    _cfg_path = get_pichkoo_home() / "config.yaml"
     if _cfg_path.exists():
         with open(_cfg_path, encoding="utf-8") as _f:
             _early_cfg_raw = _yaml_early.safe_load(_f) or {}
@@ -611,7 +611,7 @@ def _termux_bundled_skills_fingerprint() -> str:
 
 
 def _termux_bundled_skills_stamp_path() -> Path:
-    return get_hermes_home() / "skills" / ".termux_bundled_sync_stamp"
+    return get_pichkoo_home() / "skills" / ".termux_bundled_sync_stamp"
 
 
 def _termux_bundled_skills_sync_needed() -> bool:
@@ -680,7 +680,7 @@ def _relative_time(ts) -> str:
 
 def _has_any_provider_configured() -> bool:
     """Check if at least one inference provider is usable."""
-    from pichkoo_cli.config import get_env_path, get_hermes_home, load_config
+    from pichkoo_cli.config import get_env_path, get_pichkoo_home, load_config
     from pichkoo_cli.auth import get_auth_status
 
     # Determine whether Pichkoo itself has been explicitly configured (model
@@ -698,7 +698,7 @@ def _has_any_provider_configured() -> bool:
         _model_name = model_cfg.strip()
     else:
         _model_name = ""
-    _has_hermes_config = _model_name and _model_name != _DEFAULT_MODEL
+    _has_pichkoo_config = _model_name and _model_name != _DEFAULT_MODEL
 
     # Check env vars (may be set by .env or shell).
     # OPENAI_BASE_URL alone counts — local models (vLLM, llama.cpp, etc.)
@@ -746,7 +746,7 @@ def _has_any_provider_configured() -> bool:
         pass
 
     # Check for Nous Portal OAuth credentials
-    auth_file = get_hermes_home() / "auth.json"
+    auth_file = get_pichkoo_home() / "auth.json"
     if auth_file.exists():
         try:
             import json
@@ -774,7 +774,7 @@ def _has_any_provider_configured() -> bool:
     # Check for Claude Code OAuth credentials (~/.claude/.credentials.json)
     # Only count these if Pichkoo has been explicitly configured — Claude Code
     # being installed doesn't mean the user wants Pichkoo to use their tokens.
-    if _has_hermes_config:
+    if _has_pichkoo_config:
         try:
             from agent.anthropic_adapter import (
                 read_claude_code_credentials,
@@ -1080,14 +1080,14 @@ def _exec_in_container(container_info: dict, cli_args: list):
     On failure, OSError propagates naturally.
 
     Args:
-        container_info: dict with backend, container_name, exec_user, hermes_bin
+        container_info: dict with backend, container_name, exec_user, pichkoo_bin
         cli_args: the original CLI arguments (everything after 'pichkoo')
     """
 
     backend = container_info["backend"]
     container_name = container_info["container_name"]
     exec_user = container_info["exec_user"]
-    hermes_bin = container_info["hermes_bin"]
+    pichkoo_bin = container_info["pichkoo_bin"]
 
     runtime = shutil.which(backend)
     if not runtime:
@@ -1157,7 +1157,7 @@ def _exec_in_container(container_info: dict, cli_args: list):
         + tty_flags
         + ["-u", exec_user]
         + env_flags
-        + [container_name, hermes_bin]
+        + [container_name, pichkoo_bin]
         + cli_args
     )
 
@@ -1509,7 +1509,7 @@ def _ensure_tui_node() -> None:
     if not helper.is_file():
         return
 
-    hermes_home = os.environ.get("PICHKOO_HOME") or str(Path.home() / ".pichkoo")
+    pichkoo_home = os.environ.get("PICHKOO_HOME") or str(Path.home() / ".pichkoo")
     try:
         # Helper writes logs to stderr; we ask bash to print `command -v node`
         # on stdout once ensure_node succeeds. Subshell PATH edits don't leak
@@ -1520,7 +1520,7 @@ def _ensure_tui_node() -> None:
                 "-c",
                 f'source "{helper}" >&2 && ensure_node >&2 && command -v node',
             ],
-            env={**os.environ, "PICHKOO_HOME": hermes_home},
+            env={**os.environ, "PICHKOO_HOME": pichkoo_home},
             capture_output=True,
             text=True,
             check=False,
@@ -1535,7 +1535,7 @@ def _ensure_tui_node() -> None:
     if resolved:
         extras.append(Path(resolved).resolve().parent)
 
-    extras.extend([Path(hermes_home) / "node" / "bin", Path.home() / ".local" / "bin"])
+    extras.extend([Path(pichkoo_home) / "node" / "bin", Path.home() / ".local" / "bin"])
 
     for extra in extras:
         s = str(extra)
@@ -2383,7 +2383,7 @@ def cmd_whatsapp(args):
         print("✓ Bridge dependencies already installed")
 
     # ── Step 5: Check for existing session ───────────────────────────────
-    session_dir = get_hermes_home() / "whatsapp" / "session"
+    session_dir = get_pichkoo_home() / "whatsapp" / "session"
     session_dir.mkdir(parents=True, exist_ok=True)
 
     if (session_dir / "creds.json").exists():
@@ -3896,7 +3896,7 @@ def _run_anthropic_oauth_flow(save_env_value):
         ):
             use_anthropic_claude_code_credentials(save_fn=save_env_value)
             print("  ✓ Claude Code credentials linked.")
-            from pichkoo_constants import display_hermes_home as _dhh_fn
+            from pichkoo_constants import display_pichkoo_home as _dhh_fn
 
             print(
                 f"    Pichkoo will use Claude's credential store directly instead of copying a setup-token into {_dhh_fn()}/.env."
@@ -4307,9 +4307,9 @@ def _gateway_prompt(prompt_text: str, default: str = "", timeout: float = 300.0)
     """
     import json as _json
     import uuid as _uuid
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 
-    home = get_hermes_home()
+    home = get_pichkoo_home()
     prompt_path = home / ".update_prompt.json"
     response_path = home / ".update_response"
 
@@ -4793,8 +4793,8 @@ def _compute_desktop_content_hash(project_root: Path) -> str:
 
 def _desktop_stamp_path() -> Path:
     """Return the path to the desktop build stamp file under $PICHKOO_HOME."""
-    from pichkoo_constants import get_hermes_home
-    return get_hermes_home() / "desktop-build-stamp.json"
+    from pichkoo_constants import get_pichkoo_home
+    return get_pichkoo_home() / "desktop-build-stamp.json"
 
 
 def _desktop_build_needed(desktop_dir: Path, project_root: Path, *, source_mode: bool) -> bool:
@@ -5138,8 +5138,8 @@ def cmd_gui(args: argparse.Namespace):
         env["PICHKOO_DESKTOP_BOOT_FAKE"] = "1"
     if getattr(args, "ignore_existing", False):
         env["PICHKOO_DESKTOP_IGNORE_EXISTING"] = "1"
-    if getattr(args, "hermes_root", None):
-        env["PICHKOO_DESKTOP_PICHKOO_ROOT"] = str(Path(args.hermes_root).expanduser().resolve())
+    if getattr(args, "pichkoo_root", None):
+        env["PICHKOO_DESKTOP_PICHKOO_ROOT"] = str(Path(args.pichkoo_root).expanduser().resolve())
     if getattr(args, "cwd", None):
         env["PICHKOO_DESKTOP_CWD"] = str(Path(args.cwd).expanduser().resolve())
 
@@ -6188,17 +6188,17 @@ def _count_commits_between(git_cmd: list[str], cwd: Path, base: str, head: str) 
 
 def _should_skip_upstream_prompt() -> bool:
     """Check if user previously declined to add upstream."""
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 
-    return (get_hermes_home() / SKIP_UPSTREAM_PROMPT_FILE).exists()
+    return (get_pichkoo_home() / SKIP_UPSTREAM_PROMPT_FILE).exists()
 
 
 def _mark_skip_upstream_prompt():
     """Create marker file to skip future upstream prompts."""
     try:
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
-        (get_hermes_home() / SKIP_UPSTREAM_PROMPT_FILE).touch()
+        (get_pichkoo_home() / SKIP_UPSTREAM_PROMPT_FILE).touch()
     except Exception:
         pass
 
@@ -6345,9 +6345,9 @@ def _invalidate_update_cache():
     """
     homes = []
     # Default profile home (Docker-aware — uses /opt/data in Docker)
-    from pichkoo_constants import get_default_hermes_root
+    from pichkoo_constants import get_default_pichkoo_root
 
-    default_home = get_default_hermes_root()
+    default_home = get_default_pichkoo_root()
     homes.append(default_home)
     # Named profiles under <root>/profiles/
     profiles_root = default_home / "profiles"
@@ -6606,7 +6606,7 @@ def _venv_scripts_dir() -> Path | None:
     return scripts if scripts.is_dir() else None
 
 
-def _hermes_exe_shims(scripts_dir: Path) -> list[Path]:
+def _pichkoo_exe_shims(scripts_dir: Path) -> list[Path]:
     """Entry-point shims that uv may try to rewrite during ``pip install -e .``.
 
     On Windows these are .exe launchers generated by setuptools/uv. On POSIX
@@ -6621,7 +6621,7 @@ def _hermes_exe_shims(scripts_dir: Path) -> list[Path]:
     ]
 
 
-def _detect_concurrent_hermes_instances(
+def _detect_concurrent_pichkoo_instances(
     scripts_dir: Path, *, exclude_pid: int | None = None
 ) -> list[tuple[int, str]]:
     """Find other live processes whose .exe is one of our entry-point shims.
@@ -6654,7 +6654,7 @@ def _detect_concurrent_hermes_instances(
 
     # Resolve every shim path to its canonical form once for cheap comparison.
     shim_paths: set[str] = set()
-    for shim in _hermes_exe_shims(scripts_dir):
+    for shim in _pichkoo_exe_shims(scripts_dir):
         try:
             shim_paths.add(str(shim.resolve()).lower())
         except OSError:
@@ -6764,7 +6764,7 @@ def _format_concurrent_instances_message(
     return "\n".join(lines)
 
 
-def _quarantine_running_hermes_exe(
+def _quarantine_running_pichkoo_exe(
     scripts_dir: Path, *, max_attempts: int = 4
 ) -> list[tuple[Path, Path]]:
     """Pre-empt Windows file lock on the running ``pichkoo.exe``.
@@ -6812,7 +6812,7 @@ def _quarantine_running_hermes_exe(
     backoff_ms = [0, 100, 250, 500, 1000]
     attempts = max(1, min(max_attempts, len(backoff_ms)))
 
-    for shim in _hermes_exe_shims(scripts_dir):
+    for shim in _pichkoo_exe_shims(scripts_dir):
         if not shim.exists():
             continue
         target = shim.with_suffix(shim.suffix + f".old.{stamp}")
@@ -6903,7 +6903,7 @@ def _schedule_replace_on_reboot(shim: Path, quarantine_target: Path) -> bool:
 
 
 def _restore_quarantined_exes(moved: list[tuple[Path, Path]]) -> None:
-    """Roll back ``_quarantine_running_hermes_exe`` if uv didn't write replacements."""
+    """Roll back ``_quarantine_running_pichkoo_exe`` if uv didn't write replacements."""
     for original, quarantined in moved:
         try:
             if not original.exists() and quarantined.exists():
@@ -6935,7 +6935,7 @@ def _run_quarantined_install(
     """
     moved: list[tuple[Path, Path]] = []
     if scripts_dir is not None:
-        moved = _quarantine_running_hermes_exe(scripts_dir)
+        moved = _quarantine_running_pichkoo_exe(scripts_dir)
     try:
         _run_install_with_heartbeat(cmd, env=env)
     except BaseException:
@@ -7051,7 +7051,7 @@ def _install_python_dependencies_with_optional_fallback(
     On Windows, pre-renames live ``pichkoo.exe`` / ``pichkoo-gateway.exe`` shims
     in the venv Scripts dir before each install attempt so uv can write fresh
     copies (Windows blocks REPLACE on a running .exe but allows RENAME). See
-    ``_quarantine_running_hermes_exe`` for the rationale.
+    ``_quarantine_running_pichkoo_exe`` for the rationale.
     """
     scripts_dir = _venv_scripts_dir() if _is_windows() else None
 
@@ -7562,10 +7562,10 @@ def _install_hangup_protection(gateway_mode: bool = False):
     # tolerance.  Any failure here is non-fatal; we just skip the wrap.
     try:
         # Late-bound import so tests can monkeypatch
-        # pichkoo_cli.config.get_hermes_home to simulate setup failure.
-        from pichkoo_cli.config import get_hermes_home as _get_hermes_home
+        # pichkoo_cli.config.get_pichkoo_home to simulate setup failure.
+        from pichkoo_cli.config import get_pichkoo_home as _get_pichkoo_home
 
-        logs_dir = _get_hermes_home() / "logs"
+        logs_dir = _get_pichkoo_home() / "logs"
         logs_dir.mkdir(parents=True, exist_ok=True)
         log_path = logs_dir / "update.log"
         log_file = open(log_path, "a", buffering=1, encoding="utf-8")
@@ -7920,13 +7920,13 @@ def _run_pre_update_backup(args) -> None:
         size_bytes /= 1024
         size_str = f"{size_bytes:.1f} {unit}"
 
-    # Render path using display_hermes_home so the user sees ~/.pichkoo/...
+    # Render path using display_pichkoo_home so the user sees ~/.pichkoo/...
     try:
-        from pichkoo_constants import get_hermes_home, display_hermes_home
+        from pichkoo_constants import get_pichkoo_home, display_pichkoo_home
 
-        home = get_hermes_home()
+        home = get_pichkoo_home()
         try:
-            display_path = f"{display_hermes_home()}/{out_path.relative_to(home)}"
+            display_path = f"{display_pichkoo_home()}/{out_path.relative_to(home)}"
         except ValueError:
             display_path = str(out_path)
     except Exception:
@@ -8132,7 +8132,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
     if _is_windows() and not getattr(args, "force", False):
         scripts_dir = _venv_scripts_dir()
         if scripts_dir is not None:
-            concurrent = _detect_concurrent_hermes_instances(scripts_dir)
+            concurrent = _detect_concurrent_pichkoo_instances(scripts_dir)
             if concurrent:
                 print(_format_concurrent_instances_message(concurrent, scripts_dir))
                 sys.exit(2)
@@ -8471,7 +8471,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
 
         # Clear stale .pyc bytecode cache — prevents ImportError on gateway
         # restart when updated source references names that didn't exist in
-        # the old bytecode (e.g. get_hermes_home added to pichkoo_constants).
+        # the old bytecode (e.g. get_pichkoo_home added to pichkoo_constants).
         removed = _clear_bytecode_cache(PROJECT_ROOT)
         if removed:
             print(
@@ -8600,7 +8600,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         # After git pull, source files on disk are newer than cached Python
         # modules in this process.  Reload pichkoo_constants so that any lazy
         # import executed below (skills sync, gateway restart) sees new
-        # attributes like display_hermes_home() added since the last release.
+        # attributes like display_pichkoo_home() added since the last release.
         try:
             import importlib
             import pichkoo_constants as _hc
@@ -8883,7 +8883,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
         # before we attempt the restart — ensures the new gateway sees it
         # regardless of how we die.
         if gateway_mode:
-            _exit_code_path = get_hermes_home() / ".update_exit_code"
+            _exit_code_path = get_pichkoo_home() / ".update_exit_code"
             try:
                 _exit_code_path.write_text("0")
             except OSError:
@@ -9419,15 +9419,15 @@ def _cmd_update_impl(args, gateway_mode: bool):
         # every `pichkoo update` surfaces the issue until the user migrates.
         try:
             from pichkoo_cli.gateway import (
-                has_legacy_hermes_units,
-                _find_legacy_hermes_units,
+                has_legacy_pichkoo_units,
+                _find_legacy_pichkoo_units,
                 supports_systemd_services,
             )
 
-            if supports_systemd_services() and has_legacy_hermes_units():
+            if supports_systemd_services() and has_legacy_pichkoo_units():
                 print()
                 print("⚠ Legacy Pichkoo gateway unit(s) detected:")
-                for name, path, is_sys in _find_legacy_hermes_units():
+                for name, path, is_sys in _find_legacy_pichkoo_units():
                     scope = "system" if is_sys else "user"
                     print(f"    {path}  ({scope} scope)")
                 print()
@@ -9555,14 +9555,14 @@ def cmd_profile(args):
         _is_wrapper_dir_in_path,
         _get_wrapper_dir,
     )
-    from pichkoo_constants import display_hermes_home
+    from pichkoo_constants import display_pichkoo_home
 
     action = getattr(args, "profile_action", None)
 
     if action is None:
         # Bare `pichkoo profile` — show current profile status
         profile_name = get_active_profile_name()
-        dhh = display_hermes_home()
+        dhh = display_pichkoo_home()
         print(f"\nActive profile: {profile_name}")
         print(f"Path:           {dhh}")
 
@@ -9787,7 +9787,7 @@ def cmd_profile(args):
         if name and not text_value and not auto_flag:
             try:
                 if _profiles_mod.normalize_profile_name(name) == "default":
-                    from pichkoo_constants import get_hermes_home as _hh
+                    from pichkoo_constants import get_pichkoo_home as _hh
                     profile_dir = Path(_hh())
                 else:
                     profile_dir = _profiles_mod.get_profile_dir(name)
@@ -9810,7 +9810,7 @@ def cmd_profile(args):
         if text_value:
             try:
                 if _profiles_mod.normalize_profile_name(name) == "default":
-                    from pichkoo_constants import get_hermes_home as _hh
+                    from pichkoo_constants import get_pichkoo_home as _hh
                     profile_dir = Path(_hh())
                 else:
                     profile_dir = _profiles_mod.get_profile_dir(name)
@@ -9986,7 +9986,7 @@ def cmd_profile(args):
             # Preview: stage the distribution into a scratch dir, show the
             # manifest, then do the real install.  The double-stage avoids
             # any side-effects if the user declines.
-            with tempfile.TemporaryDirectory(prefix="hermes_dist_preview_") as tmp:
+            with tempfile.TemporaryDirectory(prefix="pichkoo_dist_preview_") as tmp:
                 plan = plan_install(
                     args.source,
                     Path(tmp),
@@ -10095,8 +10095,8 @@ def cmd_profile(args):
             print(f"Author:       {data['author']}")
         if data.get("license"):
             print(f"License:      {data['license']}")
-        if data.get("hermes_requires"):
-            print(f"Requires:     Pichkoo {data['hermes_requires']}")
+        if data.get("pichkoo_requires"):
+            print(f"Requires:     Pichkoo {data['pichkoo_requires']}")
         if data.get("source"):
             print(f"Source:       {data['source']}")
         if data.get("installed_at"):
@@ -10124,8 +10124,8 @@ def _render_distribution_plan(plan) -> None:
         print(f"  {mf.description}")
     if mf.author:
         print(f"  Author:   {mf.author}")
-    if mf.hermes_requires:
-        print(f"  Requires: Pichkoo {mf.hermes_requires}")
+    if mf.pichkoo_requires:
+        print(f"  Requires: Pichkoo {mf.pichkoo_requires}")
     print(f"  Source:   {plan.provenance}")
     print(f"  Target:   {plan.target_dir}")
     if plan.existing:
@@ -10703,9 +10703,9 @@ def cmd_memory(args):
         print("\n  ✓ Memory provider: built-in only")
         print("  Saved to config.yaml\n")
     elif sub == "reset":
-        from pichkoo_constants import get_hermes_home, display_hermes_home
+        from pichkoo_constants import get_pichkoo_home, display_pichkoo_home
 
-        mem_dir = get_hermes_home() / "memories"
+        mem_dir = get_pichkoo_home() / "memories"
         target = getattr(args, "target", "all")
         files_to_reset = []
         if target in {"all", "memory"}:
@@ -10719,7 +10719,7 @@ def cmd_memory(args):
         ]
         if not existing:
             print(
-                f"\n  Nothing to reset — no memory files found in {display_hermes_home()}/memories/\n"
+                f"\n  Nothing to reset — no memory files found in {display_pichkoo_home()}/memories/\n"
             )
             return
 
@@ -10746,7 +10746,7 @@ def cmd_memory(args):
         print(
             f"\n  Memory reset complete. New sessions will start with a blank slate."
         )
-        print(f"  Files were in: {display_hermes_home()}/memories/\n")
+        print(f"  Files were in: {display_pichkoo_home()}/memories/\n")
     else:
         from pichkoo_cli.memory_setup import memory_command
 
@@ -10859,7 +10859,7 @@ def main():
 
     # Sweep stale ``pichkoo.exe.old.*`` quarantine files left by previous
     # ``pichkoo update`` runs on Windows. Silent no-op on non-Windows or when
-    # there's nothing to clean. See ``_quarantine_running_hermes_exe``.
+    # there's nothing to clean. See ``_quarantine_running_pichkoo_exe``.
     try:
         _cleanup_quarantined_exes()
     except Exception:
@@ -11562,7 +11562,7 @@ def main():
                 ):
                     print("Cancelled.")
                     return
-            sessions_dir = get_hermes_home() / "sessions"
+            sessions_dir = get_pichkoo_home() / "sessions"
             if db.delete_session(resolved_session_id, sessions_dir=sessions_dir):
                 print(f"Deleted session '{resolved_session_id}'.")
             else:
@@ -11577,7 +11577,7 @@ def main():
                 ):
                     print("Cancelled.")
                     return
-            sessions_dir = get_hermes_home() / "sessions"
+            sessions_dir = get_pichkoo_home() / "sessions"
             count = db.prune_sessions(
                 older_than_days=days, source=args.source, sessions_dir=sessions_dir
             )

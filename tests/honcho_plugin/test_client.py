@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from pichkoo_cli.profiles import _get_default_hermes_home
+from pichkoo_cli.profiles import _get_default_pichkoo_home
 
 import pytest
 
@@ -341,19 +341,19 @@ class TestResolveSessionName:
 
 
 class TestResolveConfigPath:
-    def test_prefers_hermes_home_when_exists(self, tmp_path):
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
-        local_cfg = hermes_home / "honcho.json"
+    def test_prefers_pichkoo_home_when_exists(self, tmp_path):
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
+        local_cfg = pichkoo_home / "honcho.json"
         local_cfg.write_text('{"apiKey": "local"}')
 
-        with patch.dict(os.environ, {"PICHKOO_HOME": str(hermes_home)}):
+        with patch.dict(os.environ, {"PICHKOO_HOME": str(pichkoo_home)}):
             result = resolve_config_path()
         assert result == local_cfg
 
     def test_falls_back_to_default_profile_when_no_local(self, tmp_path, monkeypatch):
         # Profile mode: PICHKOO_HOME points at ~/.pichkoo/profiles/<name>, so
-        # _get_default_hermes_home() must resolve back to ~/.pichkoo — that's
+        # _get_default_pichkoo_home() must resolve back to ~/.pichkoo — that's
         # the bug the HOME-anchored helper fixes (vs. blindly using Path.home()).
         fake_home = tmp_path / "fakehome"
         fake_home.mkdir()
@@ -368,10 +368,10 @@ class TestResolveConfigPath:
 
         result = resolve_config_path()
 
-        assert _get_default_hermes_home() == default_home
+        assert _get_default_pichkoo_home() == default_home
         assert result == default_cfg
 
-    def test_falls_back_to_global_without_hermes_home_env(self, tmp_path):
+    def test_falls_back_to_global_without_pichkoo_home_env(self, tmp_path):
         fake_home = tmp_path / "fakehome"
         fake_home.mkdir()
 
@@ -384,10 +384,10 @@ class TestResolveConfigPath:
     def test_global_fallback_uses_home_at_call_time(self, tmp_path):
         fake_home = tmp_path / "fakehome"
         fake_home.mkdir()
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
 
-        with patch.dict(os.environ, {"PICHKOO_HOME": str(hermes_home)}), \
+        with patch.dict(os.environ, {"PICHKOO_HOME": str(pichkoo_home)}), \
              patch.object(Path, "home", return_value=fake_home):
             assert resolve_global_config_path() == fake_home / ".honcho" / "config.json"
             assert resolve_config_path() == fake_home / ".honcho" / "config.json"
@@ -415,15 +415,15 @@ class TestResolveConfigPath:
         assert config.workspace_id == "default-ws"
 
     def test_from_global_config_uses_local_path(self, tmp_path):
-        hermes_home = tmp_path / "pichkoo"
-        hermes_home.mkdir()
-        local_cfg = hermes_home / "honcho.json"
+        pichkoo_home = tmp_path / "pichkoo"
+        pichkoo_home.mkdir()
+        local_cfg = pichkoo_home / "honcho.json"
         local_cfg.write_text(json.dumps({
             "apiKey": "***",
             "workspace": "local-ws",
         }))
 
-        with patch.dict(os.environ, {"PICHKOO_HOME": str(hermes_home)}), \
+        with patch.dict(os.environ, {"PICHKOO_HOME": str(pichkoo_home)}), \
              patch.object(Path, "home", return_value=tmp_path):
             config = HonchoClientConfig.from_global_config()
         assert config.api_key == "***"
@@ -432,10 +432,10 @@ class TestResolveConfigPath:
 
 class TestResolveActiveHost:
     def test_profile_host_key_uses_honcho_safe_separator(self):
-        assert profile_host_key("coder") == "hermes_coder"
+        assert profile_host_key("coder") == "pichkoo_coder"
         assert profile_host_key("default") == "pichkoo"
 
-    def test_default_returns_hermes(self):
+    def test_default_returns_pichkoo(self):
         with patch.dict(os.environ, {}, clear=True):
             os.environ.pop("PICHKOO_HONCHO_HOST", None)
             os.environ.pop("PICHKOO_HOME", None)
@@ -449,15 +449,15 @@ class TestResolveActiveHost:
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("PICHKOO_HONCHO_HOST", None)
             with patch("pichkoo_cli.profiles.get_active_profile_name", return_value="coder"):
-                assert resolve_active_host() == "hermes_coder"
+                assert resolve_active_host() == "pichkoo_coder"
 
-    def test_default_profile_returns_hermes(self):
+    def test_default_profile_returns_pichkoo(self):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("PICHKOO_HONCHO_HOST", None)
             with patch("pichkoo_cli.profiles.get_active_profile_name", return_value="default"):
                 assert resolve_active_host() == "pichkoo"
 
-    def test_custom_profile_returns_hermes(self):
+    def test_custom_profile_returns_pichkoo(self):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("PICHKOO_HONCHO_HOST", None)
             with patch("pichkoo_cli.profiles.get_active_profile_name", return_value="custom"):
@@ -482,10 +482,10 @@ class TestResolveActiveHost:
 class TestProfileScopedConfig:
     def test_from_env_uses_profile_host(self):
         with patch.dict(os.environ, {"HONCHO_API_KEY": "key"}):
-            config = HonchoClientConfig.from_env(host="hermes_coder")
-        assert config.host == "hermes_coder"
+            config = HonchoClientConfig.from_env(host="pichkoo_coder")
+        assert config.host == "pichkoo_coder"
         assert config.workspace_id == "pichkoo"  # shared workspace
-        assert config.ai_peer == "hermes_coder"
+        assert config.ai_peer == "pichkoo_coder"
 
     def test_from_env_default_workspace_preserved_for_default_host(self):
         with patch.dict(os.environ, {"HONCHO_API_KEY": "key"}):
@@ -499,19 +499,19 @@ class TestProfileScopedConfig:
             "apiKey": "shared-key",
             "hosts": {
                 "pichkoo": {"aiPeer": "pichkoo", "peerName": "alice"},
-                "hermes_coder": {
-                    "aiPeer": "hermes_coder",
+                "pichkoo_coder": {
+                    "aiPeer": "pichkoo_coder",
                     "peerName": "alice-coder",
                     "workspace": "coder-ws",
                 },
             },
         }))
         config = HonchoClientConfig.from_global_config(
-            host="hermes_coder", config_path=config_file,
+            host="pichkoo_coder", config_path=config_file,
         )
-        assert config.host == "hermes_coder"
+        assert config.host == "pichkoo_coder"
         assert config.workspace_id == "coder-ws"
-        assert config.ai_peer == "hermes_coder"
+        assert config.ai_peer == "pichkoo_coder"
         assert config.peer_name == "alice-coder"
 
     def test_from_global_config_auto_resolves_host(self, tmp_path):
@@ -519,12 +519,12 @@ class TestProfileScopedConfig:
         config_file.write_text(json.dumps({
             "apiKey": "key",
             "hosts": {
-                "hermes_dreamer": {"peerName": "dreamer-user"},
+                "pichkoo_dreamer": {"peerName": "dreamer-user"},
             },
         }))
-        with patch("plugins.memory.honcho.client.resolve_active_host", return_value="hermes_dreamer"):
+        with patch("plugins.memory.honcho.client.resolve_active_host", return_value="pichkoo_dreamer"):
             config = HonchoClientConfig.from_global_config(config_path=config_file)
-        assert config.host == "hermes_dreamer"
+        assert config.host == "pichkoo_dreamer"
         assert config.peer_name == "dreamer-user"
 
     def test_from_global_config_reads_legacy_dot_profile_host_block(self, tmp_path):
@@ -536,12 +536,12 @@ class TestProfileScopedConfig:
             },
         }))
         config = HonchoClientConfig.from_global_config(
-            host="hermes_dreamer",
+            host="pichkoo_dreamer",
             config_path=config_file,
         )
-        assert config.host == "hermes_dreamer"
+        assert config.host == "pichkoo_dreamer"
         assert config.peer_name == "dreamer-user"
-        assert config.workspace_id == "hermes_dreamer"
+        assert config.workspace_id == "pichkoo_dreamer"
 
 
 class TestObservationModeMigration:
@@ -635,7 +635,7 @@ class TestGetHonchoClient:
         not importlib.util.find_spec("honcho"),
         reason="honcho SDK not installed"
     )
-    def test_hermes_config_timeout_override_used_when_config_timeout_missing(self):
+    def test_pichkoo_config_timeout_override_used_when_config_timeout_missing(self):
         fake_honcho = MagicMock(name="Honcho")
         cfg = HonchoClientConfig(
             api_key="test-key",
@@ -677,7 +677,7 @@ class TestGetHonchoClient:
         not importlib.util.find_spec("honcho"),
         reason="honcho SDK not installed"
     )
-    def test_hermes_request_timeout_alias_used(self):
+    def test_pichkoo_request_timeout_alias_used(self):
         fake_honcho = MagicMock(name="Honcho")
         cfg = HonchoClientConfig(
             api_key="test-key",

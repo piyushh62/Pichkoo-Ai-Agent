@@ -36,8 +36,8 @@ def isolated_home(tmp_path, monkeypatch):
     return pichkoo
 
 
-def _env_value(hermes_home: Path, key: str) -> str | None:
-    env_file = hermes_home / ".env"
+def _env_value(pichkoo_home: Path, key: str) -> str | None:
+    env_file = pichkoo_home / ".env"
     if not env_file.exists():
         return None
     for line in env_file.read_text().splitlines():

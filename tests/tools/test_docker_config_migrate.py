@@ -13,11 +13,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "scripts" / "docker_config_migrate.py"
 
 
-def _run_migration(hermes_home: Path, **env_overrides: str) -> subprocess.CompletedProcess[str]:
+def _run_migration(pichkoo_home: Path, **env_overrides: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.update(
         {
-            "PICHKOO_HOME": str(hermes_home),
+            "PICHKOO_HOME": str(pichkoo_home),
             "PICHKOO_SKIP_CHMOD": "1",
             "PYTHONPATH": str(REPO_ROOT),
         }

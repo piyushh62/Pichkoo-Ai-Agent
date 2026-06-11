@@ -17,12 +17,12 @@ from utils import atomic_replace
 _CREDENTIAL_SUFFIXES = ("_API_KEY", "_TOKEN", "_SECRET", "_KEY")
 
 # Names we've already warned about during this process, so repeated
-# load_hermes_dotenv() calls (user env + project env, gateway hot-reload,
+# load_pichkoo_dotenv() calls (user env + project env, gateway hot-reload,
 # tests) don't spam the same warning multiple times.
 _WARNED_KEYS: set[str] = set()
 
 # Map of env-var name → source label ("bitwarden", etc.) for credentials
-# that were injected by an external secret source during load_hermes_dotenv().
+# that were injected by an external secret source during load_pichkoo_dotenv().
 # Used by setup / `pichkoo model` flows to label detected credentials so
 # users understand WHERE a key came from when their .env doesn't contain it
 # directly (otherwise the "credentials detected ✓" line looks identical to
@@ -30,7 +30,7 @@ _WARNED_KEYS: set[str] = set()
 _SECRET_SOURCES: dict[str, str] = {}
 
 # PICHKOO_HOME paths we've already pulled external secrets for during this
-# process.  ``load_hermes_dotenv()`` is called at module-import time from
+# process.  ``load_pichkoo_dotenv()`` is called at module-import time from
 # several hot modules (cli.py, pichkoo_cli/main.py, run_agent.py,
 # trajectory_compressor.py, gateway/run.py, ...), so without this guard the
 # Bitwarden status line gets printed 3-5x per startup.  Bitwarden's own
@@ -43,7 +43,7 @@ def get_secret_source(env_var: str) -> str | None:
     """Return the label of the secret source that supplied ``env_var``, if any.
 
     Returns ``"bitwarden"`` for keys pulled from Bitwarden Secrets Manager
-    during the current process's ``load_hermes_dotenv()`` call.  Returns
+    during the current process's ``load_pichkoo_dotenv()`` call.  Returns
     ``None`` for keys that came from ``.env``, the shell environment, or
     aren't tracked.  The returned label is metadata only: credential-pool
     persistence may store it to explain the origin of a borrowed secret, but
@@ -209,9 +209,9 @@ def _sanitize_env_file_if_needed(path: Path) -> None:
         pass  # best-effort — don't block gateway startup
 
 
-def load_hermes_dotenv(
+def load_pichkoo_dotenv(
     *,
-    hermes_home: str | os.PathLike | None = None,
+    pichkoo_home: str | os.PathLike | None = None,
     project_env: str | os.PathLike | None = None,
 ) -> list[Path]:
     """Load Pichkoo environment files with user config taking precedence.
@@ -224,7 +224,7 @@ def load_hermes_dotenv(
     """
     loaded: list[Path] = []
 
-    home_path = Path(hermes_home or os.getenv("PICHKOO_HOME", Path.home() / ".pichkoo"))
+    home_path = Path(pichkoo_home or os.getenv("PICHKOO_HOME", Path.home() / ".pichkoo"))
     user_env = home_path / ".env"
     project_env_path = Path(project_env) if project_env else None
 
@@ -256,7 +256,7 @@ def _apply_external_secret_sources(home_path: Path) -> None:
     swallowed — external secret sources must never block startup.
 
     Idempotent within a process: subsequent calls for the same
-    ``home_path`` are no-ops.  ``load_hermes_dotenv()`` runs at import
+    ``home_path`` are no-ops.  ``load_pichkoo_dotenv()`` runs at import
     time from several hot modules (cli.py, pichkoo_cli/main.py,
     run_agent.py, trajectory_compressor.py, ...), so without this guard
     the Bitwarden status line would print 3-5x per CLI startup.  Use

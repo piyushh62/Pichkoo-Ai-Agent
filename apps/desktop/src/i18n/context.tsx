@@ -16,14 +16,14 @@ export interface I18nConfigClient {
 
 const defaultConfigClient: I18nConfigClient = {
   getConfig: () => {
-    if (typeof window === 'undefined' || !window.hermesDesktop?.api) {
+    if (typeof window === 'undefined' || !window.pichkooDesktop?.api) {
       return Promise.resolve({})
     }
 
     return getPichkooConfigRecord()
   },
   saveConfig: config => {
-    if (typeof window === 'undefined' || !window.hermesDesktop?.api) {
+    if (typeof window === 'undefined' || !window.pichkooDesktop?.api) {
       return Promise.resolve({ ok: true })
     }
 

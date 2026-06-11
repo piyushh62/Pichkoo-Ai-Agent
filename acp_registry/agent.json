@@ -10,7 +10,7 @@
   "distribution": {
     "uvx": {
       "package": "pichkoo-ai-agent[acp]==0.16.0",
-      "args": ["hermes-acp"]
+      "args": ["pichkoo-acp"]
     }
   }
 }

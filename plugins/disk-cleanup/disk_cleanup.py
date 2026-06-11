@@ -29,11 +29,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 except Exception:  # pragma: no cover — plugin may load before constants resolves
     import os
 
-    def get_hermes_home() -> Path:  # type: ignore[no-redef]
+    def get_pichkoo_home() -> Path:  # type: ignore[no-redef]
         val = (os.environ.get("PICHKOO_HOME") or "").strip()
         return Path(val).resolve() if val else (Path.home() / ".pichkoo").resolve()
 
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 def get_state_dir() -> Path:
     """State dir — separate from ``$PICHKOO_HOME/logs/``."""
-    return get_hermes_home() / "disk-cleanup"
+    return get_pichkoo_home() / "disk-cleanup"
 
 
 def get_tracked_file() -> Path:
@@ -68,9 +68,9 @@ def is_safe_path(path: Path) -> bool:
 
     Rejects Windows mounts (``/mnt/c`` etc.) and any system directory.
     """
-    hermes_home = get_hermes_home()
+    pichkoo_home = get_pichkoo_home()
     try:
-        path.resolve().relative_to(hermes_home)
+        path.resolve().relative_to(pichkoo_home)
         return True
     except (ValueError, OSError):
         pass
@@ -162,9 +162,9 @@ def _is_protected_cron_path(p: Path) -> bool:
     # Lazily build the set once per process so PICHKOO_HOME is resolved
     # exactly once.
     if not _PROTECTED_CRON_PATHS:
-        hermes_home = get_hermes_home()
+        pichkoo_home = get_pichkoo_home()
         for parent in ("cron", "cronjobs"):
-            base = hermes_home / parent
+            base = pichkoo_home / parent
             _PROTECTED_CRON_PATHS.add(str(base))
             _PROTECTED_CRON_PATHS.add(str(base / "jobs.json"))
             _PROTECTED_CRON_PATHS.add(str(base / ".tick.lock"))
@@ -351,7 +351,7 @@ def quick() -> Dict[str, Any]:
     # Remove empty dirs under PICHKOO_HOME (but leave PICHKOO_HOME itself and
     # a short list of well-known top-level state dirs alone — a fresh install
     # has these empty, and deleting them would surprise the user).
-    hermes_home = get_hermes_home()
+    pichkoo_home = get_pichkoo_home()
     _PROTECTED_TOP_LEVEL = {
         "logs", "memories", "sessions", "cron", "cronjobs",
         "cache", "skills", "plugins", "disk-cleanup", "optional-skills",
@@ -359,11 +359,11 @@ def quick() -> Dict[str, Any]:
     }
     empty_removed = 0
     try:
-        for dirpath in sorted(hermes_home.rglob("*"), reverse=True):
-            if not dirpath.is_dir() or dirpath == hermes_home:
+        for dirpath in sorted(pichkoo_home.rglob("*"), reverse=True):
+            if not dirpath.is_dir() or dirpath == pichkoo_home:
                 continue
             try:
-                rel_parts = dirpath.relative_to(hermes_home).parts
+                rel_parts = dirpath.relative_to(pichkoo_home).parts
             except ValueError:
                 continue
             # Skip the well-known top-level state dirs themselves.
@@ -527,9 +527,9 @@ def guess_category(path: Path) -> Optional[str]:
         return None
 
     # Skip the state dir itself, logs, memory files, sessions, config.
-    hermes_home = get_hermes_home()
+    pichkoo_home = get_pichkoo_home()
     try:
-        rel = path.resolve().relative_to(hermes_home)
+        rel = path.resolve().relative_to(pichkoo_home)
         top = rel.parts[0] if rel.parts else ""
         if top in {
             "disk-cleanup", "logs", "memories", "sessions", "config.yaml",

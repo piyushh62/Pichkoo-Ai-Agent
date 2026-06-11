@@ -7,7 +7,7 @@ Regression guard for the PICHKOO_UID/PUID remap path broken by #35027.
 
 `usermod -u <new> pichkoo` re-chowns the pichkoo home dir ($PICHKOO_HOME ==
 /opt/data) to the new UID as a side effect. #35027 gated the build-tree chown
-behind `stat $PICHKOO_HOME != hermes_uid`, so after any remap that stat is
+behind `stat $PICHKOO_HOME != pichkoo_uid`, so after any remap that stat is
 already satisfied and the build-tree chown was silently skipped — leaving
 .venv owned by the build-time UID (10000) and breaking:
   - lazy_deps.py `uv pip install` of platform extras (#15012, #21100)
@@ -50,7 +50,7 @@ def _build_tree_block(text: str) -> str:
     return m.group(1)
 
 
-def test_build_tree_chown_not_gated_on_hermes_home(stage2_text: str) -> None:
+def test_build_tree_chown_not_gated_on_pichkoo_home(stage2_text: str) -> None:
     """The build-tree chown must NOT live inside the `if [ "$needs_chown" = true ]`
     block keyed on $PICHKOO_HOME ownership — that is exactly the #35027 bug."""
     block = _build_tree_block(stage2_text)
@@ -63,7 +63,7 @@ def test_build_tree_chown_not_gated_on_hermes_home(stage2_text: str) -> None:
 
 
 def _run_build_tree_block(
-    text: str, *, venv_owner: int, hermes_uid: int
+    text: str, *, venv_owner: int, pichkoo_uid: int
 ) -> bool:
     """Run the extracted build-tree block with `stat`, `id`, and `chown`
     stubbed. Returns True iff the block attempted the recursive chown."""
@@ -77,12 +77,12 @@ def _run_build_tree_block(
         log = dpath / "chown.log"
         # Stubs:
         #   stat -c %u <path>  -> echo the simulated venv owner
-        #   id -u pichkoo       -> handled via actual_hermes_uid var below
+        #   id -u pichkoo       -> handled via actual_pichkoo_uid var below
         #   chown ...          -> record that it fired
         script = (
             "set -eu\n"
             f'INSTALL_DIR="/opt/pichkoo"\n'
-            f'actual_hermes_uid={hermes_uid}\n'
+            f'actual_pichkoo_uid={pichkoo_uid}\n'
             f'stat() {{ echo {venv_owner}; }}\n'
             f'chown() {{ echo fired >> "{log}"; }}\n'
             + block
@@ -98,7 +98,7 @@ def test_chown_fires_when_venv_owner_differs(stage2_text: str) -> None:
     """The #35027 regression scenario: after a remap $PICHKOO_HOME already
     matches the new UID, but the venv is still owned by the build-time UID
     (10000). The build-tree chown MUST still fire."""
-    fired = _run_build_tree_block(stage2_text, venv_owner=10000, hermes_uid=4242)
+    fired = _run_build_tree_block(stage2_text, venv_owner=10000, pichkoo_uid=4242)
     assert fired, (
         "build-tree chown must fire when the venv is not owned by the runtime "
         "pichkoo UID, regardless of $PICHKOO_HOME ownership (#35027 regression)"
@@ -108,7 +108,7 @@ def test_chown_fires_when_venv_owner_differs(stage2_text: str) -> None:
 def test_chown_skipped_when_venv_already_owned(stage2_text: str) -> None:
     """Idempotency: once the venv is pichkoo-owned, the recursive chown is
     skipped on subsequent boots."""
-    fired = _run_build_tree_block(stage2_text, venv_owner=4242, hermes_uid=4242)
+    fired = _run_build_tree_block(stage2_text, venv_owner=4242, pichkoo_uid=4242)
     assert not fired, (
         "build-tree chown must be skipped when the venv already matches the "
         "runtime pichkoo UID (avoid expensive recursive chown on every restart)"
@@ -118,5 +118,5 @@ def test_chown_skipped_when_venv_already_owned(stage2_text: str) -> None:
 def test_chown_skipped_for_default_uid(stage2_text: str) -> None:
     """No remap: venv owned by the default build UID (10000) and pichkoo is
     still 10000 — nothing to do."""
-    fired = _run_build_tree_block(stage2_text, venv_owner=10000, hermes_uid=10000)
+    fired = _run_build_tree_block(stage2_text, venv_owner=10000, pichkoo_uid=10000)
     assert not fired

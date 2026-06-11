@@ -72,9 +72,9 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=True)
 
         with (
-            patch("pichkoo_cli.setup.ensure_hermes_home"),
+            patch("pichkoo_cli.setup.ensure_pichkoo_home"),
             patch("pichkoo_cli.setup.load_config", return_value={}),
-            patch("pichkoo_cli.setup.get_hermes_home", return_value="/tmp/.pichkoo"),
+            patch("pichkoo_cli.setup.get_pichkoo_home", return_value="/tmp/.pichkoo"),
             patch("pichkoo_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
             patch("builtins.input", side_effect=AssertionError("input should not be called")),
         ):
@@ -90,9 +90,9 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=False)
 
         with (
-            patch("pichkoo_cli.setup.ensure_hermes_home"),
+            patch("pichkoo_cli.setup.ensure_pichkoo_home"),
             patch("pichkoo_cli.setup.load_config", return_value={}),
-            patch("pichkoo_cli.setup.get_hermes_home", return_value="/tmp/.pichkoo"),
+            patch("pichkoo_cli.setup.get_pichkoo_home", return_value="/tmp/.pichkoo"),
             patch("pichkoo_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
             patch("sys.stdin") as mock_stdin,
             patch("builtins.input", side_effect=AssertionError("input should not be called")),

@@ -8,7 +8,7 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def _isolate_hermes(tmp_path, monkeypatch):
+def _isolate_pichkoo(tmp_path, monkeypatch):
     monkeypatch.setenv("PICHKOO_HOME", str(tmp_path / ".pichkoo"))
     (tmp_path / ".pichkoo").mkdir(exist_ok=True)
 

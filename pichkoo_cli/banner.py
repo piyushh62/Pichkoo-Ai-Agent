@@ -11,7 +11,7 @@ import subprocess
 import threading
 import time
 from pathlib import Path
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 # rich and prompt_toolkit are imported lazily (inside the functions that use
@@ -221,8 +221,8 @@ def check_for_updates() -> Optional[int]:
     if behind but the count is unknown, ``0`` if up-to-date, or ``None`` if
     the check failed or doesn't apply. Cached for 6 hours.
     """
-    hermes_home = get_hermes_home()
-    cache_file = hermes_home / ".update_check"
+    pichkoo_home = get_pichkoo_home()
+    cache_file = pichkoo_home / ".update_check"
     embedded_rev = os.environ.get("PICHKOO_REVISION") or None
 
     # Docker images have no working tree to count commits against — the
@@ -270,7 +270,7 @@ def check_for_updates() -> Optional[int]:
         # Path(__file__) always resolves to the actual installed checkout.
         repo_dir = Path(__file__).parent.parent.resolve()
         if not (repo_dir / ".git").exists():
-            repo_dir = hermes_home / "pichkoo-agent"
+            repo_dir = pichkoo_home / "pichkoo-agent"
         if not (repo_dir / ".git").exists():
             behind = check_via_pypi()
         else:
@@ -295,8 +295,8 @@ def _resolve_repo_dir() -> Optional[Path]:
     """
     repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
-        hermes_home = get_hermes_home()
-        repo_dir = hermes_home / "pichkoo-agent"
+        pichkoo_home = get_pichkoo_home()
+        repo_dir = pichkoo_home / "pichkoo-agent"
     return repo_dir if (repo_dir / ".git").exists() else None
 
 

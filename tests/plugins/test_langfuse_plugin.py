@@ -125,7 +125,7 @@ class TestRuntimeGate:
             "it should short-circuit via _INIT_FAILED"
         )
 
-    def test_get_langfuse_does_not_import_hermes_config(self, monkeypatch):
+    def test_get_langfuse_does_not_import_pichkoo_config(self, monkeypatch):
         """The plugin must not re-read config.yaml per hook."""
         for k in (
             "PICHKOO_LANGFUSE_PUBLIC_KEY", "PICHKOO_LANGFUSE_SECRET_KEY",

@@ -296,7 +296,7 @@ class TestSlackNativeSlashes:
             assert isinstance(desc, str)
             assert isinstance(hint, str)
 
-    def test_hermes_catchall_is_first(self):
+    def test_pichkoo_catchall_is_first(self):
         """``/pichkoo`` must be reserved as the first slot so the legacy
         ``/pichkoo <subcommand>`` form keeps working after we add new
         commands and hit the 50-slash cap."""

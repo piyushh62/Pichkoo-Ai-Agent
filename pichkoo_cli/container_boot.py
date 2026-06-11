@@ -54,7 +54,7 @@ class ReconcileAction:
 
 def reconcile_profile_gateways(
     *,
-    hermes_home: Path,
+    pichkoo_home: Path,
     scandir: Path,
     dry_run: bool = False,
     container_argv: Sequence[str] | None = None,
@@ -76,9 +76,9 @@ def reconcile_profile_gateways(
     same way as for named profiles.
 
     Args:
-        hermes_home: The container's PICHKOO_HOME (typically /opt/data).
-            Profiles live under ``<hermes_home>/profiles/<name>/``;
-            the default profile lives at ``<hermes_home>`` itself.
+        pichkoo_home: The container's PICHKOO_HOME (typically /opt/data).
+            Profiles live under ``<pichkoo_home>/profiles/<name>/``;
+            the default profile lives at ``<pichkoo_home>`` itself.
         scandir: The s6 dynamic scandir (typically /run/service). Service
             directories are created at ``<scandir>/gateway-<profile>/``.
         dry_run: When True, walk and return the action list without
@@ -100,14 +100,14 @@ def reconcile_profile_gateways(
     # `gateway run` command and no state exists yet, seed that intent
     # as `running` so the s6 reconciler preserves the pre-s6 behavior.
     legacy_default_state = _maybe_migrate_legacy_gateway_run_state(
-        hermes_home,
+        pichkoo_home,
         container_argv=container_argv,
         dry_run=dry_run,
     )
-    default_prior_state = legacy_default_state or _read_prior_state(hermes_home)
+    default_prior_state = legacy_default_state or _read_prior_state(pichkoo_home)
     default_should_start = default_prior_state in _AUTOSTART_STATES
     if not dry_run:
-        _cleanup_stale_runtime_files(hermes_home)
+        _cleanup_stale_runtime_files(pichkoo_home)
         _register_service(scandir, "default", start=default_should_start)
     actions.append(ReconcileAction(
         profile="default",
@@ -115,7 +115,7 @@ def reconcile_profile_gateways(
         action="started" if default_should_start else "registered",
     ))
 
-    profiles_root = hermes_home / "profiles"
+    profiles_root = pichkoo_home / "profiles"
     if profiles_root.is_dir():
         for entry in sorted(profiles_root.iterdir()):
             if not entry.is_dir():
@@ -153,12 +153,12 @@ def reconcile_profile_gateways(
             ))
 
     if not dry_run:
-        _write_reconcile_log(hermes_home, actions)
+        _write_reconcile_log(pichkoo_home, actions)
     return actions
 
 
 def _maybe_migrate_legacy_gateway_run_state(
-    hermes_home: Path,
+    pichkoo_home: Path,
     *,
     container_argv: Sequence[str] | None,
     dry_run: bool,
@@ -173,7 +173,7 @@ def _maybe_migrate_legacy_gateway_run_state(
     root gateway_state.json exists so explicit stopped/failed states keep
     winning across restarts.
     """
-    state_file = hermes_home / "gateway_state.json"
+    state_file = pichkoo_home / "gateway_state.json"
     if state_file.exists():
         return None
 
@@ -327,7 +327,7 @@ def _register_service(scandir: Path, profile: str, *, start: bool) -> None:
 
 
 def _write_reconcile_log(
-    hermes_home: Path, actions: list[ReconcileAction],
+    pichkoo_home: Path, actions: list[ReconcileAction],
 ) -> None:
     """Append one line per profile to $PICHKOO_HOME/logs/container-boot.log.
 
@@ -345,7 +345,7 @@ def _write_reconcile_log(
     one append-only file (PR #30136 review item O3).
     """
     import time
-    log_dir = hermes_home / "logs"
+    log_dir = pichkoo_home / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_dir / "container-boot.log"
 
@@ -378,10 +378,10 @@ _LOG_ROTATE_BYTES = 256 * 1024
 
 def main() -> int:
     """Entry point invoked from /etc/cont-init.d/02-reconcile-profiles."""
-    hermes_home = Path(os.environ.get("PICHKOO_HOME", "/opt/data"))
+    pichkoo_home = Path(os.environ.get("PICHKOO_HOME", "/opt/data"))
     scandir = Path(os.environ.get("S6_PROFILE_GATEWAY_SCANDIR", "/run/service"))
     actions = reconcile_profile_gateways(
-        hermes_home=hermes_home, scandir=scandir,
+        pichkoo_home=pichkoo_home, scandir=scandir,
     )
     for a in actions:
         print(

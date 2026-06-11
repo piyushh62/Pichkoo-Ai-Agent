@@ -31,12 +31,12 @@ def curator_env(tmp_path, monkeypatch, capsys):
     importlib.reload(pichkoo_constants)
     from agent import curator
     importlib.reload(curator)
-    from pichkoo_cli import main as hermes_main
-    importlib.reload(hermes_main)
+    from pichkoo_cli import main as pichkoo_main
+    importlib.reload(pichkoo_main)
 
     yield {
         "curator": curator,
-        "main": hermes_main,
+        "main": pichkoo_main,
         "capsys": capsys,
     }
 

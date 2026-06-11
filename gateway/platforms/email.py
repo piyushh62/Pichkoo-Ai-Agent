@@ -75,12 +75,12 @@ def _send_imap_id(imap: "imaplib.IMAP4") -> None:
     """
     try:
         try:
-            from pichkoo_cli import __version__ as _hermes_version
+            from pichkoo_cli import __version__ as _pichkoo_version
         except Exception:  # noqa: BLE001 — keep ID best-effort if import fails
-            _hermes_version = "0"
+            _pichkoo_version = "0"
         imap.xatom(
             "ID",
-            f'("name" "pichkoo-agent" "version" "{_hermes_version}" '
+            f'("name" "pichkoo-agent" "version" "{_pichkoo_version}" '
             '"vendor" "NousResearch" '
             '"support-email" "noreply@nousresearch.com")',
         )

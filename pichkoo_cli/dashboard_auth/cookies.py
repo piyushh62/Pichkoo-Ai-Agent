@@ -1,9 +1,9 @@
 """Cookie helpers for dashboard auth.
 
 Three cookies in play:
-  - hermes_session_at:   the OAuth access token
+  - pichkoo_session_at:   the OAuth access token
                          (HttpOnly, lifetime = token TTL, ~15 min)
-  - hermes_session_rt:   the OAuth refresh token
+  - pichkoo_session_rt:   the OAuth refresh token
                          (HttpOnly, lifetime = 24h, ROTATING + reuse-detected)
                          Nous Portal issues a rotating refresh token for the
                          dashboard auth-code grant (Portal NAS #293 / pichkoo
@@ -14,7 +14,7 @@ Three cookies in play:
                          provider that omits the refresh token (empty string)
                          degrades gracefully to access-token-only sessions —
                          the RT cookie is simply not written.
-  - hermes_session_pkce: short-lived PKCE state + CSRF nonce + provider
+  - pichkoo_session_pkce: short-lived PKCE state + CSRF nonce + provider
                          hint (HttpOnly, lifetime = 10 minutes)
 
 All three are ``SameSite=Lax`` (browser will send on cross-site GET
@@ -42,7 +42,7 @@ https://datatracker.ietf.org/doc/html/draft-west-cookie-prefixes):
 
 The setters and readers BOTH consult the active prefix because the
 cookie *name* changes — a reader that looked up the bare name when the
-setter wrote ``__Secure-hermes_session_at`` would never find the value.
+setter wrote ``__Secure-pichkoo_session_at`` would never find the value.
 
 Refresh-token handling:
    ``set_session_cookies`` accepts ``refresh_token=""`` (provider omitted
@@ -64,9 +64,9 @@ from fastapi.responses import Response
 # Bare cookie names — the request-scoped ``_resolved_name`` helper
 # decides whether to prepend ``__Host-`` / ``__Secure-`` based on the
 # request's HTTPS + prefix combination.
-SESSION_AT_COOKIE = "hermes_session_at"
-SESSION_RT_COOKIE = "hermes_session_rt"
-PKCE_COOKIE = "hermes_session_pkce"
+SESSION_AT_COOKIE = "pichkoo_session_at"
+SESSION_RT_COOKIE = "pichkoo_session_rt"
+PKCE_COOKIE = "pichkoo_session_pkce"
 
 # Possible name variants we may have to read back. Sorted so most-strict
 # wins on iteration when both happen to be present (shouldn't happen in

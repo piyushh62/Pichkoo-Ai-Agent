@@ -11,7 +11,7 @@
     { pkgs, self', ... }:
     let
       packages = builtins.attrValues self'.packages;
-      hermesNpmLib = self'.packages.default.passthru.hermesNpmLib;
+      pichkooNpmLib = self'.packages.default.passthru.pichkooNpmLib;
       fixLockfilesExe = pkgs.lib.getExe self'.packages.fix-lockfiles;
 
       # Collect all packageJsonPath values from npm workspace packages.
@@ -19,7 +19,7 @@
         map (p: p.passthru.packageJsonPath or null) packages
       );
 
-      # Non-npm packages may have their own devShellHook (e.g. hermes-agent
+      # Non-npm packages may have their own devShellHook (e.g. pichkoo-agent
       # stamps pyproject.toml + uv.lock for Python venv setup).
       nonNpmHooks = map (p: p.passthru.devShellHook or "") packages;
       combinedNonNpm = pkgs.lib.concatStringsSep "\n" (builtins.filter (h: h != "") nonNpmHooks);
@@ -31,10 +31,10 @@
           uv
         ];
         shellHook = ''
-          echo "Hermes Agent dev shell"
+          echo "Pichkoo Agent dev shell"
           ${combinedNonNpm}
-          ${hermesNpmLib.mkNpmDevShellHook npmPackageJsonPaths fixLockfilesExe}
-          echo "Ready. Run 'hermes' to start."
+          ${pichkooNpmLib.mkNpmDevShellHook npmPackageJsonPaths fixLockfilesExe}
+          echo "Ready. Run 'pichkoo' to start."
         '';
       };
     };

@@ -137,14 +137,14 @@ class TestFirecrawlClientConfig:
                     api_url="https://firecrawl-gateway.nousresearch.com",
                 )
 
-    def test_nous_auth_token_respects_hermes_home_override(self, tmp_path):
+    def test_nous_auth_token_respects_pichkoo_home_override(self, tmp_path):
         """Auth lookup should read from PICHKOO_HOME/auth.json, not ~/.pichkoo/auth.json."""
         real_home = tmp_path / "real-home"
         (real_home / ".pichkoo").mkdir(parents=True)
 
-        hermes_home = tmp_path / "pichkoo-home"
-        hermes_home.mkdir()
-        (hermes_home / "auth.json").write_text(json.dumps({
+        pichkoo_home = tmp_path / "pichkoo-home"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "auth.json").write_text(json.dumps({
             "providers": {
                 "nous": {
                     "access_token": "nous-token",
@@ -154,7 +154,7 @@ class TestFirecrawlClientConfig:
 
         with patch.dict(os.environ, {
             "HOME": str(real_home),
-            "PICHKOO_HOME": str(hermes_home),
+            "PICHKOO_HOME": str(pichkoo_home),
         }, clear=False):
             import tools.web_tools
             importlib.reload(tools.web_tools)

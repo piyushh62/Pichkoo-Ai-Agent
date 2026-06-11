@@ -8,8 +8,8 @@ import pytest
 import pichkoo_constants
 from pichkoo_constants import (
     VALID_REASONING_EFFORTS,
-    get_default_hermes_root,
-    get_hermes_home,
+    get_default_pichkoo_root,
+    get_pichkoo_home,
     is_container,
     parse_reasoning_effort,
     secure_parent_dir,
@@ -17,47 +17,47 @@ from pichkoo_constants import (
 
 
 class TestGetDefaultPichkooRoot:
-    """Tests for get_default_hermes_root() — Docker/custom deployment awareness."""
+    """Tests for get_default_pichkoo_root() — Docker/custom deployment awareness."""
 
-    def test_no_hermes_home_returns_native(self, tmp_path, monkeypatch):
+    def test_no_pichkoo_home_returns_native(self, tmp_path, monkeypatch):
         """When PICHKOO_HOME is not set, returns ~/.pichkoo."""
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-        assert get_default_hermes_root() == tmp_path / ".pichkoo"
+        assert get_default_pichkoo_root() == tmp_path / ".pichkoo"
 
-    def test_hermes_home_is_native(self, tmp_path, monkeypatch):
+    def test_pichkoo_home_is_native(self, tmp_path, monkeypatch):
         """When PICHKOO_HOME = ~/.pichkoo, returns ~/.pichkoo."""
         native = tmp_path / ".pichkoo"
         native.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(native))
-        assert get_default_hermes_root() == native
+        assert get_default_pichkoo_root() == native
 
-    def test_hermes_home_is_profile(self, tmp_path, monkeypatch):
+    def test_pichkoo_home_is_profile(self, tmp_path, monkeypatch):
         """When PICHKOO_HOME is a profile under ~/.pichkoo, returns ~/.pichkoo."""
         native = tmp_path / ".pichkoo"
         profile = native / "profiles" / "coder"
         profile.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(profile))
-        assert get_default_hermes_root() == native
+        assert get_default_pichkoo_root() == native
 
-    def test_hermes_home_is_docker(self, tmp_path, monkeypatch):
+    def test_pichkoo_home_is_docker(self, tmp_path, monkeypatch):
         """When PICHKOO_HOME points outside ~/.pichkoo (Docker), returns PICHKOO_HOME."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(docker_home))
-        assert get_default_hermes_root() == docker_home
+        assert get_default_pichkoo_root() == docker_home
 
-    def test_hermes_home_is_custom_path(self, tmp_path, monkeypatch):
+    def test_pichkoo_home_is_custom_path(self, tmp_path, monkeypatch):
         """Any PICHKOO_HOME outside ~/.pichkoo is treated as the root."""
         custom = tmp_path / "my-pichkoo-data"
         custom.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(custom))
-        assert get_default_hermes_root() == custom
+        assert get_default_pichkoo_root() == custom
 
     def test_docker_profile_active(self, tmp_path, monkeypatch):
         """When a Docker profile is active (PICHKOO_HOME=<root>/profiles/<name>),
@@ -67,9 +67,9 @@ class TestGetDefaultPichkooRoot:
         profile.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(profile))
-        assert get_default_hermes_root() == docker_root
+        assert get_default_pichkoo_root() == docker_root
 
-    def test_no_hermes_home_returns_localappdata_root_on_windows(self, tmp_path, monkeypatch):
+    def test_no_pichkoo_home_returns_localappdata_root_on_windows(self, tmp_path, monkeypatch):
         """Native Windows falls back to %LOCALAPPDATA%\\pichkoo, not ~/.pichkoo."""
         local_appdata = tmp_path / "LocalAppData"
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
@@ -77,9 +77,9 @@ class TestGetDefaultPichkooRoot:
         monkeypatch.setattr(Path, "home", lambda: tmp_path / "Home")
         monkeypatch.setattr(pichkoo_constants.sys, "platform", "win32")
 
-        assert get_default_hermes_root() == local_appdata / "pichkoo"
+        assert get_default_pichkoo_root() == local_appdata / "pichkoo"
 
-    def test_no_hermes_home_uses_windows_path_when_localappdata_missing(self, tmp_path, monkeypatch):
+    def test_no_pichkoo_home_uses_windows_path_when_localappdata_missing(self, tmp_path, monkeypatch):
         """Windows fallback still uses AppData/Local/pichkoo without LOCALAPPDATA."""
         home = tmp_path / "Home"
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
@@ -87,11 +87,11 @@ class TestGetDefaultPichkooRoot:
         monkeypatch.setattr(Path, "home", lambda: home)
         monkeypatch.setattr(pichkoo_constants.sys, "platform", "win32")
 
-        assert get_default_hermes_root() == home / "AppData" / "Local" / "pichkoo"
+        assert get_default_pichkoo_root() == home / "AppData" / "Local" / "pichkoo"
 
 
 class TestGetPichkooHome:
-    """Tests for get_hermes_home() platform-aware fallback."""
+    """Tests for get_pichkoo_home() platform-aware fallback."""
 
     def test_windows_fallback_uses_localappdata(self, tmp_path, monkeypatch):
         """When PICHKOO_HOME is unset on Windows, use %LOCALAPPDATA%\\pichkoo."""
@@ -102,7 +102,7 @@ class TestGetPichkooHome:
         monkeypatch.setattr(pichkoo_constants.sys, "platform", "win32")
         monkeypatch.setattr(pichkoo_constants, "_profile_fallback_warned", False)
 
-        assert get_hermes_home() == local_appdata / "pichkoo"
+        assert get_pichkoo_home() == local_appdata / "pichkoo"
 
 
 class TestIsContainer:

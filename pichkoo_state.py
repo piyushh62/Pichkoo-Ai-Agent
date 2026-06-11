@@ -24,14 +24,14 @@ import time
 from pathlib import Path
 
 from agent.memory_manager import sanitize_context
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
-DEFAULT_DB_PATH = get_hermes_home() / "state.db"
+DEFAULT_DB_PATH = get_pichkoo_home() / "state.db"
 
 SCHEMA_VERSION = 15
 
@@ -716,8 +716,8 @@ class SessionDB:
 
     def _sqlite_supports_fts5(self, cursor: sqlite3.Cursor) -> bool:
         try:
-            cursor.execute("CREATE VIRTUAL TABLE temp._hermes_fts5_probe USING fts5(x)")
-            cursor.execute("DROP TABLE temp._hermes_fts5_probe")
+            cursor.execute("CREATE VIRTUAL TABLE temp._pichkoo_fts5_probe USING fts5(x)")
+            cursor.execute("DROP TABLE temp._pichkoo_fts5_probe")
             return True
         except sqlite3.OperationalError as exc:
             if not self._is_fts5_unavailable_error(exc):

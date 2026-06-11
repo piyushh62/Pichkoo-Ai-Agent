@@ -220,7 +220,7 @@ def test_save_config_sets_owner_only_permissions(tmp_path):
 class TestMem0Defaults:
     """Ensure we don't break existing users' defaults."""
 
-    def test_default_user_id_hermes_user(self, monkeypatch, tmp_path):
+    def test_default_user_id_pichkoo_user(self, monkeypatch, tmp_path):
         monkeypatch.setenv("MEM0_API_KEY", "test-key")
         monkeypatch.delenv("MEM0_USER_ID", raising=False)
         monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
@@ -230,7 +230,7 @@ class TestMem0Defaults:
 
         assert provider._user_id == "pichkoo-user"
 
-    def test_default_agent_id_hermes(self, monkeypatch, tmp_path):
+    def test_default_agent_id_pichkoo(self, monkeypatch, tmp_path):
         monkeypatch.setenv("MEM0_API_KEY", "test-key")
         monkeypatch.delenv("MEM0_AGENT_ID", raising=False)
         monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))

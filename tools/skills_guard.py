@@ -131,7 +131,7 @@ THREAT_PATTERNS = [
      "docker_dir_access", "high", "exfiltration",
      "references Docker config (may contain registry creds)"),
     (r'\$HOME/\.pichkoo/\.env|\~/\.pichkoo/\.env',
-     "hermes_env_access", "critical", "exfiltration",
+     "pichkoo_env_access", "critical", "exfiltration",
      "directly references Pichkoo secrets file"),
     # Match `cat <secrets-file>` (reading credentials) but NOT `cat > <file>`
     # or `cat >> <file>`, which are output redirections that WRITE a file
@@ -457,7 +457,7 @@ THREAT_PATTERNS = [
      "agent_config_mod", "critical", "persistence",
      "references agent config files (could persist malicious instructions across sessions)"),
     (r'\.pichkoo/config\.yaml|\.pichkoo/SOUL\.md',
-     "hermes_config_mod", "critical", "persistence",
+     "pichkoo_config_mod", "critical", "persistence",
      "references Pichkoo configuration files directly"),
     (r'\.claude/settings|\.codex/config',
      "other_agent_config", "high", "persistence",

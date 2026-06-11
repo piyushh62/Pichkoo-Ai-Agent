@@ -191,12 +191,12 @@ def _build_provider_env_blocklist() -> frozenset:
 _PICHKOO_PROVIDER_ENV_BLOCKLIST = _build_provider_env_blocklist()
 
 
-def _inject_context_hermes_home(env: dict) -> None:
+def _inject_context_pichkoo_home(env: dict) -> None:
     """Bridge the context-local Pichkoo home override into subprocess env."""
     try:
-        from pichkoo_constants import get_hermes_home_override
+        from pichkoo_constants import get_pichkoo_home_override
 
-        value = get_hermes_home_override()
+        value = get_pichkoo_home_override()
         if value:
             env["PICHKOO_HOME"] = value
     except Exception:
@@ -225,7 +225,7 @@ def _sanitize_subprocess_env(base_env: dict | None, extra_env: dict | None = Non
         elif key not in _PICHKOO_PROVIDER_ENV_BLOCKLIST or _is_passthrough(key):
             sanitized[key] = value
 
-    _inject_context_hermes_home(sanitized)
+    _inject_context_pichkoo_home(sanitized)
 
     # Per-profile HOME isolation for background processes (same as _make_run_env).
     from pichkoo_constants import get_subprocess_home
@@ -261,11 +261,11 @@ def _find_bash() -> str:
     #   PortableGit: %LOCALAPPDATA%\pichkoo\git\bin\bash.exe   (primary)
     #   MinGit:      %LOCALAPPDATA%\pichkoo\git\usr\bin\bash.exe (legacy/32-bit fallback)
     _local_appdata = os.environ.get("LOCALAPPDATA", "")
-    _hermes_portable_git = os.path.join(_local_appdata, "pichkoo", "git") if _local_appdata else ""
-    if _hermes_portable_git:
+    _pichkoo_portable_git = os.path.join(_local_appdata, "pichkoo", "git") if _local_appdata else ""
+    if _pichkoo_portable_git:
         for candidate in (
-            os.path.join(_hermes_portable_git, "bin", "bash.exe"),        # PortableGit (primary)
-            os.path.join(_hermes_portable_git, "usr", "bin", "bash.exe"), # MinGit fallback
+            os.path.join(_pichkoo_portable_git, "bin", "bash.exe"),        # PortableGit (primary)
+            os.path.join(_pichkoo_portable_git, "usr", "bin", "bash.exe"), # MinGit fallback
         ):
             if os.path.isfile(candidate):
                 return candidate
@@ -385,7 +385,7 @@ def _make_run_env(env: dict) -> dict:
     if path_key is not None:
         run_env[path_key] = _append_missing_sane_path_entries(run_env.get(path_key, ""))
 
-    _inject_context_hermes_home(run_env)
+    _inject_context_pichkoo_home(run_env)
 
     # Per-profile HOME isolation: redirect system tool configs (git, ssh, gh,
     # npm …) into {PICHKOO_HOME}/home/ when that directory exists.  Only the
@@ -532,10 +532,10 @@ class LocalEnvironment(BaseEnvironment):
             # accepts forward slashes in filesystem paths, and we control
             # the path so we can guarantee no spaces.
             try:
-                from pichkoo_constants import get_hermes_home
-                cache_dir = get_hermes_home() / "cache" / "terminal"
+                from pichkoo_constants import get_pichkoo_home
+                cache_dir = get_pichkoo_home() / "cache" / "terminal"
             except Exception:
-                cache_dir = Path(tempfile.gettempdir()) / "hermes_terminal"
+                cache_dir = Path(tempfile.gettempdir()) / "pichkoo_terminal"
             cache_dir.mkdir(parents=True, exist_ok=True)
             # Force forward slashes so the same string serves both contexts.
             return str(cache_dir).replace("\\", "/")
@@ -615,7 +615,7 @@ class LocalEnvironment(BaseEnvironment):
         )
         if not _IS_WINDOWS:
             try:
-                proc._hermes_pgid = os.getpgid(proc.pid)
+                proc._pichkoo_pgid = os.getpgid(proc.pid)
             except ProcessLookupError:
                 pass
 
@@ -663,7 +663,7 @@ class LocalEnvironment(BaseEnvironment):
                 try:
                     pgid = os.getpgid(proc.pid)
                 except ProcessLookupError:
-                    pgid = getattr(proc, "_hermes_pgid", None)
+                    pgid = getattr(proc, "_pichkoo_pgid", None)
                     if pgid is None:
                         raise
 

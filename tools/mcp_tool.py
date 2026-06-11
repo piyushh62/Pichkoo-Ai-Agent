@@ -130,8 +130,8 @@ def _get_mcp_stderr_log() -> Any:
         if _mcp_stderr_log_fh is not None:
             return _mcp_stderr_log_fh
         try:
-            from pichkoo_constants import get_hermes_home
-            log_dir = get_hermes_home() / "logs"
+            from pichkoo_constants import get_pichkoo_home
+            log_dir = get_pichkoo_home() / "logs"
             log_dir.mkdir(parents=True, exist_ok=True)
             log_path = log_dir / "mcp-stderr.log"
             # Line-buffered so server output lands on disk promptly; errors=
@@ -414,13 +414,13 @@ def _resolve_stdio_command(command: str, env: dict) -> tuple[str, dict]:
         if which_hit:
             resolved_command = which_hit
         elif resolved_command in {"npx", "npm", "node"}:
-            hermes_home = os.path.expanduser(
+            pichkoo_home = os.path.expanduser(
                 os.getenv(
                     "PICHKOO_HOME", os.path.join(os.path.expanduser("~"), ".pichkoo")
                 )
             )
             candidates = [
-                os.path.join(hermes_home, "node", "bin", resolved_command),
+                os.path.join(pichkoo_home, "node", "bin", resolved_command),
                 os.path.join(os.path.expanduser("~"), ".local", "bin", resolved_command),
                 # /usr/local/bin is the canonical install location for Node on
                 # Linux from-source builds, the upstream node:bookworm-slim
@@ -2558,8 +2558,8 @@ def _load_mcp_config() -> Dict[str, dict]:
             return {}
         # Ensure .env vars are available for interpolation
         try:
-            from pichkoo_cli.env_loader import load_hermes_dotenv
-            load_hermes_dotenv()
+            from pichkoo_cli.env_loader import load_pichkoo_dotenv
+            load_pichkoo_dotenv()
         except Exception:
             pass
         return {name: _interpolate_env_vars(cfg) for name, cfg in servers.items()}

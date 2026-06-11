@@ -66,7 +66,7 @@ describe('usePreviewRouting', () => {
     clearSessionPreviewRegistry()
     handleEvent = () => undefined
 
-    Object.defineProperty(window, 'hermesDesktop', {
+    Object.defineProperty(window, 'pichkooDesktop', {
       configurable: true,
       value: {
         normalizePreviewTarget: vi.fn(async (target: string) => previewTarget(target))
@@ -117,7 +117,7 @@ describe('usePreviewRouting', () => {
     })
 
     expect($previewTarget.get()).toBeNull()
-    expect(window.hermesDesktop.normalizePreviewTarget).not.toHaveBeenCalled()
+    expect(window.pichkooDesktop.normalizePreviewTarget).not.toHaveBeenCalled()
   })
 
   it('registers structured tool-result preview targets', async () => {

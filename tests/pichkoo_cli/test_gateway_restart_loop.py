@@ -32,7 +32,7 @@ class TestGatewayLifecyclePattern:
         "Hermez Gateway Restart".lower().replace("z", "s"),  # case handled
         "PICHKOO GATEWAY RESTART",           # uppercase
     ])
-    def test_hermes_gateway_commands(self, text):
+    def test_pichkoo_gateway_commands(self, text):
         assert _contains_gateway_lifecycle_command(text), f"Should match: {text!r}"
 
     @pytest.mark.parametrize("text", [
@@ -80,7 +80,7 @@ class TestCronCreateLifecycleBlock:
         monkeypatch.setattr("cron.jobs.JOBS_FILE", tmp_path / "cron" / "jobs.json")
         monkeypatch.setattr("cron.jobs.OUTPUT_DIR", tmp_path / "cron" / "output")
 
-    def test_block_hermes_gateway_restart(self, capsys):
+    def test_block_pichkoo_gateway_restart(self, capsys):
         args = Namespace(
             cron_command="create",
             schedule="30m",
@@ -123,7 +123,7 @@ class TestCronCreateLifecycleBlock:
 
     def test_block_script_with_lifecycle_command(self, tmp_path, capsys):
         script = tmp_path / "restart.sh"
-        script.write_text("#!/bin/bash\nhermes gateway restart\n")
+        script.write_text("#!/bin/bash\npichkoo gateway restart\n")
         args = Namespace(
             cron_command="create",
             schedule="1h",

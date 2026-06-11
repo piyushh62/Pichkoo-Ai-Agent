@@ -26,7 +26,7 @@ test('runBootstrap bails immediately when the signal is already aborted', async 
     installStamp: null,
     activeRoot: '/tmp/pichkoo-runner-test',
     sourceRepoRoot: null,
-    hermesHome: '/tmp/pichkoo-runner-test',
+    pichkooHome: '/tmp/pichkoo-runner-test',
     logRoot: '/tmp/pichkoo-runner-test',
     onEvent: ev => events.push(ev),
     abortSignal: controller.signal
@@ -69,7 +69,7 @@ test('resolveInstallScript prefers a cached script without touching the network'
     const result = await resolveInstallScript({
       installStamp: { commit },
       sourceRepoRoot: null,
-      hermesHome: home,
+      pichkooHome: home,
       emit: ev => logs.push(ev)
     })
 
@@ -94,7 +94,7 @@ test('resolveInstallScript falls back to the installed agent checkout on a 404',
     const result = await resolveInstallScript({
       installStamp: { commit },
       sourceRepoRoot: null,
-      hermesHome: home,
+      pichkooHome: home,
       emit: ev => logs.push(ev),
       // Simulate GitHub returning a 404 for the pinned commit.
       _download: async () => {
@@ -124,7 +124,7 @@ test('resolveInstallScript rethrows when the 404 fallback is unavailable', async
       resolveInstallScript({
         installStamp: { commit },
         sourceRepoRoot: null,
-        hermesHome: home,
+        pichkooHome: home,
         emit: () => {},
         _download: async () => {
           throw new Error('Failed to download install.sh: HTTP 404')

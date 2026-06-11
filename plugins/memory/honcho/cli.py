@@ -10,7 +10,7 @@ import os
 import sys
 from pathlib import Path
 
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 from plugins.memory.honcho.client import _host_block, profile_host_key, resolve_active_host, resolve_config_path, HOST
 from pichkoo_cli.config import cfg_get
 
@@ -259,7 +259,7 @@ def _local_config_path() -> Path:
     its own config file.  The global ~/.honcho/config.json is only used as
     a read fallback (via resolve_config_path) for cross-app interop.
     """
-    return get_hermes_home() / "honcho.json"
+    return get_pichkoo_home() / "honcho.json"
 
 
 def _read_config() -> dict:
@@ -323,7 +323,7 @@ _IDENTITY_MAPPING_KEYS = (
 
 
 def _resolve_effective_identity_mapping(
-    cfg: dict, hermes_host: dict
+    cfg: dict, pichkoo_host: dict
 ) -> tuple[bool, dict, str, bool, bool]:
     """Resolve the effective identity-mapping state for the active host.
 
@@ -340,8 +340,8 @@ def _resolve_effective_identity_mapping(
     """
     pin = False
     for val in (
-        hermes_host.get("pinUserPeer"),
-        hermes_host.get("pinPeerName"),
+        pichkoo_host.get("pinUserPeer"),
+        pichkoo_host.get("pinPeerName"),
         cfg.get("pinUserPeer"),
         cfg.get("pinPeerName"),
     ):
@@ -349,16 +349,16 @@ def _resolve_effective_identity_mapping(
             pin = bool(val)
             break
 
-    if "userPeerAliases" in hermes_host:
-        aliases_src = hermes_host.get("userPeerAliases")
+    if "userPeerAliases" in pichkoo_host:
+        aliases_src = pichkoo_host.get("userPeerAliases")
         aliases_from_root = False
     else:
         aliases_src = cfg.get("userPeerAliases")
         aliases_from_root = aliases_src is not None
     aliases = aliases_src if isinstance(aliases_src, dict) else {}
 
-    if "runtimePeerPrefix" in hermes_host:
-        prefix_src = hermes_host.get("runtimePeerPrefix")
+    if "runtimePeerPrefix" in pichkoo_host:
+        prefix_src = pichkoo_host.get("runtimePeerPrefix")
         prefix_from_root = False
     else:
         prefix_src = cfg.get("runtimePeerPrefix")
@@ -368,7 +368,7 @@ def _resolve_effective_identity_mapping(
     return pin, aliases, prefix, aliases_from_root, prefix_from_root
 
 
-def _scrub_identity_mapping(hermes_host: dict) -> None:
+def _scrub_identity_mapping(pichkoo_host: dict) -> None:
     """Drop every peer-mapping key from the host block.
 
     Called before the wizard writes a chosen shape so latent precedence
@@ -377,7 +377,7 @@ def _scrub_identity_mapping(hermes_host: dict) -> None:
     (host ``pinUserPeer`` is first in the resolver ladder).
     """
     for key in _IDENTITY_MAPPING_KEYS:
-        hermes_host.pop(key, None)
+        pichkoo_host.pop(key, None)
 
 
 def _prompt(label: str, default: str | None = None, secret: bool = False) -> str:
@@ -444,7 +444,7 @@ def cmd_setup(args) -> None:
         return
 
     hosts = cfg.setdefault("hosts", {})
-    hermes_host = hosts.setdefault(_host_key(), {})
+    pichkoo_host = hosts.setdefault(_host_key(), {})
 
     # --- 1. Cloud or local? ---
     print("  Deployment:")
@@ -477,7 +477,7 @@ def cmd_setup(args) -> None:
         # apiKey) so ``get_honcho_client`` recognises it as an explicit
         # local auth opt-in (see ``_host_has_key`` in client.py) and
         # cloud/hybrid switching is unaffected.
-        current_host_key = hermes_host.get("apiKey", "")
+        current_host_key = pichkoo_host.get("apiKey", "")
         masked = (
             f"...{current_host_key[-8:]}"
             if len(current_host_key) > 8
@@ -496,7 +496,7 @@ def cmd_setup(args) -> None:
             secret=True,
         )
         if new_local_key:
-            hermes_host["apiKey"] = new_local_key
+            pichkoo_host["apiKey"] = new_local_key
         elif current_host_key:
             print("  Keeping existing local JWT.")
         else:
@@ -530,20 +530,20 @@ def cmd_setup(args) -> None:
             return
 
     # --- 3. Identity ---
-    current_peer = hermes_host.get("peerName") or cfg.get("peerName", "")
+    current_peer = pichkoo_host.get("peerName") or cfg.get("peerName", "")
     new_peer = _prompt("Your name (user peer)", default=current_peer or os.getenv("USER", "user"))
     if new_peer:
-        hermes_host["peerName"] = new_peer
+        pichkoo_host["peerName"] = new_peer
 
-    current_ai = hermes_host.get("aiPeer") or cfg.get("aiPeer", "pichkoo")
+    current_ai = pichkoo_host.get("aiPeer") or cfg.get("aiPeer", "pichkoo")
     new_ai = _prompt("AI peer name", default=current_ai)
     if new_ai:
-        hermes_host["aiPeer"] = new_ai
+        pichkoo_host["aiPeer"] = new_ai
 
-    current_workspace = hermes_host.get("workspace") or cfg.get("workspace", "pichkoo")
+    current_workspace = pichkoo_host.get("workspace") or cfg.get("workspace", "pichkoo")
     new_workspace = _prompt("Workspace ID", default=current_workspace)
     if new_workspace:
-        hermes_host["workspace"] = new_workspace
+        pichkoo_host["workspace"] = new_workspace
 
     # --- 3b. Deployment shape ---
     # Determines how runtime user identities (Telegram UIDs, Discord
@@ -563,7 +563,7 @@ def cmd_setup(args) -> None:
         current_prefix,
         aliases_from_root,
         prefix_from_root,
-    ) = _resolve_effective_identity_mapping(cfg, hermes_host)
+    ) = _resolve_effective_identity_mapping(cfg, pichkoo_host)
 
     if current_pin:
         current_shape = "single"
@@ -584,7 +584,7 @@ def cmd_setup(args) -> None:
     # history).  Steer the operator toward hybrid so their own continuity is
     # preserved via alias mappings.
     if current_shape == "single" and new_shape == "multi":
-        peer_target = hermes_host.get("peerName") or current_peer or "user"
+        peer_target = pichkoo_host.get("peerName") or current_peer or "user"
         print(
             f"\n  ⚠ Switching from single to multi will orphan memory accumulated\n"
             f"    under peer '{peer_target}'.  Existing runtime users (Telegram,\n"
@@ -602,9 +602,9 @@ def cmd_setup(args) -> None:
     # so a stale ``pinUserPeer`` left behind by an earlier setup run can't
     # outrank the freshly written ``pinPeerName`` via host-level precedence.
     if new_shape == "single":
-        _scrub_identity_mapping(hermes_host)
-        hermes_host["pinPeerName"] = True
-        print(f"  pinPeerName=true → all gateway users route to '{hermes_host.get('peerName', '?')}'.")
+        _scrub_identity_mapping(pichkoo_host)
+        pichkoo_host["pinPeerName"] = True
+        print(f"  pinPeerName=true → all gateway users route to '{pichkoo_host.get('peerName', '?')}'.")
     elif new_shape == "multi":
         # Preserve operator-curated, host-level aliases so multi → multi
         # re-runs don't drop them.  Root-sourced aliases are left to
@@ -614,14 +614,14 @@ def cmd_setup(args) -> None:
             if isinstance(current_aliases, dict) and not aliases_from_root
             else {}
         )
-        _scrub_identity_mapping(hermes_host)
-        hermes_host["pinPeerName"] = False
+        _scrub_identity_mapping(pichkoo_host)
+        pichkoo_host["pinPeerName"] = False
         # Do NOT auto-write ``userPeerAliases: {}``: an empty host map
         # would override any root-level ``userPeerAliases`` the operator
         # set as a cross-host baseline, silently disabling those aliases.
         # Absence is the right "no host opinion" signal.
         if prior_aliases:
-            hermes_host["userPeerAliases"] = prior_aliases
+            pichkoo_host["userPeerAliases"] = prior_aliases
         _prefix_default = current_prefix or ""
         _new_prefix = _prompt(
             "Runtime peer prefix (e.g. 'telegram_', blank for none)",
@@ -631,7 +631,7 @@ def cmd_setup(args) -> None:
         # diverges from the inherited root value; otherwise let the root
         # cascade continue unmodified.
         if _new_prefix and not (prefix_from_root and _new_prefix == current_prefix):
-            hermes_host["runtimePeerPrefix"] = _new_prefix
+            pichkoo_host["runtimePeerPrefix"] = _new_prefix
         print("  Multi-user mode: each runtime ID → own peer. Use 'pichkoo honcho status' to inspect.")
     elif new_shape == "hybrid":
         # Hybrid encodes operator intent at the host level: collect existing
@@ -641,9 +641,9 @@ def cmd_setup(args) -> None:
         # the alias prompts for a host, they're declaring "this host owns
         # the mapping".
         existing_aliases = dict(current_aliases) if isinstance(current_aliases, dict) else {}
-        _scrub_identity_mapping(hermes_host)
-        hermes_host["pinPeerName"] = False
-        peer_target = hermes_host.get("peerName") or current_peer or "user"
+        _scrub_identity_mapping(pichkoo_host)
+        pichkoo_host["pinPeerName"] = False
+        peer_target = pichkoo_host.get("peerName") or current_peer or "user"
         print(f"\n  Add runtime IDs that should alias to peer '{peer_target}'.")
         print("  Leave blank to skip a platform.  Existing aliases are preserved.")
         for platform_label, alias_hint in (
@@ -656,14 +656,14 @@ def cmd_setup(args) -> None:
             if entered:
                 existing_aliases[entered] = peer_target
         if existing_aliases:
-            hermes_host["userPeerAliases"] = existing_aliases
+            pichkoo_host["userPeerAliases"] = existing_aliases
         _prefix_default = current_prefix or ""
         _new_prefix = _prompt(
             "Runtime peer prefix for unknown users (e.g. 'telegram_', blank for none)",
             default=_prefix_default,
         ).strip()
         if _new_prefix and not (prefix_from_root and _new_prefix == current_prefix):
-            hermes_host["runtimePeerPrefix"] = _new_prefix
+            pichkoo_host["runtimePeerPrefix"] = _new_prefix
         print(f"  Hybrid mode: your runtime IDs → '{peer_target}', others → own peer.")
     elif new_shape == "skip":
         pass  # leave config untouched
@@ -671,18 +671,18 @@ def cmd_setup(args) -> None:
         print(f"  Unknown shape '{new_shape}' — leaving identity-mapping config untouched.")
 
     # --- 4. Observation mode ---
-    current_obs = hermes_host.get("observationMode") or cfg.get("observationMode", "directional")
+    current_obs = pichkoo_host.get("observationMode") or cfg.get("observationMode", "directional")
     print("\n  Observation mode:")
     print("    directional  -- all observations on, each AI peer builds its own view (default)")
     print("    unified      -- shared pool, user observes self, AI observes others only")
     new_obs = _prompt("Observation mode", default=current_obs)
     if new_obs in {"unified", "directional"}:
-        hermes_host["observationMode"] = new_obs
+        pichkoo_host["observationMode"] = new_obs
     else:
-        hermes_host["observationMode"] = "directional"
+        pichkoo_host["observationMode"] = "directional"
 
     # --- 5. Write frequency ---
-    current_wf = str(hermes_host.get("writeFrequency") or cfg.get("writeFrequency", "async"))
+    current_wf = str(pichkoo_host.get("writeFrequency") or cfg.get("writeFrequency", "async"))
     print("\n  Write frequency:")
     print("    async   -- background thread, no token cost (recommended)")
     print("    turn    -- sync write after every turn")
@@ -690,12 +690,12 @@ def cmd_setup(args) -> None:
     print("    N       -- write every N turns (e.g. 5)")
     new_wf = _prompt("Write frequency", default=current_wf)
     try:
-        hermes_host["writeFrequency"] = int(new_wf)
+        pichkoo_host["writeFrequency"] = int(new_wf)
     except (ValueError, TypeError):
-        hermes_host["writeFrequency"] = new_wf if new_wf in {"async", "turn", "session"} else "async"
+        pichkoo_host["writeFrequency"] = new_wf if new_wf in {"async", "turn", "session"} else "async"
 
     # --- 6. Recall mode ---
-    _raw_recall = hermes_host.get("recallMode") or cfg.get("recallMode", "hybrid")
+    _raw_recall = pichkoo_host.get("recallMode") or cfg.get("recallMode", "hybrid")
     current_recall = "hybrid" if _raw_recall not in {"hybrid", "context", "tools"} else _raw_recall
     print("\n  Recall mode:")
     print("    hybrid  -- auto-injected context + Honcho tools available (default)")
@@ -703,29 +703,29 @@ def cmd_setup(args) -> None:
     print("    tools   -- Honcho tools only, no auto-injected context")
     new_recall = _prompt("Recall mode", default=current_recall)
     if new_recall in {"hybrid", "context", "tools"}:
-        hermes_host["recallMode"] = new_recall
+        pichkoo_host["recallMode"] = new_recall
 
     # --- 7. Context token budget ---
-    current_ctx_tokens = hermes_host.get("contextTokens") or cfg.get("contextTokens")
+    current_ctx_tokens = pichkoo_host.get("contextTokens") or cfg.get("contextTokens")
     current_display = str(current_ctx_tokens) if current_ctx_tokens else "uncapped"
     print("\n  Context injection per turn (hybrid/context recall modes only):")
     print("    uncapped -- no limit (default)")
     print("    N        -- token limit per turn (e.g. 1200)")
     new_ctx_tokens = _prompt("Context tokens", default=current_display)
     if new_ctx_tokens.strip().lower() in {"none", "uncapped", "no limit"}:
-        hermes_host.pop("contextTokens", None)
+        pichkoo_host.pop("contextTokens", None)
     elif new_ctx_tokens.strip() == "":
         pass  # keep current
     else:
         try:
             val = int(new_ctx_tokens)
             if val >= 0:
-                hermes_host["contextTokens"] = val
+                pichkoo_host["contextTokens"] = val
         except (ValueError, TypeError):
             pass  # keep current
 
     # --- 7b. Dialectic cadence ---
-    current_dialectic = str(hermes_host.get("dialecticCadence") or cfg.get("dialecticCadence") or "2")
+    current_dialectic = str(pichkoo_host.get("dialecticCadence") or cfg.get("dialecticCadence") or "2")
     print("\n  Dialectic cadence:")
     print("    How often Honcho rebuilds its user model (LLM call on Honcho backend).")
     print("    1 = every turn, 2 = every other turn, 3+ = sparser.")
@@ -734,13 +734,13 @@ def cmd_setup(args) -> None:
     try:
         val = int(new_dialectic)
         if val >= 1:
-            hermes_host["dialecticCadence"] = val
+            pichkoo_host["dialecticCadence"] = val
     except (ValueError, TypeError):
-        hermes_host["dialecticCadence"] = 2
+        pichkoo_host["dialecticCadence"] = 2
 
     # --- 7c. Dialectic reasoning level ---
     current_reasoning = (
-        hermes_host.get("dialecticReasoningLevel")
+        pichkoo_host.get("dialecticReasoningLevel")
         or cfg.get("dialecticReasoningLevel")
         or "low"
     )
@@ -753,12 +753,12 @@ def cmd_setup(args) -> None:
     print("    max      -- thorough audit-level analysis")
     new_reasoning = _prompt("Reasoning level", default=current_reasoning)
     if new_reasoning in {"minimal", "low", "medium", "high", "max"}:
-        hermes_host["dialecticReasoningLevel"] = new_reasoning
+        pichkoo_host["dialecticReasoningLevel"] = new_reasoning
     else:
-        hermes_host["dialecticReasoningLevel"] = "low"
+        pichkoo_host["dialecticReasoningLevel"] = "low"
 
     # --- 8. Session strategy ---
-    current_strat = hermes_host.get("sessionStrategy") or cfg.get("sessionStrategy", "per-session")
+    current_strat = pichkoo_host.get("sessionStrategy") or cfg.get("sessionStrategy", "per-session")
     print("\n  Session strategy:")
     print("    per-session   -- each run starts clean, Honcho injects context automatically")
     print("    per-directory -- reuses session per dir, prior context auto-injected each run")
@@ -766,10 +766,10 @@ def cmd_setup(args) -> None:
     print("    global        -- single session across all directories")
     new_strat = _prompt("Session strategy", default=current_strat)
     if new_strat in {"per-session", "per-repo", "per-directory", "global"}:
-        hermes_host["sessionStrategy"] = new_strat
+        pichkoo_host["sessionStrategy"] = new_strat
 
-    hermes_host["enabled"] = True
-    hermes_host.setdefault("saveMessages", True)
+    pichkoo_host["enabled"] = True
+    pichkoo_host.setdefault("saveMessages", True)
 
     _write_config(cfg)
     print(f"\n  Config written to {write_path}")
@@ -777,9 +777,9 @@ def cmd_setup(args) -> None:
     # --- Auto-enable Honcho as memory provider in config.yaml ---
     try:
         from pichkoo_cli.config import load_config, save_config
-        hermes_config = load_config()
-        hermes_config.setdefault("memory", {})["provider"] = "honcho"
-        save_config(hermes_config)
+        pichkoo_config = load_config()
+        pichkoo_config.setdefault("memory", {})["provider"] = "honcho"
+        save_config(pichkoo_config)
         print("  Memory provider set to 'honcho' in config.yaml")
     except Exception as e:
         print(f"  Could not auto-enable in config.yaml: {e}")

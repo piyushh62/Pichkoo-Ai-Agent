@@ -48,7 +48,7 @@ from pichkoo_cli.config import (
     OPTIONAL_ENV_VARS,
     get_config_path,
     get_env_path,
-    get_hermes_home,
+    get_pichkoo_home,
     load_config,
     load_env,
     save_config,
@@ -830,7 +830,7 @@ def _media_serve_roots() -> list[Path]:
     key or a screenshot outside the cache) merely because the suffix passes the
     allowlist.
     """
-    home = get_hermes_home()
+    home = get_pichkoo_home()
     roots = [home / "images", home / "screenshots", home / "cache"]
     out: list[Path] = []
     for root in roots:
@@ -977,7 +977,7 @@ async def get_status():
     return {
         "version": __version__,
         "release_date": __release_date__,
-        "hermes_home": str(get_hermes_home()),
+        "pichkoo_home": str(get_pichkoo_home()),
         "config_path": str(get_config_path()),
         "env_path": str(get_env_path()),
         "config_version": current_ver,
@@ -1014,7 +1014,7 @@ async def get_system_stats():
         "hostname": _platform.node(),
         "python_version": _platform.python_version(),
         "python_impl": _platform.python_implementation(),
-        "hermes_version": __version__,
+        "pichkoo_version": __version__,
         "cpu_count": os.cpu_count(),
     }
 
@@ -1030,7 +1030,7 @@ async def get_system_stats():
             "percent": vm.percent,
         }
         try:
-            du = psutil.disk_usage(str(get_hermes_home()))
+            du = psutil.disk_usage(str(get_pichkoo_home()))
             info["disk"] = {
                 "total": du.total,
                 "used": du.used,
@@ -1120,7 +1120,7 @@ async def set_curator_paused(body: CuratorPause):
 async def run_curator():
     """Trigger a curator review now (backgrounded; tail via action status)."""
     try:
-        proc = _spawn_hermes_action(["curator", "run"], "curator-run")
+        proc = _spawn_pichkoo_action(["curator", "run"], "curator-run")
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to run curator: {exc}")
     return {"ok": True, "pid": proc.pid, "name": "curator-run"}
@@ -1190,7 +1190,7 @@ async def get_portal_status():
 @app.post("/api/ops/prompt-size")
 async def run_prompt_size():
     try:
-        proc = _spawn_hermes_action(["prompt-size"], "prompt-size")
+        proc = _spawn_pichkoo_action(["prompt-size"], "prompt-size")
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed: {exc}")
     return {"ok": True, "pid": proc.pid, "name": "prompt-size"}
@@ -1199,7 +1199,7 @@ async def run_prompt_size():
 @app.post("/api/ops/dump")
 async def run_dump():
     try:
-        proc = _spawn_hermes_action(["dump"], "dump")
+        proc = _spawn_pichkoo_action(["dump"], "dump")
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed: {exc}")
     return {"ok": True, "pid": proc.pid, "name": "dump"}
@@ -1208,7 +1208,7 @@ async def run_dump():
 @app.post("/api/ops/config-migrate")
 async def run_config_migrate():
     try:
-        proc = _spawn_hermes_action(["config", "migrate"], "config-migrate")
+        proc = _spawn_pichkoo_action(["config", "migrate"], "config-migrate")
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed: {exc}")
     return {"ok": True, "pid": proc.pid, "name": "config-migrate"}
@@ -1269,7 +1269,7 @@ async def run_debug_share_endpoint(body: DebugShareRequest | None = None):
 # the dashboard can tail them back to the user.
 # ---------------------------------------------------------------------------
 
-_ACTION_LOG_DIR: Path = get_hermes_home() / "logs"
+_ACTION_LOG_DIR: Path = get_pichkoo_home() / "logs"
 
 # Short ``name`` (from the URL) → absolute log file path.
 _ACTION_LOG_FILES: Dict[str, str] = {
@@ -1317,7 +1317,7 @@ def _record_completed_action(name: str, message: str, exit_code: int = 1) -> Non
     _ACTION_RESULTS[name] = {"exit_code": exit_code, "pid": None}
 
 
-def _spawn_hermes_action(subcommand: List[str], name: str) -> subprocess.Popen:
+def _spawn_pichkoo_action(subcommand: List[str], name: str) -> subprocess.Popen:
     """Spawn ``pichkoo <subcommand>`` detached and record the Popen handle.
 
     Uses the running interpreter's ``pichkoo_cli.main`` module so the action
@@ -1386,7 +1386,7 @@ def _spawn_gateway_restart() -> Tuple[subprocess.Popen, bool]:
     existing = _ACTION_PROCS.get("gateway-restart")
     if existing is not None and existing.poll() is None:
         return existing, True
-    return _spawn_hermes_action(["gateway", "restart"], "gateway-restart"), False
+    return _spawn_pichkoo_action(["gateway", "restart"], "gateway-restart"), False
 
 
 @app.post("/api/gateway/restart")
@@ -1405,7 +1405,7 @@ async def restart_gateway():
 
 
 @app.post("/api/pichkoo/update")
-async def update_hermes():
+async def update_pichkoo():
     """Kick off ``pichkoo update`` in the background."""
     install_method = detect_install_method(PROJECT_ROOT)
     if install_method == "docker":
@@ -1421,7 +1421,7 @@ async def update_hermes():
         }
 
     try:
-        proc = _spawn_hermes_action(["update"], "pichkoo-update")
+        proc = _spawn_pichkoo_action(["update"], "pichkoo-update")
     except Exception as exc:
         _log.exception("Failed to spawn pichkoo update")
         raise HTTPException(status_code=500, detail=f"Failed to start update: {exc}")
@@ -1481,7 +1481,7 @@ def _recent_upstream_commits(n: int = 20) -> List[Dict[str, Any]]:
 
 
 @app.get("/api/pichkoo/update/check")
-async def check_hermes_update(force: bool = False):
+async def check_pichkoo_update(force: bool = False):
     """Report whether a Pichkoo update is available, without applying it.
 
     Powers the dashboard's "check before you update" flow: the System page
@@ -1531,7 +1531,7 @@ async def check_hermes_update(force: bool = False):
 
         if force:
             try:
-                (get_hermes_home() / ".update_check").unlink()
+                (get_pichkoo_home() / ".update_check").unlink()
             except OSError:
                 pass
 
@@ -4014,29 +4014,29 @@ def _anthropic_oauth_status() -> Dict[str, Any]:
     """
     try:
         from agent.anthropic_adapter import (
-            read_hermes_oauth_credentials,
+            read_pichkoo_oauth_credentials,
             read_claude_code_credentials,
             _PICHKOO_OAUTH_FILE,
         )
     except ImportError:
         read_claude_code_credentials = None  # type: ignore
-        read_hermes_oauth_credentials = None  # type: ignore
+        read_pichkoo_oauth_credentials = None  # type: ignore
         _PICHKOO_OAUTH_FILE = None  # type: ignore
 
-    hermes_creds = None
-    if read_hermes_oauth_credentials:
+    pichkoo_creds = None
+    if read_pichkoo_oauth_credentials:
         try:
-            hermes_creds = read_hermes_oauth_credentials()
+            pichkoo_creds = read_pichkoo_oauth_credentials()
         except Exception:
-            hermes_creds = None
-    if hermes_creds and hermes_creds.get("accessToken"):
+            pichkoo_creds = None
+    if pichkoo_creds and pichkoo_creds.get("accessToken"):
         return {
             "logged_in": True,
-            "source": "hermes_pkce",
+            "source": "pichkoo_pkce",
             "source_label": f"Pichkoo PKCE ({_PICHKOO_OAUTH_FILE})",
-            "token_preview": _truncate_token(hermes_creds.get("accessToken")),
-            "expires_at": hermes_creds.get("expiresAt"),
-            "has_refresh_token": bool(hermes_creds.get("refreshToken")),
+            "token_preview": _truncate_token(pichkoo_creds.get("accessToken")),
+            "expires_at": pichkoo_creds.get("expiresAt"),
+            "has_refresh_token": bool(pichkoo_creds.get("refreshToken")),
         }
 
     cc_creds = None
@@ -4251,7 +4251,7 @@ async def list_oauth_providers():
         docs_url        external docs/portal link for the "Learn more" link
         status:
           logged_in        bool — currently has usable creds
-          source           short slug ("hermes_pkce", "claude_code", ...)
+          source           short slug ("pichkoo_pkce", "claude_code", ...)
           source_label     human-readable origin (file path, env var name)
           token_preview    last N chars of the token, never the full token
           expires_at       ISO timestamp string or null
@@ -5705,7 +5705,7 @@ async def prune_sessions_endpoint(body: SessionPrune):
 
     db = SessionDB()
     try:
-        sessions_dir = get_hermes_home() / "sessions"
+        sessions_dir = get_pichkoo_home() / "sessions"
         removed = db.prune_sessions(
             older_than_days=body.older_than_days,
             source=(body.source or None),
@@ -5734,7 +5734,7 @@ async def get_logs(
     log_name = LOG_FILES.get(file)
     if not log_name:
         raise HTTPException(status_code=400, detail=f"Unknown log file: {file}")
-    log_path = get_hermes_home() / "logs" / log_name
+    log_path = get_pichkoo_home() / "logs" / log_name
     if not log_path.exists():
         return {"file": file, "lines": []}
 
@@ -5822,7 +5822,7 @@ def _annotate_cron_job(job: Dict[str, Any], profile: str, home: Path) -> Dict[st
     annotated = dict(job)
     annotated["profile"] = profile
     annotated["profile_name"] = profile
-    annotated["hermes_home"] = str(home)
+    annotated["pichkoo_home"] = str(home)
     annotated["is_default_profile"] = profile == "default"
     return annotated
 
@@ -6285,7 +6285,7 @@ async def install_mcp_catalog_entry(body: MCPCatalogInstall):
     # action path so the request returns immediately and the UI can tail logs.
     if entry.install is not None:
         try:
-            proc = _spawn_hermes_action(["mcp", "install", name], "mcp-install")
+            proc = _spawn_pichkoo_action(["mcp", "install", name], "mcp-install")
         except Exception as exc:
             raise HTTPException(status_code=500, detail=f"Install failed: {exc}")
         return {"ok": True, "name": name, "background": True, "action": "mcp-install"}
@@ -6537,7 +6537,7 @@ async def set_webhook_enabled(name: str, body: WebhookEnabledToggle):
 @app.post("/api/gateway/start")
 async def start_gateway():
     try:
-        proc = _spawn_hermes_action(["gateway", "start"], "gateway-start")
+        proc = _spawn_pichkoo_action(["gateway", "start"], "gateway-start")
     except Exception as exc:
         _log.exception("Failed to spawn gateway start")
         raise HTTPException(status_code=500, detail=f"Failed to start gateway: {exc}")
@@ -6547,7 +6547,7 @@ async def start_gateway():
 @app.post("/api/gateway/stop")
 async def stop_gateway():
     try:
-        proc = _spawn_hermes_action(["gateway", "stop"], "gateway-stop")
+        proc = _spawn_pichkoo_action(["gateway", "stop"], "gateway-stop")
     except Exception as exc:
         _log.exception("Failed to spawn gateway stop")
         raise HTTPException(status_code=500, detail=f"Failed to stop gateway: {exc}")
@@ -6712,7 +6712,7 @@ async def get_memory_status():
         _log.exception("discover_memory_providers failed")
 
     # Built-in memory file sizes (so the UI can show what a reset would erase).
-    mem_dir = get_hermes_home() / "memories"
+    mem_dir = get_pichkoo_home() / "memories"
     files = {}
     for fname, key in (("MEMORY.md", "memory"), ("USER.md", "user")):
         path = mem_dir / fname
@@ -6755,7 +6755,7 @@ async def reset_memory(body: MemoryReset):
     if target not in {"all", "memory", "user"}:
         raise HTTPException(status_code=400, detail="target must be all, memory, or user")
 
-    mem_dir = get_hermes_home() / "memories"
+    mem_dir = get_pichkoo_home() / "memories"
     deleted = []
     targets = []
     if target in {"all", "memory"}:
@@ -6789,7 +6789,7 @@ async def reset_memory(body: MemoryReset):
 @app.post("/api/ops/doctor")
 async def run_doctor():
     try:
-        proc = _spawn_hermes_action(["doctor"], "doctor")
+        proc = _spawn_pichkoo_action(["doctor"], "doctor")
     except Exception as exc:
         _log.exception("Failed to spawn doctor")
         raise HTTPException(status_code=500, detail=f"Failed to run doctor: {exc}")
@@ -6799,7 +6799,7 @@ async def run_doctor():
 @app.post("/api/ops/security-audit")
 async def run_security_audit():
     try:
-        proc = _spawn_hermes_action(["security", "audit"], "security-audit")
+        proc = _spawn_pichkoo_action(["security", "audit"], "security-audit")
     except Exception as exc:
         _log.exception("Failed to spawn security audit")
         raise HTTPException(status_code=500, detail=f"Failed to run security audit: {exc}")
@@ -6817,7 +6817,7 @@ async def run_backup(body: BackupRequest):
     if body.output:
         args.append(body.output.strip())
     try:
-        proc = _spawn_hermes_action(args, "backup")
+        proc = _spawn_pichkoo_action(args, "backup")
     except Exception as exc:
         _log.exception("Failed to spawn backup")
         raise HTTPException(status_code=500, detail=f"Failed to run backup: {exc}")
@@ -6836,7 +6836,7 @@ async def run_import(body: ImportRequest):
     if not os.path.isfile(archive):
         raise HTTPException(status_code=404, detail=f"Archive not found: {archive}")
     try:
-        proc = _spawn_hermes_action(["import", archive], "import")
+        proc = _spawn_pichkoo_action(["import", archive], "import")
     except Exception as exc:
         _log.exception("Failed to spawn import")
         raise HTTPException(status_code=500, detail=f"Failed to run import: {exc}")
@@ -7004,11 +7004,11 @@ async def delete_hook(body: HookDelete):
 @app.get("/api/ops/checkpoints")
 async def list_checkpoints():
     """List the /rollback shadow store checkpoints (read-only)."""
-    # Checkpoints live under <hermes_home>/checkpoints/.  Surface a count +
+    # Checkpoints live under <pichkoo_home>/checkpoints/.  Surface a count +
     # total size so the dashboard can show what a prune would reclaim; the
     # actual prune is a spawned action so confirmation/pruning logic stays
     # in one place (the CLI).
-    cp_dir = get_hermes_home() / "checkpoints"
+    cp_dir = get_pichkoo_home() / "checkpoints"
     sessions = []
     total_bytes = 0
     if cp_dir.is_dir():
@@ -7036,7 +7036,7 @@ async def list_checkpoints():
 @app.post("/api/ops/checkpoints/prune")
 async def prune_checkpoints():
     try:
-        proc = _spawn_hermes_action(["checkpoints", "prune"], "checkpoints-prune")
+        proc = _spawn_pichkoo_action(["checkpoints", "prune"], "checkpoints-prune")
     except Exception as exc:
         _log.exception("Failed to spawn checkpoints prune")
         raise HTTPException(status_code=500, detail=f"Failed to prune checkpoints: {exc}")
@@ -7063,7 +7063,7 @@ async def install_skill_hub(body: SkillInstallRequest):
     if not identifier:
         raise HTTPException(status_code=400, detail="identifier is required")
     try:
-        proc = _spawn_hermes_action(["skills", "install", identifier], "skills-install")
+        proc = _spawn_pichkoo_action(["skills", "install", identifier], "skills-install")
     except Exception as exc:
         _log.exception("Failed to spawn skills install")
         raise HTTPException(status_code=500, detail=f"Failed to install skill: {exc}")
@@ -7080,7 +7080,7 @@ async def uninstall_skill_hub(body: SkillUninstallRequest):
     if not name:
         raise HTTPException(status_code=400, detail="name is required")
     try:
-        proc = _spawn_hermes_action(["skills", "uninstall", name, "--yes"], "skills-uninstall")
+        proc = _spawn_pichkoo_action(["skills", "uninstall", name, "--yes"], "skills-uninstall")
     except Exception as exc:
         _log.exception("Failed to spawn skills uninstall")
         raise HTTPException(status_code=500, detail=f"Failed to uninstall skill: {exc}")
@@ -7090,7 +7090,7 @@ async def uninstall_skill_hub(body: SkillUninstallRequest):
 @app.post("/api/skills/hub/update")
 async def update_skills_hub():
     try:
-        proc = _spawn_hermes_action(["skills", "update"], "skills-update")
+        proc = _spawn_pichkoo_action(["skills", "update"], "skills-update")
     except Exception as exc:
         _log.exception("Failed to spawn skills update")
         raise HTTPException(status_code=500, detail=f"Failed to update skills: {exc}")
@@ -7483,7 +7483,7 @@ def _fallback_profile_dicts(profiles_mod) -> List[Dict[str, Any]]:
             return default
 
     profiles: List[Dict[str, Any]] = []
-    default_home = profiles_mod._get_default_hermes_home()
+    default_home = profiles_mod._get_default_pichkoo_home()
     if default_home.is_dir():
         model, provider = _safe(lambda: profiles_mod._read_config_model(default_home), (None, None))
         profiles.append({
@@ -7556,15 +7556,15 @@ def _write_profile_model(profile_dir: Path, provider: str, model: str) -> None:
     Clears any stale ``base_url`` / ``context_length`` the same way
     ``POST /api/model/set`` does, since the new model may differ.
     """
-    from pichkoo_constants import set_hermes_home_override, reset_hermes_home_override
+    from pichkoo_constants import set_pichkoo_home_override, reset_pichkoo_home_override
 
-    token = set_hermes_home_override(str(profile_dir))
+    token = set_pichkoo_home_override(str(profile_dir))
     try:
         cfg = load_config()
         cfg["model"] = _apply_main_model_assignment(cfg.get("model", {}), provider, model)
         save_config(cfg)
     finally:
-        reset_hermes_home_override(token)
+        reset_pichkoo_home_override(token)
 
 
 @app.get("/api/profiles")
@@ -8149,7 +8149,7 @@ async def run_toolset_post_setup(name: str, body: ToolsetPostSetup):
         )
 
     try:
-        proc = _spawn_hermes_action(
+        proc = _spawn_pichkoo_action(
             ["tools", "post-setup", body.key], "tools-post-setup"
         )
     except Exception as exc:
@@ -9408,7 +9408,7 @@ def _discover_user_themes() -> list:
     to the frontend, so the client can apply them without a secondary
     round-trip or a built-in stub.
     """
-    themes_dir = get_hermes_home() / "dashboard-themes"
+    themes_dir = get_pichkoo_home() / "dashboard-themes"
     if not themes_dir.is_dir():
         return []
     result = []
@@ -9570,7 +9570,7 @@ def _discover_dashboard_plugins() -> list:
     from pichkoo_cli.plugins import get_bundled_plugins_dir
     bundled_root = get_bundled_plugins_dir()
     search_dirs = [
-        (get_hermes_home() / "plugins", "user"),
+        (get_pichkoo_home() / "plugins", "user"),
         (bundled_root / "memory", "bundled"),
         (bundled_root, "bundled"),
     ]
@@ -9729,7 +9729,7 @@ def _merged_plugins_hub() -> Dict[str, Any]:
     config = load_config()
     hidden_plugins: list = cfg_get(config, "dashboard", "hidden_plugins", default=[]) or []
 
-    plugins_root_resolved = (get_hermes_home() / "plugins").resolve()
+    plugins_root_resolved = (get_pichkoo_home() / "plugins").resolve()
     rows: List[Dict[str, Any]] = []
 
     for name, version, description, source, dir_str, key in _discover_all_plugins():
@@ -10080,7 +10080,7 @@ def _mount_plugin_api_routes():
             _log.warning("Plugin %s declares api=%s but file not found", plugin["name"], api_file_name)
             continue
         try:
-            module_name = f"hermes_dashboard_plugin_{plugin['name']}"
+            module_name = f"pichkoo_dashboard_plugin_{plugin['name']}"
             spec = importlib.util.spec_from_file_location(module_name, api_path)
             if spec is None or spec.loader is None:
                 continue

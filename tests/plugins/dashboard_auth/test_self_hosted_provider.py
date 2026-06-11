@@ -365,7 +365,7 @@ class TestStartLogin:
         result = provider.start_login(
             redirect_uri="https://pichkoo.example/auth/callback"
         )
-        pkce = result.cookie_payload["hermes_session_pkce"]
+        pkce = result.cookie_payload["pichkoo_session_pkce"]
         parts = dict(seg.split("=", 1) for seg in pkce.split(";") if "=" in seg)
         assert 43 <= len(parts["verifier"]) <= 128  # RFC 7636 §4.1
 
@@ -375,7 +375,7 @@ class TestStartLogin:
         )
         parsed = urllib.parse.urlparse(result.redirect_url)
         params = dict(urllib.parse.parse_qsl(parsed.query))
-        pkce = result.cookie_payload["hermes_session_pkce"]
+        pkce = result.cookie_payload["pichkoo_session_pkce"]
         parts = dict(seg.split("=", 1) for seg in pkce.split(";") if "=" in seg)
         assert parts["state"] == params["state"]
 
@@ -385,7 +385,7 @@ class TestStartLogin:
         )
         parsed = urllib.parse.urlparse(result.redirect_url)
         params = dict(urllib.parse.parse_qsl(parsed.query))
-        pkce = result.cookie_payload["hermes_session_pkce"]
+        pkce = result.cookie_payload["pichkoo_session_pkce"]
         parts = dict(seg.split("=", 1) for seg in pkce.split(";") if "=" in seg)
         expected = (
             base64.urlsafe_b64encode(
@@ -400,8 +400,8 @@ class TestStartLogin:
         a = provider.start_login(redirect_uri="https://pichkoo.example/auth/callback")
         b = provider.start_login(redirect_uri="https://pichkoo.example/auth/callback")
         assert (
-            a.cookie_payload["hermes_session_pkce"]
-            != b.cookie_payload["hermes_session_pkce"]
+            a.cookie_payload["pichkoo_session_pkce"]
+            != b.cookie_payload["pichkoo_session_pkce"]
         )
 
     def test_rejects_wrong_callback_path(self, provider):

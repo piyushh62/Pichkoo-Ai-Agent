@@ -20,7 +20,7 @@ def _isolate_config(tmp_path, monkeypatch):
     """Redirect all config I/O to a temp directory."""
     monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
     monkeypatch.setattr(
-        "pichkoo_cli.config.get_hermes_home", lambda: tmp_path
+        "pichkoo_cli.config.get_pichkoo_home", lambda: tmp_path
     )
     config_path = tmp_path / "config.yaml"
     env_path = tmp_path / ".env"
@@ -150,9 +150,9 @@ class TestMcpRemove:
             "oauth-srv": {"url": "https://example.com/mcp", "auth": "oauth"},
         })
         monkeypatch.setattr("builtins.input", lambda _: "y")
-        # Also patch get_hermes_home in the mcp_config module namespace
+        # Also patch get_pichkoo_home in the mcp_config module namespace
         monkeypatch.setattr(
-            "pichkoo_cli.mcp_config.get_hermes_home", lambda: tmp_path
+            "pichkoo_cli.mcp_config.get_pichkoo_home", lambda: tmp_path
         )
 
         # Create a fake token file
@@ -646,7 +646,7 @@ class TestMcpRemoveEvictsManager:
         })
         monkeypatch.setattr("builtins.input", lambda _: "y")
         monkeypatch.setattr(
-            "pichkoo_cli.mcp_config.get_hermes_home", lambda: tmp_path
+            "pichkoo_cli.mcp_config.get_pichkoo_home", lambda: tmp_path
         )
         monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
 

@@ -815,7 +815,7 @@ export const ja = defineLocale({
     noSessions: 'セッションはまだありません。',
     gatewayRunning: 'メッセージングゲートウェイが実行中',
     gatewayStopped: 'メッセージングゲートウェイが停止中',
-    hermesActiveSessions: (version, count) => `Pichkoo ${version} · アクティブセッション ${count}`,
+    pichkooActiveSessions: (version, count) => `Pichkoo ${version} · アクティブセッション ${count}`,
     restartMessaging: 'メッセージングを再起動',
     updatePichkoo: 'Pichkoo を更新',
     actionRunning: '実行中',

@@ -14,10 +14,10 @@ import tempfile
 import time
 from typing import Optional
 
-from pichkoo_cli.config import get_hermes_home
+from pichkoo_cli.config import get_pichkoo_home
 
 
-CACHE_PATH = get_hermes_home() / "sticker_cache.json"
+CACHE_PATH = get_pichkoo_home() / "sticker_cache.json"
 
 # Vision prompt for describing stickers -- kept concise to save tokens
 STICKER_VISION_PROMPT = (

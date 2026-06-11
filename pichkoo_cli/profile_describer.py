@@ -179,8 +179,8 @@ def describe_profile(
 
     try:
         if canon == "default":
-            from pichkoo_constants import get_hermes_home  # type: ignore
-            profile_dir = Path(get_hermes_home())
+            from pichkoo_constants import get_pichkoo_home  # type: ignore
+            profile_dir = Path(get_pichkoo_home())
         else:
             profile_dir = profiles_mod.get_profile_dir(canon)
     except Exception as exc:

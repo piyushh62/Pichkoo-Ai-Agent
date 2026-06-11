@@ -26,7 +26,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 
-def hermes_available() -> bool:
+def pichkoo_available() -> bool:
     return shutil.which("pichkoo") is not None
 
 
@@ -171,7 +171,7 @@ def main():
                     help="Print one snapshot and exit (no polling loop)")
     args = ap.parse_args()
 
-    if not hermes_available():
+    if not pichkoo_available():
         print("ERROR: 'pichkoo' CLI not found in PATH", file=sys.stderr)
         sys.exit(1)
 

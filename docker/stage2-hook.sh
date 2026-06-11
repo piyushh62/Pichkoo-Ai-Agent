@@ -21,7 +21,7 @@ HERMES_HOME="${HERMES_HOME:-/opt/data}"
 INSTALL_DIR="/opt/pichkoo"
 
 # Drop to pichkoo via s6-setuidgid, but skip it when already non-root.
-as_hermes() { [ "$(id -u)" = 0 ] || { "$@"; return; }; s6-setuidgid pichkoo "$@"; }
+as_pichkoo() { [ "$(id -u)" = 0 ] || { "$@"; return; }; s6-setuidgid pichkoo "$@"; }
 
 # --- Reject the unsupported `docker run --user <uid>:<gid>` start ---
 # Detect the case where the container was launched with `--user` pinned to an
@@ -180,13 +180,13 @@ done
 #
 # The canonical list of pichkoo-owned subdirs is the same one the s6-setuidgid
 # mkdir -p block below seeds. Keep them in sync if the seed list changes.
-actual_hermes_uid=$(id -u pichkoo)
+actual_pichkoo_uid=$(id -u pichkoo)
 needs_chown=false
-if [ "$(stat -c %u "$HERMES_HOME" 2>/dev/null)" != "$actual_hermes_uid" ]; then
+if [ "$(stat -c %u "$HERMES_HOME" 2>/dev/null)" != "$actual_pichkoo_uid" ]; then
     needs_chown=true
 fi
 if [ "$needs_chown" = true ]; then
-    echo "[stage2] Fixing ownership of $HERMES_HOME (targeted) to pichkoo ($actual_hermes_uid)"
+    echo "[stage2] Fixing ownership of $HERMES_HOME (targeted) to pichkoo ($actual_pichkoo_uid)"
     # In rootless Podman the container's "root" is mapped to an
     # unprivileged host UID — chown will fail. That's fine: the volume
     # is already owned by the mapped user on the host side.
@@ -196,7 +196,7 @@ if [ "$needs_chown" = true ]; then
     # their existing ownership.
     chown pichkoo:pichkoo "$HERMES_HOME" 2>/dev/null || \
         echo "[stage2] Warning: chown $HERMES_HOME failed (rootless container?) — continuing"
-    # Hermes-owned subdirs: recursive chown is safe here because these are
+    # Pichkoo-owned subdirs: recursive chown is safe here because these are
     # created and managed exclusively by pichkoo (see the s6-setuidgid mkdir
     # -p block below for the canonical list).
     for sub in cron sessions logs hooks memories skills skins plans workspace home profiles pairing platforms/pairing; do
@@ -208,7 +208,7 @@ if [ "$needs_chown" = true ]; then
 fi
 
 # --- Fix ownership of build trees under $INSTALL_DIR ---
-# Hermes-owned trees under $INSTALL_DIR must be re-chowned whenever the
+# Pichkoo-owned trees under $INSTALL_DIR must be re-chowned whenever the
 # runtime pichkoo UID no longer owns them — otherwise:
 #   - .venv: lazy_deps.py cannot install platform packages (discord.py,
 #     telegram, slack, etc.) with EACCES (#15012, #21100)
@@ -240,8 +240,8 @@ fi
 # and skips the expensive recursive chown on every restart once ownership
 # is settled.
 venv_owner=$(stat -c %u "$INSTALL_DIR/.venv" 2>/dev/null || echo "")
-if [ -n "$venv_owner" ] && [ "$venv_owner" != "$actual_hermes_uid" ]; then
-    echo "[stage2] Fixing ownership of build trees under $INSTALL_DIR to pichkoo ($actual_hermes_uid)"
+if [ -n "$venv_owner" ] && [ "$venv_owner" != "$actual_pichkoo_uid" ]; then
+    echo "[stage2] Fixing ownership of build trees under $INSTALL_DIR to pichkoo ($actual_pichkoo_uid)"
     chown -R pichkoo:pichkoo \
         "$INSTALL_DIR/.venv" \
         "$INSTALL_DIR/ui-tui" \
@@ -312,7 +312,7 @@ fi
 # Use direct `mkdir -p` invocation (no `sh -c "..."` wrapper) so the
 # shell isn't a second interpreter — defends against $HERMES_HOME values
 # containing shell metacharacters. PR #30136 review item O2.
-as_hermes mkdir -p \
+as_pichkoo mkdir -p \
     "$HERMES_HOME/cron" \
     "$HERMES_HOME/sessions" \
     "$HERMES_HOME/logs" \
@@ -331,7 +331,7 @@ as_hermes mkdir -p \
 # the pichkoo user so ownership matches the file's documented owner.
 # tee is invoked directly via s6-setuidgid (no `sh -c` wrapper) for the
 # same shell-metacharacter safety described above.
-printf 'docker\n' | as_hermes tee "$HERMES_HOME/.install_method" >/dev/null \
+printf 'docker\n' | as_pichkoo tee "$HERMES_HOME/.install_method" >/dev/null \
     || true
 
 # --- Seed config files (only on first boot) ---
@@ -339,7 +339,7 @@ seed_one() {
     dest=$1
     src=$2
     if [ ! -f "$HERMES_HOME/$dest" ] && [ -f "$INSTALL_DIR/$src" ]; then
-        as_hermes cp "$INSTALL_DIR/$src" "$HERMES_HOME/$dest"
+        as_pichkoo cp "$INSTALL_DIR/$src" "$HERMES_HOME/$dest"
     fi
 }
 seed_one ".env" ".env.example"
@@ -413,7 +413,7 @@ fi
 # the python binary's own bin-stub already sets up (sys.path is rooted
 # at the venv's site-packages by virtue of running .venv/bin/python).
 if [ -d "$INSTALL_DIR/skills" ]; then
-    as_hermes "$INSTALL_DIR/.venv/bin/python" "$INSTALL_DIR/tools/skills_sync.py" \
+    as_pichkoo "$INSTALL_DIR/.venv/bin/python" "$INSTALL_DIR/tools/skills_sync.py" \
         || echo "[stage2] Warning: skills_sync.py failed; continuing"
 fi
 
@@ -421,7 +421,7 @@ fi
 # The image's Dockerfile runs `npx playwright install chromium`, which
 # populates ``$PLAYWRIGHT_BROWSERS_PATH`` (=/opt/pichkoo/.playwright) with
 # a ``chromium_headless_shell-<build>/chrome-headless-shell-linux64/``
-# directory. agent-browser (the runtime CLI Hermes spawns for the
+# directory. agent-browser (the runtime CLI Pichkoo spawns for the
 # browser tool) doesn't recognise this layout in its own cache scan and
 # fails with "Auto-launch failed: Chrome not found" — even though the
 # binary is right there (#15697).

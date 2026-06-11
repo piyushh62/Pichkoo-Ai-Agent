@@ -71,11 +71,11 @@ class TestIsWriteDenied:
             "pairing",
         ],
     )
-    def test_hermes_control_files_oauth_and_mcp_tokens_denied(self, path):
+    def test_pichkoo_control_files_oauth_and_mcp_tokens_denied(self, path):
         """Pichkoo control files, PKCE creds, mcp-tokens, and pairing entries must be write-denied."""
-        from pichkoo_constants import get_hermes_home
-        hermes_home = get_hermes_home()
-        full_path = str(hermes_home / path)
+        from pichkoo_constants import get_pichkoo_home
+        pichkoo_home = get_pichkoo_home()
+        full_path = str(pichkoo_home / path)
         assert _is_write_denied(full_path) is True
 
     @pytest.mark.parametrize(
@@ -87,11 +87,11 @@ class TestIsWriteDenied:
             "mcp-tokens/../config.yaml",
         ],
     )
-    def test_hermes_control_files_and_oauth_traversal_denied(self, path):
+    def test_pichkoo_control_files_and_oauth_traversal_denied(self, path):
         """Path traversal attempts to protected Pichkoo files must be blocked."""
-        from pichkoo_constants import get_hermes_home
-        hermes_home = get_hermes_home()
-        full_path = str(hermes_home / path)
+        from pichkoo_constants import get_pichkoo_home
+        pichkoo_home = get_pichkoo_home()
+        full_path = str(pichkoo_home / path)
         assert _is_write_denied(full_path) is True
 
     @pytest.mark.parametrize(

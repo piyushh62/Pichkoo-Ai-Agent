@@ -52,7 +52,7 @@ class AuditEvent(enum.Enum):
 def _resolve_log_path() -> Path:
     """``$PICHKOO_HOME/logs/dashboard-auth.log`` with the standard fallback.
 
-    Mirrors ``pichkoo_constants.get_hermes_home`` semantics: env var wins,
+    Mirrors ``pichkoo_constants.get_pichkoo_home`` semantics: env var wins,
     else ``~/.pichkoo``. A local copy avoids an import cycle with the
     middleware which lives below ``pichkoo_cli``.
     """

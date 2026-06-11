@@ -61,19 +61,19 @@ class TestDoctorEnvFileEncoding:
     ):
         import pathlib
 
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
         # Write a UTF-8 .env containing an em dash (U+2014 = e2 80 94). The
         # 0x94 byte is exactly the one the issue reporter hit: it's invalid
         # as a GBK trailing byte in this position, so locale-default reads
         # raise UnicodeDecodeError on Chinese Windows.
-        env_path = hermes_home / ".env"
+        env_path = pichkoo_home / ".env"
         env_path.write_text(
             "OPENAI_API_KEY=sk-test  # em-dash here — should not crash\n",
             encoding="utf-8",
         )
 
-        monkeypatch.setattr(doctor_mod, "PICHKOO_HOME", hermes_home)
+        monkeypatch.setattr(doctor_mod, "PICHKOO_HOME", pichkoo_home)
 
         orig_read_text = pathlib.Path.read_text
 
@@ -193,12 +193,12 @@ class TestHonchoDoctorConfigDetection:
 def test_run_doctor_sets_interactive_env_for_tool_checks(monkeypatch, tmp_path):
     """Doctor should present CLI-gated tools as available in CLI context."""
     project_root = tmp_path / "project"
-    hermes_home = tmp_path / ".pichkoo"
+    pichkoo_home = tmp_path / ".pichkoo"
     project_root.mkdir()
-    hermes_home.mkdir()
+    pichkoo_home.mkdir()
 
     monkeypatch.setattr(doctor_mod, "PROJECT_ROOT", project_root)
-    monkeypatch.setattr(doctor_mod, "PICHKOO_HOME", hermes_home)
+    monkeypatch.setattr(doctor_mod, "PICHKOO_HOME", pichkoo_home)
     monkeypatch.delenv("PICHKOO_INTERACTIVE", raising=False)
 
     seen = {}
@@ -259,7 +259,7 @@ def test_check_gateway_service_linger_skips_when_service_not_installed(monkeypat
 class TestDoctorMemoryProviderSection:
     """The ◆ Memory Provider section should respect memory.provider config."""
 
-    def _make_hermes_home(self, tmp_path, provider=""):
+    def _make_pichkoo_home(self, tmp_path, provider=""):
         """Create a minimal PICHKOO_HOME with config.yaml."""
         home = tmp_path / ".pichkoo"
         home.mkdir(parents=True, exist_ok=True)
@@ -270,7 +270,7 @@ class TestDoctorMemoryProviderSection:
 
     def _run_doctor_and_capture(self, monkeypatch, tmp_path, provider=""):
         """Run doctor and capture stdout."""
-        home = self._make_hermes_home(tmp_path, provider)
+        home = self._make_pichkoo_home(tmp_path, provider)
         monkeypatch.setattr(doctor_mod, "PICHKOO_HOME", home)
         monkeypatch.setattr(doctor_mod, "PROJECT_ROOT", tmp_path / "project")
         monkeypatch.setattr(doctor_mod, "_DHH", str(home))
@@ -495,7 +495,7 @@ def test_run_doctor_flags_missing_credentials_for_active_openrouter_provider(mon
         ("kimi-coding", "kimi-k2"),
     ],
 )
-def test_run_doctor_accepts_hermes_provider_ids_that_catalog_aliases(
+def test_run_doctor_accepts_pichkoo_provider_ids_that_catalog_aliases(
     monkeypatch, tmp_path, provider, default_model
 ):
     home = tmp_path / ".pichkoo"
@@ -1342,20 +1342,20 @@ class TestDoctorStaleMaxIterationsDrift:
         import io
         from argparse import Namespace
 
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir(parents=True)
-        (hermes_home / "config.yaml").write_text(
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir(parents=True)
+        (pichkoo_home / "config.yaml").write_text(
             f"agent:\n  max_turns: {cfg_turns}\n", encoding="utf-8"
         )
         env_lines = ["OPENAI_API_KEY=sk-test\n"]
         if ghost is not None:
             env_lines.append(f"PICHKOO_MAX_ITERATIONS={ghost}\n")
-        (hermes_home / ".env").write_text("".join(env_lines), encoding="utf-8")
+        (pichkoo_home / ".env").write_text("".join(env_lines), encoding="utf-8")
 
-        monkeypatch.setattr(doctor_mod, "PICHKOO_HOME", hermes_home)
-        monkeypatch.setattr(doctor_mod, "get_hermes_home", lambda: hermes_home)
+        monkeypatch.setattr(doctor_mod, "PICHKOO_HOME", pichkoo_home)
+        monkeypatch.setattr(doctor_mod, "get_pichkoo_home", lambda: pichkoo_home)
         # Point the config helpers at the temp home.
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         if os_environ_value is not None:
             # Simulate the gateway bridge having already overridden os.environ.
             monkeypatch.setenv("PICHKOO_MAX_ITERATIONS", str(os_environ_value))
@@ -1373,25 +1373,25 @@ class TestDoctorStaleMaxIterationsDrift:
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf), pytest.raises(SystemExit):
             doctor_mod.run_doctor(Namespace(fix=fix))
-        return buf.getvalue(), hermes_home
+        return buf.getvalue(), pichkoo_home
 
     def test_detects_drift_warn_only(self, monkeypatch, tmp_path):
-        out, hermes_home = self._run_config_section(
+        out, pichkoo_home = self._run_config_section(
             monkeypatch, tmp_path, fix=False, ghost=90, cfg_turns=400,
             os_environ_value=400,  # bridge contaminated os.environ
         )
         assert "PICHKOO_MAX_ITERATIONS=90" in out
         assert "shadows" in out
         # Warn-only must NOT mutate .env.
-        assert "PICHKOO_MAX_ITERATIONS=90" in (hermes_home / ".env").read_text(encoding="utf-8")
+        assert "PICHKOO_MAX_ITERATIONS=90" in (pichkoo_home / ".env").read_text(encoding="utf-8")
 
     def test_fix_removes_ghost(self, monkeypatch, tmp_path):
-        out, hermes_home = self._run_config_section(
+        out, pichkoo_home = self._run_config_section(
             monkeypatch, tmp_path, fix=True, ghost=90, cfg_turns=400,
             os_environ_value=400,
         )
         assert "Removed stale PICHKOO_MAX_ITERATIONS" in out
-        env_after = (hermes_home / ".env").read_text(encoding="utf-8")
+        env_after = (pichkoo_home / ".env").read_text(encoding="utf-8")
         assert "PICHKOO_MAX_ITERATIONS" not in env_after
         assert "OPENAI_API_KEY=sk-test" in env_after  # other keys preserved
 

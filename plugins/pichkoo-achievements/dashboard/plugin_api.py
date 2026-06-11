@@ -13,10 +13,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 try:
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 except ImportError:
     import os as _os
-    def get_hermes_home() -> Path:  # type: ignore[misc]
+    def get_pichkoo_home() -> Path:  # type: ignore[misc]
         val = (_os.environ.get("PICHKOO_HOME") or "").strip()
         return Path(val) if val else Path.home() / ".pichkoo"
 
@@ -143,15 +143,15 @@ ACHIEVEMENTS: List[Dict[str, Any]] = [
 
 
 def state_path() -> Path:
-    return get_hermes_home() / "plugins" / "pichkoo-achievements" / "state.json"
+    return get_pichkoo_home() / "plugins" / "pichkoo-achievements" / "state.json"
 
 
 def snapshot_path() -> Path:
-    return get_hermes_home() / "plugins" / "pichkoo-achievements" / "scan_snapshot.json"
+    return get_pichkoo_home() / "plugins" / "pichkoo-achievements" / "scan_snapshot.json"
 
 
 def checkpoint_path() -> Path:
-    return get_hermes_home() / "plugins" / "pichkoo-achievements" / "scan_checkpoint.json"
+    return get_pichkoo_home() / "plugins" / "pichkoo-achievements" / "scan_checkpoint.json"
 
 
 def load_state() -> Dict[str, Any]:

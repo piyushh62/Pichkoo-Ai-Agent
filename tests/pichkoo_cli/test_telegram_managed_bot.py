@@ -27,20 +27,20 @@ SECOND_VALID_TOKEN = "987654321:abcdefghijklmnopqrstuvwxyzABCDEF"
 class TestGenerateBotUsername:
     def test_secure_default_format(self):
         name = generate_bot_username()
-        assert name.startswith("hermes_")
+        assert name.startswith("pichkoo_")
         assert name.endswith("_bot")
-        assert len(name) == len("hermes_") + 16 + len("_bot")
+        assert len(name) == len("pichkoo_") + 16 + len("_bot")
         assert len(name) <= 32
 
     def test_profile_name_not_embedded(self):
         name = generate_bot_username("work")
         assert "work" not in name
-        assert name.startswith("hermes_")
+        assert name.startswith("pichkoo_")
         assert name.endswith("_bot")
 
     def test_slug_uses_telegram_safe_base32_chars(self):
         name = generate_bot_username()
-        slug = name.removeprefix("hermes_").removesuffix("_bot")
+        slug = name.removeprefix("pichkoo_").removesuffix("_bot")
         assert len(slug) == 16
         assert set(slug) <= set("abcdefghijklmnopqrstuvwxyz234567")
 
@@ -69,7 +69,7 @@ class TestGenerateDeepLink:
     def test_defaults(self):
         link = generate_deep_link()
         assert f"https://t.me/newbot/{DEFAULT_MANAGER_BOT}/" in link
-        assert "hermes_" in link
+        assert "pichkoo_" in link
 
     def test_name_url_encoded(self):
         link = generate_deep_link(
@@ -118,9 +118,9 @@ class TestCreatePairing:
         mock_resp.json.return_value = {
             "pairing_id": "abcdefghijklmnop",
             "poll_token": "secret-token",
-            "suggested_username": "hermes_abcdefghijklmnop_bot",
-            "deep_link": "https://t.me/newbot/PichkooSetupBot/hermes_abcdefghijklmnop_bot?name=Pichkoo+Agent",
-            "qr_payload": "https://t.me/newbot/PichkooSetupBot/hermes_abcdefghijklmnop_bot?name=Pichkoo+Agent",
+            "suggested_username": "pichkoo_abcdefghijklmnop_bot",
+            "deep_link": "https://t.me/newbot/PichkooSetupBot/pichkoo_abcdefghijklmnop_bot?name=Pichkoo+Agent",
+            "qr_payload": "https://t.me/newbot/PichkooSetupBot/pichkoo_abcdefghijklmnop_bot?name=Pichkoo+Agent",
             "expires_at": "2026-05-18T00:00:00.000Z",
         }
 
@@ -132,9 +132,9 @@ class TestCreatePairing:
         assert pairing == TelegramPairing(
             pairing_id="abcdefghijklmnop",
             poll_token="secret-token",
-            suggested_username="hermes_abcdefghijklmnop_bot",
-            deep_link="https://t.me/newbot/PichkooSetupBot/hermes_abcdefghijklmnop_bot?name=Pichkoo+Agent",
-            qr_payload="https://t.me/newbot/PichkooSetupBot/hermes_abcdefghijklmnop_bot?name=Pichkoo+Agent",
+            suggested_username="pichkoo_abcdefghijklmnop_bot",
+            deep_link="https://t.me/newbot/PichkooSetupBot/pichkoo_abcdefghijklmnop_bot?name=Pichkoo+Agent",
+            qr_payload="https://t.me/newbot/PichkooSetupBot/pichkoo_abcdefghijklmnop_bot?name=Pichkoo+Agent",
             expires_at="2026-05-18T00:00:00.000Z",
         )
         post.assert_called_once_with(
@@ -176,16 +176,16 @@ class TestPollForToken:
         return TelegramPairing(
             pairing_id="abcdefghijklmnop",
             poll_token="secret-token",
-            suggested_username="hermes_abcdefghijklmnop_bot",
-            deep_link="https://t.me/newbot/PichkooSetupBot/hermes_abcdefghijklmnop_bot",
-            qr_payload="https://t.me/newbot/PichkooSetupBot/hermes_abcdefghijklmnop_bot",
+            suggested_username="pichkoo_abcdefghijklmnop_bot",
+            deep_link="https://t.me/newbot/PichkooSetupBot/pichkoo_abcdefghijklmnop_bot",
+            qr_payload="https://t.me/newbot/PichkooSetupBot/pichkoo_abcdefghijklmnop_bot",
         )
 
     def test_immediate_success(self):
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {
-            "bot_username": "hermes_abcdefghijklmnop_bot",
+            "bot_username": "pichkoo_abcdefghijklmnop_bot",
             "owner_user_id": 42,
             "status": "ready",
             "token": VALID_TOKEN,
@@ -212,7 +212,7 @@ class TestPollForToken:
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {
-            "bot_username": "hermes_abcdefghijklmnop_bot",
+            "bot_username": "pichkoo_abcdefghijklmnop_bot",
             "owner_user_id": 42,
             "status": "ready",
             "token": VALID_TOKEN,
@@ -226,7 +226,7 @@ class TestPollForToken:
 
         assert result == TelegramBotSetupResult(
             token=VALID_TOKEN,
-            bot_username="hermes_abcdefghijklmnop_bot",
+            bot_username="pichkoo_abcdefghijklmnop_bot",
             owner_user_id=42,
         )
 
@@ -234,7 +234,7 @@ class TestPollForToken:
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {
-            "bot_username": "hermes_abcdefghijklmnop_bot",
+            "bot_username": "pichkoo_abcdefghijklmnop_bot",
             "owner_user_id": "42",
             "status": "ready",
             "token": VALID_TOKEN,
@@ -247,7 +247,7 @@ class TestPollForToken:
 
         assert result == TelegramBotSetupResult(
             token=VALID_TOKEN,
-            bot_username="hermes_abcdefghijklmnop_bot",
+            bot_username="pichkoo_abcdefghijklmnop_bot",
             owner_user_id=42,
         )
 
@@ -255,7 +255,7 @@ class TestPollForToken:
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {
-            "bot_username": "hermes_abcdefghijklmnop_bot",
+            "bot_username": "pichkoo_abcdefghijklmnop_bot",
             "owner_user_id": 42,
             "status": "ready",
             "token": "not-a-real-token",

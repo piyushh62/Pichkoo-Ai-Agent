@@ -388,7 +388,7 @@ db.delete_session("sess_abc123")
 
 Default path: `~/.pichkoo/state.db`
 
-This is derived from `pichkoo_constants.get_hermes_home()` which resolves to
+This is derived from `pichkoo_constants.get_pichkoo_home()` which resolves to
 `~/.pichkoo/` by default, or the value of `PICHKOO_HOME` environment variable.
 
 The database file, WAL file (`state.db-wal`), and shared-memory file

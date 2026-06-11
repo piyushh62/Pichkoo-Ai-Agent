@@ -498,7 +498,7 @@ class TestCookiePathRespectsPrefix:
             follow_redirects=False,
         )
         cookies = r.headers.get_list("set-cookie")
-        pkce = next(c for c in cookies if "hermes_session_pkce" in c)
+        pkce = next(c for c in cookies if "pichkoo_session_pkce" in c)
         # Browser only sends cookie back if the request path is under
         # the cookie's Path attribute, so we need /pichkoo here. Bare
         # /-rooted cookies would still be sent but would also be sent
@@ -523,7 +523,7 @@ class TestCookiePathRespectsPrefix:
         # The PKCE cookie name carries the __Secure- prefix.
         pkce_candidates = [
             c for c in cookies
-            if c.startswith("__Secure-hermes_session_pkce=")
+            if c.startswith("__Secure-pichkoo_session_pkce=")
         ]
         assert pkce_candidates, (
             f"PKCE cookie missing __Secure- prefix: {cookies!r}"
@@ -542,7 +542,7 @@ class TestCookiePathRespectsPrefix:
         cookies = r.headers.get_list("set-cookie")
         pkce_candidates = [
             c for c in cookies
-            if c.startswith("__Host-hermes_session_pkce=")
+            if c.startswith("__Host-pichkoo_session_pkce=")
         ]
         assert pkce_candidates, (
             f"PKCE cookie missing __Host- prefix on direct deploy: "
@@ -574,7 +574,7 @@ class TestCookiePathRespectsPrefix:
         r = client.get("/set")
         cookies = r.headers.get_list("set-cookie")
         # Bare cookie name, no prefix.
-        assert any(c.startswith("hermes_session_pkce=") for c in cookies), (
+        assert any(c.startswith("pichkoo_session_pkce=") for c in cookies), (
             f"Loopback cookie should be bare-named: {cookies!r}"
         )
         # And no __Host- / __Secure- variant accidentally emitted.
@@ -612,10 +612,10 @@ class TestCookiePathRespectsPrefix:
         )
         pkce_set = next(
             c for c in r1.headers.get_list("set-cookie")
-            if "hermes_session_pkce" in c
+            if "pichkoo_session_pkce" in c
         )
-        # Parse "__Secure-hermes_session_pkce=...; HttpOnly; ...".
-        pkce_kv = pkce_set.split(";", 1)[0]  # "__Secure-hermes_session_pkce=value"
+        # Parse "__Secure-pichkoo_session_pkce=...; HttpOnly; ...".
+        pkce_kv = pkce_set.split(";", 1)[0]  # "__Secure-pichkoo_session_pkce=value"
         state = r1.headers["location"].split("state=")[1]
 
         # Round-trip the cookie by hand because TestClient's jar won't
@@ -633,7 +633,7 @@ class TestCookiePathRespectsPrefix:
         cookies = r2.headers.get_list("set-cookie")
         at_cookies = [
             c for c in cookies
-            if c.startswith("__Secure-hermes_session_at=")
+            if c.startswith("__Secure-pichkoo_session_at=")
         ]
         assert at_cookies, (
             f"session_at missing __Secure- prefix: {cookies!r}"

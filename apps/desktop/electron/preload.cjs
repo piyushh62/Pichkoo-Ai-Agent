@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer, webUtils } = require('electron')
 
-contextBridge.exposeInMainWorld('hermesDesktop', {
+contextBridge.exposeInMainWorld('pichkooDesktop', {
   getConnection: profile => ipcRenderer.invoke('pichkoo:connection', profile),
   revalidateConnection: () => ipcRenderer.invoke('pichkoo:connection:revalidate'),
   touchBackend: profile => ipcRenderer.invoke('pichkoo:backend:touch', profile),

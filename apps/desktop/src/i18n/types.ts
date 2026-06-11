@@ -573,7 +573,7 @@ export interface Translations {
     noSessions: string
     gatewayRunning: string
     gatewayStopped: string
-    hermesActiveSessions: (version: string, count: number) => string
+    pichkooActiveSessions: (version: string, count: number) => string
     restartMessaging: string
     updatePichkoo: string
     actionRunning: string

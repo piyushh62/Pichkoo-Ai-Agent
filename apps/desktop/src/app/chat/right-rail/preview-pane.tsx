@@ -92,7 +92,7 @@ function PreviewLoadError({
             href={error.url}
             onClick={event => {
               event.preventDefault()
-              void window.hermesDesktop?.openExternal(error.url)
+              void window.pichkooDesktop?.openExternal(error.url)
             }}
           >
             {compactUrl(error.url)}
@@ -406,8 +406,8 @@ export function PreviewPane({
   useEffect(() => {
     if (
       target.kind !== 'file' ||
-      !window.hermesDesktop?.watchPreviewFile ||
-      !window.hermesDesktop?.onPreviewFileChanged
+      !window.pichkooDesktop?.watchPreviewFile ||
+      !window.pichkooDesktop?.onPreviewFileChanged
     ) {
       return
     }
@@ -440,7 +440,7 @@ export function PreviewPane({
       reloadPreview()
     }
 
-    const unsubscribe = window.hermesDesktop.onPreviewFileChanged(payload => {
+    const unsubscribe = window.pichkooDesktop.onPreviewFileChanged(payload => {
       if (!active || payload.id !== watchId) {
         return
       }
@@ -458,11 +458,11 @@ export function PreviewPane({
       }, FILE_RELOAD_DEBOUNCE_MS)
     })
 
-    void window.hermesDesktop
+    void window.pichkooDesktop
       .watchPreviewFile(target.url)
       .then(watch => {
         if (!active) {
-          void window.hermesDesktop?.stopPreviewFileWatch?.(watch.id)
+          void window.pichkooDesktop?.stopPreviewFileWatch?.(watch.id)
 
           return
         }
@@ -485,7 +485,7 @@ export function PreviewPane({
       }
 
       if (watchId) {
-        void window.hermesDesktop?.stopPreviewFileWatch?.(watchId)
+        void window.pichkooDesktop?.stopPreviewFileWatch?.(watchId)
       }
     }
   }, [appendConsoleEntry, copy, reloadPreview, target.kind, target.url])

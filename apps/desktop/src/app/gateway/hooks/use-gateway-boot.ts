@@ -38,7 +38,7 @@ import type { RpcEvent } from '@/types/pichkoo'
 interface GatewayBootOptions {
   handleGatewayEvent: (event: RpcEvent) => void
   onConnectionReady: (
-    connection: Awaited<ReturnType<NonNullable<typeof window.hermesDesktop>['getConnection']>> | null
+    connection: Awaited<ReturnType<NonNullable<typeof window.pichkooDesktop>['getConnection']>> | null
   ) => void
   onGatewayReady: (gateway: PichkooGateway | null) => void
   refreshPichkooConfig: () => Promise<void>
@@ -70,7 +70,7 @@ export function useGatewayBoot({
 
   useEffect(() => {
     let cancelled = false
-    const desktop = window.hermesDesktop
+    const desktop = window.pichkooDesktop
 
     const publish = (next: PichkooConnection | null) => {
       callbacksRef.current.onConnectionReady(next)

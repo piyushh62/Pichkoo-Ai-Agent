@@ -271,7 +271,7 @@ class TestCloneHonchoForProfile:
         honcho_cli, written = self._setup_clone_env(monkeypatch, tmp_path, cfg)
         ok = honcho_cli.clone_honcho_for_profile("coder")
         assert ok is True
-        new_block = written["cfg"]["hosts"]["hermes_coder"]
+        new_block = written["cfg"]["hosts"]["pichkoo_coder"]
         assert new_block["userPeerAliases"] == {"86701400": "eri", "discord-491827364": "eri"}
 
     def test_runtime_peer_prefix_carries_into_cloned_profile(self, monkeypatch, tmp_path):
@@ -287,7 +287,7 @@ class TestCloneHonchoForProfile:
         honcho_cli, written = self._setup_clone_env(monkeypatch, tmp_path, cfg)
         ok = honcho_cli.clone_honcho_for_profile("coder")
         assert ok is True
-        new_block = written["cfg"]["hosts"]["hermes_coder"]
+        new_block = written["cfg"]["hosts"]["pichkoo_coder"]
         assert new_block["runtimePeerPrefix"] == "telegram_"
 
     def test_pin_peer_name_carries_into_cloned_profile(self, monkeypatch, tmp_path):
@@ -303,7 +303,7 @@ class TestCloneHonchoForProfile:
         honcho_cli, written = self._setup_clone_env(monkeypatch, tmp_path, cfg)
         ok = honcho_cli.clone_honcho_for_profile("coder")
         assert ok is True
-        new_block = written["cfg"]["hosts"]["hermes_coder"]
+        new_block = written["cfg"]["hosts"]["pichkoo_coder"]
         assert new_block["pinPeerName"] is True
 
     def test_unset_identity_keys_do_not_appear_in_cloned_profile(self, monkeypatch, tmp_path):
@@ -314,7 +314,7 @@ class TestCloneHonchoForProfile:
         honcho_cli, written = self._setup_clone_env(monkeypatch, tmp_path, cfg)
         ok = honcho_cli.clone_honcho_for_profile("coder")
         assert ok is True
-        new_block = written["cfg"]["hosts"]["hermes_coder"]
+        new_block = written["cfg"]["hosts"]["pichkoo_coder"]
         assert "userPeerAliases" not in new_block
         assert "runtimePeerPrefix" not in new_block
         assert "pinPeerName" not in new_block
@@ -329,7 +329,7 @@ class TestSetupWizardDeploymentShape:
     Hybrid deployments alias the operator's own runtime IDs only.
 
     These tests script the interactive _prompt calls and assert the
-    resulting hermes_host block, so the wizard's deployment-shape
+    resulting pichkoo_host block, so the wizard's deployment-shape
     semantics stay locked even as adjacent prompts are added.
     """
 
@@ -651,5 +651,5 @@ class TestCloneCarriesPinUserPeer:
 
         ok = honcho_cli.clone_honcho_for_profile("partner")
         assert ok is True
-        new_block = written["cfg"]["hosts"]["hermes_partner"]
+        new_block = written["cfg"]["hosts"]["pichkoo_partner"]
         assert new_block["pinUserPeer"] is True

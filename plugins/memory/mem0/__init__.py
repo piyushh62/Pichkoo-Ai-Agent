@@ -44,7 +44,7 @@ def _load_config() -> dict:
     individual keys.  This avoids a silent failure when the JSON file exists
     but is missing fields like ``api_key`` that the user set in ``.env``.
     """
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 
     config = {
         "api_key": os.environ.get("MEM0_API_KEY", ""),
@@ -54,7 +54,7 @@ def _load_config() -> dict:
         "keyword_search": False,
     }
 
-    config_path = get_hermes_home() / "mem0.json"
+    config_path = get_pichkoo_home() / "mem0.json"
     if config_path.exists():
         try:
             file_cfg = json.loads(config_path.read_text(encoding="utf-8"))
@@ -143,11 +143,11 @@ class Mem0MemoryProvider(MemoryProvider):
         cfg = _load_config()
         return bool(cfg.get("api_key"))
 
-    def save_config(self, values, hermes_home):
+    def save_config(self, values, pichkoo_home):
         """Write config to $PICHKOO_HOME/mem0.json."""
         import json
         from pathlib import Path
-        config_path = Path(hermes_home) / "mem0.json"
+        config_path = Path(pichkoo_home) / "mem0.json"
         existing = {}
         if config_path.exists():
             try:

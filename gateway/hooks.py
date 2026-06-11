@@ -43,10 +43,10 @@ from typing import Any, Callable, Dict, List, Optional
 
 import yaml
 
-from pichkoo_cli.config import get_hermes_home
+from pichkoo_cli.config import get_pichkoo_home
 
 
-HOOKS_DIR = get_hermes_home() / "hooks"
+HOOKS_DIR = get_pichkoo_home() / "hooks"
 
 
 class HookRegistry:
@@ -122,7 +122,7 @@ class HookRegistry:
                 # in the handler). Without this, a handler that declares a
                 # Pydantic BaseModel for webhook/event payloads fails at first
                 # dispatch with "TypeAdapter ... is not fully defined".
-                module_name = f"hermes_hook_{hook_name}"
+                module_name = f"pichkoo_hook_{hook_name}"
                 spec = importlib.util.spec_from_file_location(
                     module_name, handler_path
                 )

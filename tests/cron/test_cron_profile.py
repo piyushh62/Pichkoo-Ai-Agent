@@ -154,7 +154,7 @@ class TestCronjobToolProfile:
         assert "pichkoo profile" in desc_lower
         assert "context-local" in desc_lower
         assert "subprocess" in desc_lower
-        assert "temporarily sets hermes_home" not in desc_lower
+        assert "temporarily sets pichkoo_home" not in desc_lower
 
 
 class TestRunJobProfileContext:
@@ -165,7 +165,7 @@ class TestRunJobProfileContext:
 
         class FakeAgent:
             def __init__(self, **kwargs):
-                from pichkoo_constants import get_hermes_home
+                from pichkoo_constants import get_pichkoo_home
 
                 observed["env_home_during_init"] = os.environ.get("PICHKOO_HOME")
                 observed["profile_env_only_during_init"] = os.environ.get(
@@ -174,12 +174,12 @@ class TestRunJobProfileContext:
                 observed["profile_env_shared_during_init"] = os.environ.get(
                     "PICHKOO_PROFILE_TEST_SHARED"
                 )
-                observed["hermes_home_during_init"] = str(get_hermes_home())
-                observed["scheduler_home_during_init"] = str(sched._get_hermes_home())
+                observed["pichkoo_home_during_init"] = str(get_pichkoo_home())
+                observed["scheduler_home_during_init"] = str(sched._get_pichkoo_home())
                 observed["skip_context_files"] = kwargs.get("skip_context_files")
 
             def run_conversation(self, *_a, **_kw):
-                from pichkoo_constants import get_hermes_home
+                from pichkoo_constants import get_pichkoo_home
 
                 observed["env_home_during_run"] = os.environ.get("PICHKOO_HOME")
                 observed["profile_env_only_during_run"] = os.environ.get(
@@ -188,8 +188,8 @@ class TestRunJobProfileContext:
                 observed["profile_env_shared_during_run"] = os.environ.get(
                     "PICHKOO_PROFILE_TEST_SHARED"
                 )
-                observed["hermes_home_during_run"] = str(get_hermes_home())
-                observed["scheduler_home_during_run"] = str(sched._get_hermes_home())
+                observed["pichkoo_home_during_run"] = str(get_pichkoo_home())
+                observed["scheduler_home_during_run"] = str(sched._get_pichkoo_home())
                 return {"final_response": "done", "messages": []}
 
             def get_activity_summary(self):
@@ -219,7 +219,7 @@ class TestRunJobProfileContext:
         monkeypatch.setattr(sched, "_resolve_origin", lambda job: None)
         monkeypatch.setattr(sched, "_resolve_delivery_target", lambda job: None)
         monkeypatch.setattr(sched, "_resolve_cron_enabled_toolsets", lambda job, cfg: None)
-        monkeypatch.setattr(sched, "_hermes_home", None)
+        monkeypatch.setattr(sched, "_pichkoo_home", None)
         monkeypatch.setenv("PICHKOO_CRON_TIMEOUT", "0")
 
         import dotenv
@@ -252,13 +252,13 @@ class TestRunJobProfileContext:
         assert observed["dotenv_paths"] == [str(profile_home / ".env")]
         assert observed["env_home_during_init"] == str(root)
         assert observed["env_home_during_run"] == str(root)
-        assert observed["hermes_home_during_init"] == str(profile_home.resolve())
-        assert observed["hermes_home_during_run"] == str(profile_home.resolve())
+        assert observed["pichkoo_home_during_init"] == str(profile_home.resolve())
+        assert observed["pichkoo_home_during_run"] == str(profile_home.resolve())
         assert observed["scheduler_home_during_init"] == str(profile_home.resolve())
         assert observed["scheduler_home_during_run"] == str(profile_home.resolve())
         assert observed["skip_context_files"] is True
         assert os.environ["PICHKOO_HOME"] == str(root)
-        assert sched._get_hermes_home() == root
+        assert sched._get_pichkoo_home() == root
 
     def test_profile_dotenv_environment_is_restored(
         self, isolated_cron_profile_home, monkeypatch
@@ -300,7 +300,7 @@ class TestRunJobProfileContext:
         assert "PICHKOO_PROFILE_TEST_ONLY" not in os.environ
         assert os.environ["PICHKOO_CRON_TIMEOUT"] == "0"
         assert os.environ["PICHKOO_HOME"] == str(root)
-        assert sched._get_hermes_home() == root
+        assert sched._get_pichkoo_home() == root
 
     def test_no_agent_profile_uses_profile_scripts_dir_and_restores_env(
         self, isolated_cron_profile_home, monkeypatch
@@ -314,7 +314,7 @@ class TestRunJobProfileContext:
             "import os\nprint(os.environ.get('PICHKOO_HOME', ''))\n",
             encoding="utf-8",
         )
-        monkeypatch.setattr(sched, "_hermes_home", None)
+        monkeypatch.setattr(sched, "_pichkoo_home", None)
 
         job = {
             "id": "script1",
@@ -329,9 +329,9 @@ class TestRunJobProfileContext:
         assert success is True, error
         assert response.strip() == str(profile_home.resolve())
         assert os.environ["PICHKOO_HOME"] == str(root)
-        assert sched._get_hermes_home() == root
+        assert sched._get_pichkoo_home() == root
 
-    def test_run_job_without_profile_leaves_hermes_home_untouched(
+    def test_run_job_without_profile_leaves_pichkoo_home_untouched(
         self, isolated_cron_profile_home, monkeypatch
     ):
         import cron.scheduler as sched
@@ -350,7 +350,7 @@ class TestRunJobProfileContext:
         success, *_ = sched.run_job(job)
 
         assert success is True
-        assert observed["hermes_home_during_init"] == str(root)
+        assert observed["pichkoo_home_during_init"] == str(root)
         assert os.environ["PICHKOO_HOME"] == str(root)
 
     def test_run_job_falls_back_on_missing_runtime_profile(
@@ -374,7 +374,7 @@ class TestRunJobProfileContext:
 
         assert success is True, f"run_job should fallback, not fail: error={error!r}"
         # Verify it used the default home, not the missing profile
-        assert observed["hermes_home_during_init"] == str(root)
+        assert observed["pichkoo_home_during_init"] == str(root)
         assert os.environ["PICHKOO_HOME"] == str(root)
 
 
@@ -400,11 +400,11 @@ class TestTickProfilePartition:
         success, _output, _response, error = sched.run_job(job)
 
         assert success is True, error
-        assert observed["hermes_home_during_init"] == str(profile_home.resolve())
+        assert observed["pichkoo_home_during_init"] == str(profile_home.resolve())
         assert os.environ.get("TERMINAL_CWD", "") != fake_workdir, \
             "TERMINAL_CWD should be restored after job"
         assert os.environ["PICHKOO_HOME"] == str(root)
-        assert sched._get_hermes_home() == root
+        assert sched._get_pichkoo_home() == root
 
     def test_profile_jobs_run_sequentially(self, isolated_cron_profile_home, monkeypatch):
         import threading

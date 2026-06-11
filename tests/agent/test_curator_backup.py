@@ -22,7 +22,7 @@ def backup_env(monkeypatch, tmp_path):
     monkeypatch.setenv("PICHKOO_HOME", str(home))
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-    # Reload so get_hermes_home picks up the env var fresh.
+    # Reload so get_pichkoo_home picks up the env var fresh.
     import pichkoo_constants
     importlib.reload(pichkoo_constants)
     from agent import curator_backup

@@ -1296,15 +1296,15 @@ class LineAdapter(BasePlatformAdapter):
             return web.Response(status=404, text="not found")
 
         try:
-            from pichkoo_constants import get_hermes_home
-            hermes_home = Path(get_hermes_home()).resolve()
+            from pichkoo_constants import get_pichkoo_home
+            pichkoo_home = Path(get_pichkoo_home()).resolve()
         except Exception:
-            hermes_home = Path.home().joinpath(".pichkoo").resolve()
+            pichkoo_home = Path.home().joinpath(".pichkoo").resolve()
 
         allowed_roots = {
             Path(tempfile.gettempdir()).resolve(),
             Path("/tmp").resolve(),  # → /private/tmp on macOS
-            hermes_home,
+            pichkoo_home,
         }
         resolved = path.resolve()
         if not any(_is_relative_to(resolved, r) for r in allowed_roots):

@@ -28,7 +28,7 @@ import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
-from pichkoo_constants import get_bundled_skills_dir, get_hermes_home, get_optional_skills_dir
+from pichkoo_constants import get_bundled_skills_dir, get_pichkoo_home, get_optional_skills_dir
 from agent.skill_utils import is_excluded_skill_path
 from typing import Dict, List, Tuple
 from utils import atomic_replace
@@ -36,7 +36,7 @@ from utils import atomic_replace
 logger = logging.getLogger(__name__)
 
 
-PICHKOO_HOME = get_hermes_home()
+PICHKOO_HOME = get_pichkoo_home()
 SKILLS_DIR = PICHKOO_HOME / "skills"
 MANIFEST_FILE = SKILLS_DIR / ".bundled_manifest"
 

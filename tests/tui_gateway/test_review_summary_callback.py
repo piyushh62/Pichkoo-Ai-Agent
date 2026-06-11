@@ -22,7 +22,7 @@ def server():
         "sys.modules",
         {
             "pichkoo_constants": MagicMock(
-                get_hermes_home=MagicMock(return_value="/tmp/hermes_test_review_summary")
+                get_pichkoo_home=MagicMock(return_value="/tmp/pichkoo_test_review_summary")
             ),
             "pichkoo_cli.env_loader": MagicMock(),
             "pichkoo_cli.banner": MagicMock(),

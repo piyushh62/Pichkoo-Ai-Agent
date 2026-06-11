@@ -241,10 +241,10 @@ def test_load_website_blocklist_wraps_shared_file_read_errors(tmp_path, monkeypa
     assert result["rules"] == []  # shared file rules skipped
 
 
-def test_check_website_access_uses_dynamic_hermes_home(monkeypatch, tmp_path):
-    hermes_home = tmp_path / "pichkoo-home"
-    hermes_home.mkdir()
-    (hermes_home / "config.yaml").write_text(
+def test_check_website_access_uses_dynamic_pichkoo_home(monkeypatch, tmp_path):
+    pichkoo_home = tmp_path / "pichkoo-home"
+    pichkoo_home.mkdir()
+    (pichkoo_home / "config.yaml").write_text(
         yaml.safe_dump(
             {
                 "security": {
@@ -259,11 +259,11 @@ def test_check_website_access_uses_dynamic_hermes_home(monkeypatch, tmp_path):
         encoding="utf-8",
     )
 
-    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
     # Invalidate the module-level cache so the new PICHKOO_HOME is picked up.
     # A prior test may have cached a default policy (enabled=False) under the
-    # old PICHKOO_HOME set by the autouse _isolate_hermes_home fixture.
+    # old PICHKOO_HOME set by the autouse _isolate_pichkoo_home fixture.
     from tools.website_policy import invalidate_cache
     invalidate_cache()
 

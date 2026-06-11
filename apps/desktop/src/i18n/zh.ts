@@ -882,7 +882,7 @@ export const zh: Translations = {
     noSessions: '暂无会话。',
     gatewayRunning: '消息网关运行中',
     gatewayStopped: '消息网关已停止',
-    hermesActiveSessions: (version, count) => `Pichkoo ${version} · 活跃会话 ${count}`,
+    pichkooActiveSessions: (version, count) => `Pichkoo ${version} · 活跃会话 ${count}`,
     restartMessaging: '重启消息服务',
     updatePichkoo: '更新 Pichkoo',
     actionRunning: '运行中',

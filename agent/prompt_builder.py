@@ -11,7 +11,7 @@ import threading
 from collections import OrderedDict
 from pathlib import Path
 
-from pichkoo_constants import get_hermes_home, get_skills_dir, is_wsl
+from pichkoo_constants import get_pichkoo_home, get_skills_dir, is_wsl
 from typing import Optional
 
 from agent.runtime_cwd import resolve_agent_cwd
@@ -77,7 +77,7 @@ def _find_git_root(start: Path) -> Optional[Path]:
 _PICHKOO_MD_NAMES = (".pichkoo.md", "PICHKOO.md")
 
 
-def _find_hermes_md(cwd: Path) -> Optional[Path]:
+def _find_pichkoo_md(cwd: Path) -> Optional[Path]:
     """Discover the nearest ``.pichkoo.md`` or ``PICHKOO.md``.
 
     Search order: *cwd* first, then each parent directory up to (and
@@ -943,7 +943,7 @@ _SKILLS_SNAPSHOT_VERSION = 1
 
 
 def _skills_prompt_snapshot_path() -> Path:
-    return get_hermes_home() / ".skills_prompt_snapshot.json"
+    return get_pichkoo_home() / ".skills_prompt_snapshot.json"
 
 
 def clear_skills_system_prompt_cache(*, clear_snapshot: bool = False) -> None:
@@ -1422,12 +1422,12 @@ def load_soul_md() -> Optional[str]:
     ``skip_soul=True`` so SOUL.md isn't injected twice.
     """
     try:
-        from pichkoo_cli.config import ensure_hermes_home
-        ensure_hermes_home()
+        from pichkoo_cli.config import ensure_pichkoo_home
+        ensure_pichkoo_home()
     except Exception as e:
         logger.debug("Could not ensure PICHKOO_HOME before loading SOUL.md: %s", e)
 
-    soul_path = get_hermes_home() / "SOUL.md"
+    soul_path = get_pichkoo_home() / "SOUL.md"
     if not soul_path.exists():
         return None
     try:
@@ -1442,26 +1442,26 @@ def load_soul_md() -> Optional[str]:
         return None
 
 
-def _load_hermes_md(cwd_path: Path) -> str:
+def _load_pichkoo_md(cwd_path: Path) -> str:
     """.pichkoo.md / PICHKOO.md — walk to git root."""
-    hermes_md_path = _find_hermes_md(cwd_path)
-    if not hermes_md_path:
+    pichkoo_md_path = _find_pichkoo_md(cwd_path)
+    if not pichkoo_md_path:
         return ""
     try:
-        content = hermes_md_path.read_text(encoding="utf-8").strip()
+        content = pichkoo_md_path.read_text(encoding="utf-8").strip()
         if not content:
             return ""
         content = _strip_yaml_frontmatter(content)
-        rel = hermes_md_path.name
+        rel = pichkoo_md_path.name
         try:
-            rel = str(hermes_md_path.relative_to(cwd_path))
+            rel = str(pichkoo_md_path.relative_to(cwd_path))
         except ValueError:
             pass
         content = _scan_context_content(content, rel)
         result = f"## {rel}\n\n{content}"
         return _truncate_content(result, ".pichkoo.md")
     except Exception as e:
-        logger.debug("Could not read %s: %s", hermes_md_path, e)
+        logger.debug("Could not read %s: %s", pichkoo_md_path, e)
         return ""
 
 
@@ -1550,7 +1550,7 @@ def build_context_files_prompt(cwd: Optional[str] = None, skip_soul: bool = Fals
 
     # Priority-based project context: first match wins
     project_context = (
-        _load_hermes_md(cwd_path)
+        _load_pichkoo_md(cwd_path)
         or _load_agents_md(cwd_path)
         or _load_claude_md(cwd_path)
         or _load_cursorrules(cwd_path)

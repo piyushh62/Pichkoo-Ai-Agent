@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 
 # File + directory layout (under $PICHKOO_HOME):
 #
@@ -37,7 +37,7 @@ from pichkoo_constants import get_hermes_home
 
 
 def _root() -> Path:
-    return Path(get_hermes_home()) / "workspace" / "meetings"
+    return Path(get_pichkoo_home()) / "workspace" / "meetings"
 
 
 def _active_file() -> Path:

@@ -52,7 +52,7 @@ from pathlib import Path
 from typing import Callable, Dict, Any, Optional
 from urllib.parse import urljoin
 
-from pichkoo_constants import display_hermes_home
+from pichkoo_constants import display_pichkoo_home
 
 logger = logging.getLogger(__name__)
 def get_env_value(name, default=None):
@@ -75,7 +75,7 @@ from tools.tool_backend_helpers import (
     prefers_gateway,
     resolve_openai_audio_api_key,
 )
-from tools.xai_http import hermes_xai_user_agent
+from tools.xai_http import pichkoo_xai_user_agent
 
 # ---------------------------------------------------------------------------
 # Lazy imports -- providers are imported only when actually used to avoid
@@ -198,8 +198,8 @@ GEMINI_TTS_CHANNELS = 1
 GEMINI_TTS_SAMPLE_WIDTH = 2  # 16-bit PCM (L16)
 
 def _get_default_output_dir() -> str:
-    from pichkoo_constants import get_hermes_dir
-    return str(get_hermes_dir("cache/audio", "audio_cache"))
+    from pichkoo_constants import get_pichkoo_dir
+    return str(get_pichkoo_dir("cache/audio", "audio_cache"))
 
 DEFAULT_OUTPUT_DIR = _get_default_output_dir()
 
@@ -1169,7 +1169,7 @@ def _generate_xai_tts(text: str, output_path: str, tts_config: Dict[str, Any]) -
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "User-Agent": hermes_xai_user_agent(),
+            "User-Agent": pichkoo_xai_user_agent(),
         },
         json=payload,
         timeout=60,
@@ -1410,8 +1410,8 @@ def _resolve_gemini_persona_prompt_path(gemini_config: Dict[str, Any]) -> Option
     path = Path(expanded).expanduser()
     if not path.is_absolute():
         try:
-            from pichkoo_constants import get_hermes_home
-            path = get_hermes_home() / path
+            from pichkoo_constants import get_pichkoo_home
+            path = get_pichkoo_home() / path
         except Exception:
             path = Path.cwd() / path
     return path
@@ -1812,8 +1812,8 @@ def _get_piper_voices_dir() -> Path:
     Resolves to ``~/.pichkoo/cache/piper-voices/`` under the active
     PICHKOO_HOME so voice downloads follow profile boundaries.
     """
-    from pichkoo_constants import get_hermes_dir
-    root = Path(get_hermes_dir("cache/piper-voices", "piper_voices_cache"))
+    from pichkoo_constants import get_pichkoo_dir
+    root = Path(get_pichkoo_dir("cache/piper-voices", "piper_voices_cache"))
     root.mkdir(parents=True, exist_ok=True)
     return root
 
@@ -2712,7 +2712,7 @@ TTS_SCHEMA = {
             },
             "output_path": {
                 "type": "string",
-                "description": f"Optional custom file path to save the audio. Defaults to {display_hermes_home()}/audio_cache/<timestamp>.mp3"
+                "description": f"Optional custom file path to save the audio. Defaults to {display_pichkoo_home()}/audio_cache/<timestamp>.mp3"
             }
         },
         "required": ["text"]

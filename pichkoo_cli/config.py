@@ -316,7 +316,7 @@ def get_managed_system() -> Optional[str]:
             return "NixOS"
         return _MANAGED_SYSTEM_NAMES.get(normalized, raw)
 
-    managed_marker = get_hermes_home() / ".managed"
+    managed_marker = get_pichkoo_home() / ".managed"
     if managed_marker.exists():
         return "NixOS"
     return None
@@ -368,7 +368,7 @@ def detect_install_method(project_root: Optional[Path] = None) -> str:
     container". Without that fallback such installs fall through to the
     ``.git``/pip checks and behave like any off-path install. See issue #34397.
     """
-    stamp = get_hermes_home() / ".install_method"
+    stamp = get_pichkoo_home() / ".install_method"
     try:
         method = stamp.read_text(encoding="utf-8").strip().lower()
         if method:
@@ -387,7 +387,7 @@ def detect_install_method(project_root: Optional[Path] = None) -> str:
 
 def stamp_install_method(method: str) -> None:
     """Write the install method to ~/.pichkoo/.install_method."""
-    stamp = get_hermes_home() / ".install_method"
+    stamp = get_pichkoo_home() / ".install_method"
     try:
         stamp.parent.mkdir(parents=True, exist_ok=True)
         stamp.write_text(method + "\n", encoding="utf-8")
@@ -542,7 +542,7 @@ def managed_error(action: str = "modify configuration"):
 def get_container_exec_info() -> Optional[dict]:
     """Read container mode metadata from PICHKOO_HOME/.container-mode.
 
-    Returns a dict with keys: backend, container_name, exec_user, hermes_bin
+    Returns a dict with keys: backend, container_name, exec_user, pichkoo_bin
     or None if container mode is not active, we're already inside the
     container, or PICHKOO_DEV=1 is set.
 
@@ -557,7 +557,7 @@ def get_container_exec_info() -> Optional[dict]:
     if is_container():
         return None
 
-    container_mode_file = get_hermes_home() / ".container-mode"
+    container_mode_file = get_pichkoo_home() / ".container-mode"
 
     try:
         info = {}
@@ -574,13 +574,13 @@ def get_container_exec_info() -> Optional[dict]:
     backend = info.get("backend", "docker")
     container_name = info.get("container_name", "pichkoo-agent")
     exec_user = info.get("exec_user", "pichkoo")
-    hermes_bin = info.get("hermes_bin", "/data/current-package/bin/pichkoo")
+    pichkoo_bin = info.get("pichkoo_bin", "/data/current-package/bin/pichkoo")
 
     return {
         "backend": backend,
         "container_name": container_name,
         "exec_user": exec_user,
-        "hermes_bin": hermes_bin,
+        "pichkoo_bin": pichkoo_bin,
     }
 
 
@@ -589,28 +589,28 @@ def get_container_exec_info() -> Optional[dict]:
 # =============================================================================
 
 # Re-export from pichkoo_constants — canonical definition lives there.
-from pichkoo_constants import get_hermes_home  # noqa: F811,E402
+from pichkoo_constants import get_pichkoo_home  # noqa: F811,E402
 from utils import atomic_replace
 
 def get_config_path() -> Path:
     """Get the main config file path."""
-    return get_hermes_home() / "config.yaml"
+    return get_pichkoo_home() / "config.yaml"
 
 def get_env_path() -> Path:
     """Get the .env file path (for API keys)."""
-    return get_hermes_home() / ".env"
+    return get_pichkoo_home() / ".env"
 
 def get_project_root() -> Path:
     """Get the project installation directory."""
     return Path(__file__).parent.parent.resolve()
 
-def _resolve_hermes_uid_gid() -> tuple[Optional[int], Optional[int]]:
+def _resolve_pichkoo_uid_gid() -> tuple[Optional[int], Optional[int]]:
     """Read the PICHKOO_UID / PICHKOO_GID env vars set by Docker deployments.
 
     Docker containers running Pichkoo commonly set these to map the in-container
     user to a host user so volume-mounted state files end up with the right
     ownership. The entrypoint chowns the top-level PICHKOO_HOME once, but
-    subdirectories created at runtime by ``ensure_hermes_home()`` (especially
+    subdirectories created at runtime by ``ensure_pichkoo_home()`` (especially
     for profile namespaces under ``profiles/<name>/``) need the same chown
     or they land as ``root:root`` and block subsequent uid-mapped workers
     with ``PermissionError [Errno 13]``. See #34107.
@@ -634,7 +634,7 @@ def _resolve_hermes_uid_gid() -> tuple[Optional[int], Optional[int]]:
     return uid, gid
 
 
-def _chown_to_hermes_uid(path) -> None:
+def _chown_to_pichkoo_uid(path) -> None:
     """Chown ``path`` to ``PICHKOO_UID:PICHKOO_GID`` if those env vars are set.
 
     No-op when:
@@ -643,10 +643,10 @@ def _chown_to_hermes_uid(path) -> None:
       - On Windows (chown semantics don't apply)
 
     Used by :func:`_secure_dir` to keep ownership consistent across all
-    directories created by :func:`ensure_hermes_home` on Docker deployments.
+    directories created by :func:`ensure_pichkoo_home` on Docker deployments.
     See #34107.
     """
-    uid, gid = _resolve_hermes_uid_gid()
+    uid, gid = _resolve_pichkoo_uid_gid()
     if uid is None and gid is None:
         return
     try:
@@ -692,7 +692,7 @@ def _secure_dir(path):
         os.chmod(path, mode)
     except (OSError, NotImplementedError):
         pass
-    _chown_to_hermes_uid(path)
+    _chown_to_pichkoo_uid(path)
 
 
 def _is_container() -> bool:
@@ -747,18 +747,18 @@ def _ensure_default_soul_md(home: Path) -> None:
     _secure_file(soul_path)
 
 
-def ensure_hermes_home():
+def ensure_pichkoo_home():
     """Ensure ~/.pichkoo directory structure exists with secure permissions.
 
     In managed mode (NixOS), dirs are created by the activation script with
     setgid + group-writable (2770). We skip mkdir and set umask(0o007) so
     any files created (e.g. SOUL.md) are group-writable (0660).
     """
-    home = get_hermes_home()
+    home = get_pichkoo_home()
     if is_managed():
         old_umask = os.umask(0o007)
         try:
-            _ensure_hermes_home_managed(home)
+            _ensure_pichkoo_home_managed(home)
         finally:
             os.umask(old_umask)
     else:
@@ -774,7 +774,7 @@ def ensure_hermes_home():
         _ensure_default_soul_md(home)
 
 
-def _ensure_hermes_home_managed(home: Path):
+def _ensure_pichkoo_home_managed(home: Path):
     """Managed-mode variant: verify dirs exist (activation creates them), seed SOUL.md."""
     if not home.is_dir():
         raise RuntimeError(
@@ -4617,7 +4617,7 @@ def migrate_config(interactive: bool = True, quiet: bool = False) -> Dict[str, A
             # Scan ``$PICHKOO_HOME/plugins/`` for currently installed user plugins.
             grandfathered: List[str] = []
             try:
-                user_plugins_dir = get_hermes_home() / "plugins"
+                user_plugins_dir = get_pichkoo_home() / "plugins"
                 if user_plugins_dir.is_dir():
                     for child in sorted(user_plugins_dir.iterdir()):
                         if not child.is_dir():
@@ -4674,11 +4674,11 @@ def migrate_config(interactive: bool = True, quiet: bool = False) -> Dict[str, A
     #      base_url, api_key, timeout, extra_body) — canonical slot for
     #      routing the curator fork to a cheaper aux model.
     #   3. Creates `~/.pichkoo/logs/curator/` if missing (belt-and-suspenders
-    #      on top of ensure_hermes_home() — old profiles that predate this
+    #      on top of ensure_pichkoo_home() — old profiles that predate this
     #      migration still benefit).
     if current_ver < 23:
         try:
-            curator_dir = get_hermes_home() / "logs" / "curator"
+            curator_dir = get_pichkoo_home() / "logs" / "curator"
             curator_dir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             results["warnings"].append(f"Could not create {curator_dir}: {e}")
@@ -5116,7 +5116,7 @@ def cfg_get(cfg: Optional[Dict[str, Any]], *keys: str, default: Any = None) -> A
       3. ``cfg is None`` (callers sometimes pass ``load_config() or None``).
 
     Named ``cfg_get`` rather than ``cfg_path`` to avoid shadowing the
-    ubiquitous ``cfg_path = _hermes_home / "config.yaml"`` local variable
+    ubiquitous ``cfg_path = _pichkoo_home / "config.yaml"`` local variable
     that appears in gateway/run.py, cron/scheduler.py, main.py, etc.
 
     Explicit ``None`` values are returned as-is (matches ``dict.get(key,
@@ -5317,7 +5317,7 @@ def apply_terminal_config_to_env(
 
 def _load_config_impl(*, want_deepcopy: bool) -> Dict[str, Any]:
     with _CONFIG_LOCK:
-        ensure_hermes_home()
+        ensure_pichkoo_home()
         config_path = get_config_path()
         path_key = str(config_path)
 
@@ -5457,7 +5457,7 @@ def save_config(config: Dict[str, Any]):
             return
         from utils import atomic_yaml_write
 
-        ensure_hermes_home()
+        ensure_pichkoo_home()
         config_path = get_config_path()
         current_normalized = _normalize_root_model_keys(_normalize_max_turns_config(config))
         normalized = current_normalized
@@ -5727,7 +5727,7 @@ def save_env_value(key: str, value: str):
     value = value.replace("\n", "").replace("\r", "")
     # API keys / tokens must be ASCII — strip non-ASCII with a warning.
     value = _check_non_ascii_credential(key, value)
-    ensure_hermes_home()
+    ensure_pichkoo_home()
     env_path = get_env_path()
 
     # On Windows, open() defaults to the system locale (cp1252) which can
@@ -6203,7 +6203,7 @@ def set_config_value(key: str, value: str):
     _set_nested(user_config, key, value)
     
     # Write only user config back (not the full merged defaults)
-    ensure_hermes_home()
+    ensure_pichkoo_home()
     from utils import atomic_yaml_write
     atomic_yaml_write(config_path, user_config, sort_keys=False)
     

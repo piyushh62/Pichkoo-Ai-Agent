@@ -135,7 +135,7 @@ def _clone_all_copytree_ignore(source_dir: Path):
     clone.
     """
     source_resolved = source_dir.resolve()
-    is_default_source = source_resolved == _get_default_hermes_home().resolve()
+    is_default_source = source_resolved == _get_default_pichkoo_home().resolve()
 
     def _ignore(directory: str, names: List[str]) -> List[str]:
         ignored: list[str] = []
@@ -183,7 +183,7 @@ _DEFAULT_EXPORT_EXCLUDE_ROOT = frozenset({
     ".env",                 # API keys (dotenv)
     "auth.lock", "active_profile", ".update_check",
     "errors.log",
-    ".hermes_history",
+    ".pichkoo_history",
     # Caches (regenerated on use)
     "image_cache", "audio_cache", "document_cache",
     "browser_screenshots", "checkpoints",
@@ -220,23 +220,23 @@ def _get_profiles_root() -> Path:
     ``~/.pichkoo``, profiles live under ``PICHKOO_HOME/profiles/`` so
     they persist on the mounted volume.
     """
-    return _get_default_hermes_home() / "profiles"
+    return _get_default_pichkoo_home() / "profiles"
 
 
-def _get_default_hermes_home() -> Path:
+def _get_default_pichkoo_home() -> Path:
     """Return the default (pre-profile) PICHKOO_HOME path.
 
     In standard deployments this is ``~/.pichkoo``.
     In Docker/custom deployments where PICHKOO_HOME is outside ``~/.pichkoo``
     (e.g. ``/opt/data``), returns PICHKOO_HOME directly.
     """
-    from pichkoo_constants import get_default_hermes_root
-    return get_default_hermes_root()
+    from pichkoo_constants import get_default_pichkoo_root
+    return get_default_pichkoo_root()
 
 
 def _get_active_profile_path() -> Path:
     """Return the path to the sticky active_profile file."""
-    return _get_default_hermes_home() / "active_profile"
+    return _get_default_pichkoo_home() / "active_profile"
 
 
 def _get_wrapper_dir() -> Path:
@@ -300,7 +300,7 @@ def get_profile_dir(name: str) -> Path:
     """Resolve a profile name to its PICHKOO_HOME directory."""
     canon = normalize_profile_name(name)
     if canon == "default":
-        return _get_default_hermes_home()
+        return _get_default_pichkoo_home()
     return _get_profiles_root() / canon
 
 
@@ -382,7 +382,7 @@ def create_wrapper_script(name: str, target: Optional[str] = None) -> Optional[P
     if is_windows:
         wrapper_path = wrapper_dir / f"{canon}.bat"
         try:
-            wrapper_path.write_text(f"@echo off\r\nhermes -p {profile} %*\r\n")
+            wrapper_path.write_text(f"@echo off\r\npichkoo -p {profile} %*\r\n")
             return wrapper_path
         except OSError as e:
             print(f"⚠ Could not create wrapper at {wrapper_path}: {e}")
@@ -655,7 +655,7 @@ def list_profiles() -> List[ProfileInfo]:
     wrapper_dir = _get_wrapper_dir()
 
     # Default profile
-    default_home = _get_default_hermes_home()
+    default_home = _get_default_pichkoo_home()
     if default_home.is_dir():
         model, provider = _read_config_model(default_home)
         dist_name, dist_version, dist_source = _read_distribution_meta(default_home)
@@ -775,8 +775,8 @@ def create_profile(
     if clone_from is not None or clone_all or clone_config:
         if clone_from is None:
             # Default: clone from active profile
-            from pichkoo_constants import get_hermes_home
-            source_dir = get_hermes_home()
+            from pichkoo_constants import get_pichkoo_home
+            source_dir = get_pichkoo_home()
         else:
             clone_from = normalize_profile_name(clone_from)
             validate_profile_name(clone_from)
@@ -1294,11 +1294,11 @@ def get_active_profile_name() -> str:
     Returns the profile name if PICHKOO_HOME points into ``~/.pichkoo/profiles/<name>``.
     Returns ``"custom"`` if PICHKOO_HOME is set to an unrecognized path.
     """
-    from pichkoo_constants import get_hermes_home
-    hermes_home = get_hermes_home()
-    resolved = hermes_home.resolve()
+    from pichkoo_constants import get_pichkoo_home
+    pichkoo_home = get_pichkoo_home()
+    resolved = pichkoo_home.resolve()
 
-    default_resolved = _get_default_hermes_home().resolve()
+    default_resolved = _get_default_pichkoo_home().resolve()
     if resolved == default_resolved:
         return "default"
 
@@ -1506,7 +1506,7 @@ def import_profile(archive_path: str, name: Optional[str] = None) -> Path:
     profiles_root = _get_profiles_root()
     profiles_root.mkdir(parents=True, exist_ok=True)
 
-    with tempfile.TemporaryDirectory(prefix="hermes_profile_import_") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="pichkoo_profile_import_") as tmpdir:
         staging_root = Path(tmpdir)
         _safe_extract_profile_archive(archive, staging_root)
 
@@ -1532,13 +1532,13 @@ def import_profile(archive_path: str, name: Optional[str] = None) -> Path:
 
 def _migrate_honcho_profile_host(old_name: str, new_name: str, new_dir: Path) -> None:
     """Rename Honcho host blocks for a renamed profile without changing peers."""
-    old_host = f"hermes_{old_name}"
+    old_host = f"pichkoo_{old_name}"
     legacy_old_host = f"pichkoo.{old_name}"
-    new_host = f"hermes_{new_name}"
+    new_host = f"pichkoo_{new_name}"
 
     candidates = [
         new_dir / "honcho.json",
-        _get_default_hermes_home() / "honcho.json",
+        _get_default_pichkoo_home() / "honcho.json",
         Path.home() / ".honcho" / "config.json",
     ]
 
@@ -1570,7 +1570,7 @@ def _migrate_honcho_profile_host(old_name: str, new_name: str, new_dir: Path) ->
 
         block = hosts[source_host]
         if isinstance(block, dict) and "aiPeer" not in block:
-            if source_host.startswith("hermes_"):
+            if source_host.startswith("pichkoo_"):
                 bare = source_host.split("_", 1)[1]
             else:
                 bare = source_host.split(".", 1)[1] if "." in source_host else source_host

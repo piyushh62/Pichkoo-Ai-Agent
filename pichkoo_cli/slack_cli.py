@@ -131,9 +131,9 @@ def slack_manifest_command(args) -> int:
         if isinstance(write_target, bool) and write_target:
             # --write with no value → default location
             try:
-                from pichkoo_constants import get_hermes_home
+                from pichkoo_constants import get_pichkoo_home
 
-                target = Path(get_hermes_home()) / "slack-manifest.json"
+                target = Path(get_pichkoo_home()) / "slack-manifest.json"
             except Exception:
                 target = Path(os.environ.get("PICHKOO_HOME") or str(Path.home() / ".pichkoo")) / "slack-manifest.json"
         else:

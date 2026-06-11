@@ -276,7 +276,7 @@ class TestGmiAuxiliary:
         headers = mock_openai.call_args.kwargs.get("default_headers", {})
         assert headers.get("User-Agent", "").startswith("PichkooAgent/")
 
-    def test_gmi_profile_declares_hermes_user_agent(self):
+    def test_gmi_profile_declares_pichkoo_user_agent(self):
         """The GMI plugin sets a PichkooAgent/<ver> User-Agent on its profile."""
         from providers import get_provider_profile
 
@@ -355,9 +355,9 @@ class TestGmiMainFlow:
             _model_flow_api_key_provider(load_config(), "gmi", "old-model")
 
         import yaml
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
-        config = yaml.safe_load((get_hermes_home() / "config.yaml").read_text()) or {}
+        config = yaml.safe_load((get_pichkoo_home() / "config.yaml").read_text()) or {}
         model_cfg = config.get("model")
         assert isinstance(model_cfg, dict)
         assert model_cfg["provider"] == "gmi"

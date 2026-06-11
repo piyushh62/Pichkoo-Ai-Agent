@@ -1,8 +1,8 @@
-# nix/overlays.nix — Expose pkgs.hermes-agent for external NixOS configs
+# nix/overlays.nix — Expose pkgs.pichkoo-agent for external NixOS configs
 { inputs, ... }:
 {
   flake.overlays.default = final: _: {
-    hermes-agent = final.callPackage ./pichkoo-ai-agent.nix {
+    pichkoo-agent = final.callPackage ./pichkoo-ai-agent.nix {
       inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
       npm-lockfile-fix = inputs.npm-lockfile-fix.packages.${final.stdenv.hostPlatform.system}.default;
       rev = inputs.self.rev or null;

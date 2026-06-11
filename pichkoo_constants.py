@@ -18,7 +18,7 @@ _PICHKOO_HOME_OVERRIDE: ContextVar[str | object] = ContextVar(
 )
 
 
-def set_hermes_home_override(path: str | Path | None) -> Token:
+def set_pichkoo_home_override(path: str | Path | None) -> Token:
     """Set a context-local Pichkoo home override and return its reset token.
 
     This is for in-process, per-task scoping.  It deliberately does not mutate
@@ -28,12 +28,12 @@ def set_hermes_home_override(path: str | Path | None) -> Token:
     return _PICHKOO_HOME_OVERRIDE.set(value)
 
 
-def reset_hermes_home_override(token: Token) -> None:
+def reset_pichkoo_home_override(token: Token) -> None:
     """Restore the previous context-local Pichkoo home override."""
     _PICHKOO_HOME_OVERRIDE.reset(token)
 
 
-def get_hermes_home_override() -> str | None:
+def get_pichkoo_home_override() -> str | None:
     """Return the active context-local Pichkoo home override, if any."""
     override = _PICHKOO_HOME_OVERRIDE.get()
     if override is _UNSET or not override:
@@ -41,7 +41,7 @@ def get_hermes_home_override() -> str | None:
     return str(override)
 
 
-def _get_platform_default_hermes_home() -> Path:
+def _get_platform_default_pichkoo_home() -> Path:
     """Return the platform-native default Pichkoo home path."""
     if sys.platform == "win32":
         local_appdata = os.environ.get("LOCALAPPDATA", "").strip()
@@ -50,7 +50,7 @@ def _get_platform_default_hermes_home() -> Path:
     return Path.home() / ".pichkoo"
 
 
-def get_hermes_home() -> Path:
+def get_pichkoo_home() -> Path:
     """Return the Pichkoo home directory (default: platform-native path).
 
     Reads PICHKOO_HOME env var, falls back to the platform-native default.
@@ -66,7 +66,7 @@ def get_hermes_home() -> Path:
     template in ``pichkoo_cli/gateway.py`` and the kanban dispatcher in
     ``pichkoo_cli/kanban_db.py``).  See https://github.com/piyushh62/Pichkoo-AI-Agent/issues/18594.
     """
-    override = get_hermes_home_override()
+    override = get_pichkoo_home_override()
     if override:
         return Path(override)
 
@@ -79,7 +79,7 @@ def get_hermes_home() -> Path:
     global _profile_fallback_warned
     if not _profile_fallback_warned:
         try:
-            fallback_home = _get_platform_default_hermes_home()
+            fallback_home = _get_platform_default_pichkoo_home()
             active_path = fallback_home / "active_profile"
             active = active_path.read_text().strip() if active_path.exists() else ""
         except (UnicodeDecodeError, OSError):
@@ -105,10 +105,10 @@ def get_hermes_home() -> Path:
             except Exception:
                 pass
 
-    return _get_platform_default_hermes_home()
+    return _get_platform_default_pichkoo_home()
 
 
-def get_default_hermes_root() -> Path:
+def get_default_pichkoo_root() -> Path:
     """Return the root Pichkoo directory for profile-level operations.
 
     In standard deployments this is the platform-native Pichkoo home
@@ -125,7 +125,7 @@ def get_default_hermes_root() -> Path:
 
     Import-safe — no dependencies beyond stdlib.
     """
-    native_home = _get_platform_default_hermes_home()
+    native_home = _get_platform_default_pichkoo_home()
     env_home = os.environ.get("PICHKOO_HOME", "")
     if not env_home:
         return native_home
@@ -179,7 +179,7 @@ def get_optional_skills_dir(default: Path | None = None) -> Path:
         return packaged
     if default is not None:
         return default
-    return get_hermes_home() / "optional-skills"
+    return get_pichkoo_home() / "optional-skills"
 
 
 def get_optional_mcps_dir(default: Path | None = None) -> Path:
@@ -198,7 +198,7 @@ def get_optional_mcps_dir(default: Path | None = None) -> Path:
         return packaged
     if default is not None:
         return default
-    return get_hermes_home() / "optional-mcps"
+    return get_pichkoo_home() / "optional-mcps"
 
 
 def get_bundled_skills_dir(default: Path | None = None) -> Path:
@@ -218,10 +218,10 @@ def get_bundled_skills_dir(default: Path | None = None) -> Path:
         return packaged
     if default is not None:
         return default
-    return get_hermes_home() / "skills"
+    return get_pichkoo_home() / "skills"
 
 
-def get_hermes_dir(new_subpath: str, old_name: str) -> Path:
+def get_pichkoo_dir(new_subpath: str, old_name: str) -> Path:
     """Resolve a Pichkoo subdirectory with backward compatibility.
 
     New installs get the consolidated layout (e.g. ``cache/images``).
@@ -235,14 +235,14 @@ def get_hermes_dir(new_subpath: str, old_name: str) -> Path:
     Returns:
         Absolute ``Path`` — old location if it exists on disk, otherwise the new one.
     """
-    home = get_hermes_home()
+    home = get_pichkoo_home()
     old_path = home / old_name
     if old_path.exists():
         return old_path
     return home / new_subpath
 
 
-def display_hermes_home() -> str:
+def display_pichkoo_home() -> str:
     """Return a user-friendly display string for the current PICHKOO_HOME.
 
     Uses ``~/`` shorthand for readability::
@@ -253,9 +253,9 @@ def display_hermes_home() -> str:
 
     Use this in **user-facing** print/log messages instead of hardcoding
     ``~/.pichkoo``.  For code that needs a real ``Path``, use
-    :func:`get_hermes_home` instead.
+    :func:`get_pichkoo_home` instead.
     """
-    home = get_hermes_home()
+    home = get_pichkoo_home()
     try:
         return "~/" + str(home.relative_to(Path.home()))
     except ValueError:
@@ -299,10 +299,10 @@ def get_subprocess_home() -> str | None:
     Activation is directory-based: if the ``home/`` subdirectory doesn't
     exist, returns ``None`` and behavior is unchanged.
     """
-    hermes_home = get_hermes_home_override() or os.getenv("PICHKOO_HOME")
-    if not hermes_home:
+    pichkoo_home = get_pichkoo_home_override() or os.getenv("PICHKOO_HOME")
+    if not pichkoo_home:
         return None
-    profile_home = os.path.join(hermes_home, "home")
+    profile_home = os.path.join(pichkoo_home, "home")
     if os.path.isdir(profile_home):
         return profile_home
     return None
@@ -397,21 +397,21 @@ def is_container() -> bool:
 def get_config_path() -> Path:
     """Return the path to ``config.yaml`` under PICHKOO_HOME.
 
-    Replaces the ``get_hermes_home() / "config.yaml"`` pattern repeated
+    Replaces the ``get_pichkoo_home() / "config.yaml"`` pattern repeated
     in 7+ files (skill_utils.py, pichkoo_logging.py, pichkoo_time.py, etc.).
     """
-    return get_hermes_home() / "config.yaml"
+    return get_pichkoo_home() / "config.yaml"
 
 
 def get_skills_dir() -> Path:
     """Return the path to the skills directory under PICHKOO_HOME."""
-    return get_hermes_home() / "skills"
+    return get_pichkoo_home() / "skills"
 
 
 
 def get_env_path() -> Path:
     """Return the path to the ``.env`` file under PICHKOO_HOME."""
-    return get_hermes_home() / ".env"
+    return get_pichkoo_home() / ".env"
 
 
 # ─── Network Preferences ─────────────────────────────────────────────────────
@@ -439,7 +439,7 @@ def apply_ipv4_preference(force: bool = False) -> None:
     import socket
 
     # Guard against double-patching
-    if getattr(socket.getaddrinfo, "_hermes_ipv4_patched", False):
+    if getattr(socket.getaddrinfo, "_pichkoo_ipv4_patched", False):
         return
 
     _original_getaddrinfo = socket.getaddrinfo
@@ -455,7 +455,7 @@ def apply_ipv4_preference(force: bool = False) -> None:
                 return _original_getaddrinfo(host, port, family, type, proto, flags)
         return _original_getaddrinfo(host, port, family, type, proto, flags)
 
-    _ipv4_getaddrinfo._hermes_ipv4_patched = True  # type: ignore[attr-defined]
+    _ipv4_getaddrinfo._pichkoo_ipv4_patched = True  # type: ignore[attr-defined]
     socket.getaddrinfo = _ipv4_getaddrinfo  # type: ignore[assignment]
 
 

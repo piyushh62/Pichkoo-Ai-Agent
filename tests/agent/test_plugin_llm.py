@@ -723,9 +723,9 @@ class TestConfigDrivenPolicy:
     def test_policy_loaded_from_yaml(self, tmp_path, monkeypatch):
         from agent.plugin_llm import _resolve_trust_policy
 
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text(
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text(
             """
 plugins:
   entries:
@@ -741,7 +741,7 @@ plugins:
 """,
             encoding="utf-8",
         )
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         from pichkoo_cli import config as _config_mod
         _config_mod._config_cache = None  # type: ignore[attr-defined]
 
@@ -757,10 +757,10 @@ plugins:
     def test_missing_plugin_entry_yields_default_deny(self, tmp_path, monkeypatch):
         from agent.plugin_llm import _resolve_trust_policy
 
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        (hermes_home / "config.yaml").write_text("plugins: {}\n", encoding="utf-8")
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        (pichkoo_home / "config.yaml").write_text("plugins: {}\n", encoding="utf-8")
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         from pichkoo_cli import config as _config_mod
         _config_mod._config_cache = None  # type: ignore[attr-defined]
 

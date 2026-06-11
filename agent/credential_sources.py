@@ -4,7 +4,7 @@ Pichkoo seeds its credential pool from many places:
 
     env:<VAR>     — os.environ / ~/.pichkoo/.env
     claude_code   — ~/.claude/.credentials.json
-    hermes_pkce   — ~/.pichkoo/.anthropic_oauth.json
+    pichkoo_pkce   — ~/.pichkoo/.anthropic_oauth.json
     device_code   — auth.json providers.<provider> (nous, openai-codex, ...)
     qwen-cli      — ~/.qwen/oauth_creds.json
     gh_cli        — gh auth token
@@ -21,7 +21,7 @@ unify here is **removal**:
 Before this module, every source had an ad-hoc removal branch in
 ``auth_remove_command``, and several sources had no branch at all — so
 ``auth remove`` silently reverted on the next ``load_pool()`` call for
-qwen-cli, nous device_code (partial), hermes_pkce, copilot gh_cli, and
+qwen-cli, nous device_code (partial), pichkoo_pkce, copilot gh_cli, and
 custom-config sources.
 
 Now every source registers a ``RemovalStep`` that does exactly three things
@@ -204,12 +204,12 @@ def _remove_claude_code(provider: str, removed) -> RemovalResult:
     ])
 
 
-def _remove_hermes_pkce(provider: str, removed) -> RemovalResult:
+def _remove_pichkoo_pkce(provider: str, removed) -> RemovalResult:
     """~/.pichkoo/.anthropic_oauth.json is ours — delete it outright."""
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 
     result = RemovalResult()
-    oauth_file = get_hermes_home() / ".anthropic_oauth.json"
+    oauth_file = get_pichkoo_home() / ".anthropic_oauth.json"
     if oauth_file.exists():
         try:
             oauth_file.unlink()
@@ -407,8 +407,8 @@ def _register_all_sources() -> None:
         description="~/.claude/.credentials.json",
     ))
     register(RemovalStep(
-        provider="anthropic", source_id="hermes_pkce",
-        remove_fn=_remove_hermes_pkce,
+        provider="anthropic", source_id="pichkoo_pkce",
+        remove_fn=_remove_pichkoo_pkce,
         description="~/.pichkoo/.anthropic_oauth.json",
     ))
     register(RemovalStep(

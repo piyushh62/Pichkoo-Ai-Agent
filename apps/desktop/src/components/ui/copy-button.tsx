@@ -18,8 +18,8 @@ export async function writeClipboardText(text: string) {
     return
   }
 
-  if (window.hermesDesktop?.writeClipboard) {
-    await window.hermesDesktop.writeClipboard(text)
+  if (window.pichkooDesktop?.writeClipboard) {
+    await window.pichkooDesktop.writeClipboard(text)
 
     return
   }

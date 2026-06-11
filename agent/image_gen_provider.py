@@ -164,9 +164,9 @@ def resolve_aspect_ratio(value: Optional[str]) -> str:
 
 def _images_cache_dir() -> Path:
     """Return ``$PICHKOO_HOME/cache/images/``, creating parents as needed."""
-    from pichkoo_constants import get_hermes_home
+    from pichkoo_constants import get_pichkoo_home
 
-    path = get_hermes_home() / "cache" / "images"
+    path = get_pichkoo_home() / "cache" / "images"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

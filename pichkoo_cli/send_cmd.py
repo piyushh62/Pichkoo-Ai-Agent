@@ -195,7 +195,7 @@ def _list_targets(platform_filter: Optional[str], *, json_mode: bool) -> int:
     return _SUCCESS_EXIT
 
 
-def _load_hermes_env() -> None:
+def _load_pichkoo_env() -> None:
     """Populate ``os.environ`` from ``~/.pichkoo/.env`` AND bridge top-level
     ``config.yaml`` keys into the environment so the underlying gateway
     config loader sees platform credentials and home channel IDs.
@@ -221,8 +221,8 @@ def _load_hermes_env() -> None:
         load_dotenv = None  # type: ignore[assignment]
 
     try:
-        from pichkoo_cli.config import get_hermes_home
-        home = get_hermes_home()
+        from pichkoo_cli.config import get_pichkoo_home
+        home = get_pichkoo_home()
     except Exception:
         return
 
@@ -280,7 +280,7 @@ def cmd_send(args: argparse.Namespace) -> None:
     # Bridge ~/.pichkoo/.env and ~/.pichkoo/config.yaml into os.environ so the
     # gateway config loader (invoked downstream by send_message_tool and by
     # the channel directory) can see platform credentials and home channels.
-    _load_hermes_env()
+    _load_pichkoo_env()
 
     # --list short-circuits everything else.
     if getattr(args, "list_targets", False):

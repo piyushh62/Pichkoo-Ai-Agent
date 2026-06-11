@@ -29,7 +29,7 @@ COMMON_PICHKOO_TOOLS = ["read_file", "search_files", "terminal", "patch", "write
 
 
 class TestToolKindMap:
-    def test_all_hermes_tools_have_kind(self):
+    def test_all_pichkoo_tools_have_kind(self):
         """Every common pichkoo tool should appear in TOOL_KIND_MAP."""
         for tool in COMMON_PICHKOO_TOOLS:
             assert tool in TOOL_KIND_MAP, f"{tool} missing from TOOL_KIND_MAP"
@@ -125,8 +125,8 @@ class TestBuildToolTitle:
         assert title == "skill view (github-pitfalls/references/api.md)"
 
     def test_execute_code_title_includes_first_code_line(self):
-        title = build_tool_title("execute_code", {"code": "\nfrom hermes_tools import terminal\nprint('done')"})
-        assert title == "python: from hermes_tools import terminal"
+        title = build_tool_title("execute_code", {"code": "\nfrom pichkoo_tools import terminal\nprint('done')"})
+        assert title == "python: from pichkoo_tools import terminal"
 
     def test_skill_manage_title_includes_action_and_target(self):
         title = build_tool_title(

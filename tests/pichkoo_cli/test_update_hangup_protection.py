@@ -182,7 +182,7 @@ class TestInstallHangupProtection:
     def test_installs_sighup_ignore(self, tmp_path, monkeypatch):
         """SIGHUP should be set to SIG_IGN so SSH disconnect doesn't kill the update."""
         monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
-        # Clear cached get_hermes_home if present
+        # Clear cached get_pichkoo_home if present
         import pichkoo_cli.config as _cfg
         if hasattr(_cfg, "_PICHKOO_HOME_CACHE"):
             _cfg._PICHKOO_HOME_CACHE = None  # type: ignore[attr-defined]
@@ -245,7 +245,7 @@ class TestInstallHangupProtection:
             _finalize_update_output(state)
 
     def test_non_fatal_if_log_setup_fails(self, monkeypatch):
-        """If get_hermes_home() raises, stdio must be left untouched but SIGHUP still handled."""
+        """If get_pichkoo_home() raises, stdio must be left untouched but SIGHUP still handled."""
         prev_out, prev_err = sys.stdout, sys.stderr
 
         def _boom():
@@ -253,7 +253,7 @@ class TestInstallHangupProtection:
 
         # Patch the import inside _install_hangup_protection.
         monkeypatch.setattr(
-            "pichkoo_cli.config.get_hermes_home", _boom, raising=True
+            "pichkoo_cli.config.get_pichkoo_home", _boom, raising=True
         )
 
         original_handler = (

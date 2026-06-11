@@ -135,7 +135,7 @@ export function usePreviewRouting({
         return
       }
 
-      const desktop = window.hermesDesktop
+      const desktop = window.pichkooDesktop
 
       if (!desktop?.normalizePreviewTarget) {
         return

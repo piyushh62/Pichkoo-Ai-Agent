@@ -51,7 +51,7 @@ def _install_fake_tools_package(*, credential_mounts=None):
     pichkoo_cli.__path__ = []  # type: ignore[attr-defined]
     sys.modules["pichkoo_cli"] = pichkoo_cli
     sys.modules["pichkoo_cli.config"] = types.SimpleNamespace(
-        get_hermes_home=lambda: Path(tempfile.gettempdir()) / "pichkoo-home",
+        get_pichkoo_home=lambda: Path(tempfile.gettempdir()) / "pichkoo-home",
     )
 
     tools_package = types.ModuleType("tools")

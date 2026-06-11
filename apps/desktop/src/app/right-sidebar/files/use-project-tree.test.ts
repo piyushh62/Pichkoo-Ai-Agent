@@ -10,12 +10,12 @@ const readDir = vi.fn<(path: string) => Promise<PichkooReadDirResult>>()
 beforeEach(() => {
   resetProjectTreeState()
   readDir.mockReset()
-  ;(window as unknown as { hermesDesktop: { readDir: typeof readDir } }).hermesDesktop = { readDir }
+  ;(window as unknown as { pichkooDesktop: { readDir: typeof readDir } }).pichkooDesktop = { readDir }
 })
 
 afterEach(() => {
   resetProjectTreeState()
-  delete (window as unknown as { hermesDesktop?: unknown }).hermesDesktop
+  delete (window as unknown as { pichkooDesktop?: unknown }).pichkooDesktop
 })
 
 function ok(entries: { name: string; path: string; isDirectory: boolean }[]): PichkooReadDirResult {
@@ -179,8 +179,8 @@ describe('useProjectTree', () => {
     expect(readDir).toHaveBeenLastCalledWith('/b')
   })
 
-  it('returns no-bridge gracefully when window.hermesDesktop is missing', async () => {
-    delete (window as unknown as { hermesDesktop?: unknown }).hermesDesktop
+  it('returns no-bridge gracefully when window.pichkooDesktop is missing', async () => {
+    delete (window as unknown as { pichkooDesktop?: unknown }).pichkooDesktop
 
     const { result } = renderHook(() => useProjectTree('/p'))
 

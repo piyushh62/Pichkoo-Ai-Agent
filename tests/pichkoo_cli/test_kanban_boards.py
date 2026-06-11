@@ -43,7 +43,7 @@ def fresh_home(tmp_path, monkeypatch):
     fixture layers a per-test PICHKOO_HOME plus a path-init cache reset
     so each test sees a truly empty board set.
     """
-    home = tmp_path / "hermes_home"
+    home = tmp_path / "pichkoo_home"
     home.mkdir()
     monkeypatch.setenv("PICHKOO_HOME", str(home))
     for var in (
@@ -53,10 +53,10 @@ def fresh_home(tmp_path, monkeypatch):
         "PICHKOO_KANBAN_BOARD",
     ):
         monkeypatch.delenv(var, raising=False)
-    # Also reset pichkoo_constants cache so get_default_hermes_root() re-reads.
+    # Also reset pichkoo_constants cache so get_default_pichkoo_root() re-reads.
     try:
         import pichkoo_constants
-        pichkoo_constants._cached_default_hermes_root = None  # type: ignore[attr-defined]
+        pichkoo_constants._cached_default_pichkoo_root = None  # type: ignore[attr-defined]
     except Exception:
         pass
     # Kanban module-level init cache must not leak between tests.

@@ -36,17 +36,17 @@ _MEMORY_PLUGINS_DIR = Path(__file__).parent
 
 # Synthetic parent package for user-installed providers, so they don't
 # collide with bundled providers in sys.modules.
-_USER_NAMESPACE = "_hermes_user_memory"
+_USER_NAMESPACE = "_pichkoo_user_memory"
 
 
 def _register_synthetic_package(name: str, search_locations: List[str]) -> None:
     """Register an empty package shell in sys.modules.
 
-    User-installed providers import as ``_hermes_user_memory.<name>``, a
+    User-installed providers import as ``_pichkoo_user_memory.<name>``, a
     dotted name whose parents exist nowhere on disk.  Unless those parents
     are present in ``sys.modules``, any relative import inside the plugin
     (``from . import config``) fails with
-    ``ModuleNotFoundError: No module named '_hermes_user_memory'`` — the
+    ``ModuleNotFoundError: No module named '_pichkoo_user_memory'`` — the
     same reason the loader already registers ``plugins`` and
     ``plugins.memory`` for bundled providers.
     """
@@ -64,8 +64,8 @@ def _register_synthetic_package(name: str, search_locations: List[str]) -> None:
 def _get_user_plugins_dir() -> Optional[Path]:
     """Return ``$PICHKOO_HOME/plugins/`` or None if unavailable."""
     try:
-        from pichkoo_constants import get_hermes_home
-        d = get_hermes_home() / "plugins"
+        from pichkoo_constants import get_pichkoo_home
+        d = get_pichkoo_home() / "plugins"
         return d if d.is_dir() else None
     except Exception:
         return None
@@ -393,7 +393,7 @@ def discover_plugin_cli_commands() -> List[dict]:
             cli_mod = sys.modules[module_name]
         else:
             if not _is_bundled:
-                # cli.py imports as _hermes_user_memory.<name>.cli, usually
+                # cli.py imports as _pichkoo_user_memory.<name>.cli, usually
                 # before the provider itself is loaded.  Register its parent
                 # packages so relative imports inside cli.py
                 # ("from . import config") resolve without executing the

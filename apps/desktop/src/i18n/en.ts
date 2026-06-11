@@ -690,7 +690,7 @@ export const en: Translations = {
     noSessions: 'No sessions yet.',
     gatewayRunning: 'Messaging gateway running',
     gatewayStopped: 'Messaging gateway stopped',
-    hermesActiveSessions: (version, count) => `Pichkoo ${version} · Active sessions ${count}`,
+    pichkooActiveSessions: (version, count) => `Pichkoo ${version} · Active sessions ${count}`,
     restartMessaging: 'Restart messaging',
     updatePichkoo: 'Update Pichkoo',
     actionRunning: 'running',

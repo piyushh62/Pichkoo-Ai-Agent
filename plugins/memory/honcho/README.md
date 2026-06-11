@@ -113,7 +113,7 @@ Config is read from the first file that exists:
 | 2 | `~/.pichkoo/honcho.json` | Default profile (shared host blocks) |
 | 3 | `~/.honcho/config.json` | Global (cross-app interop) |
 
-Host key is derived from the active Pichkoo profile: `pichkoo` (default) or `hermes_<profile>`.
+Host key is derived from the active Pichkoo profile: `pichkoo` (default) or `pichkoo_<profile>`.
 
 For every key, resolution order is: **host block > root > env var > default**.
 
@@ -229,7 +229,7 @@ Multiple Pichkoo profiles can share one workspace while maintaining separate AI 
       "recallMode": "hybrid",
       "sessionStrategy": "per-directory"
     },
-    "hermes_coder": {
+    "pichkoo_coder": {
       "aiPeer": "coder",
       "recallMode": "tools",
       "sessionStrategy": "per-repo"
@@ -240,7 +240,7 @@ Multiple Pichkoo profiles can share one workspace while maintaining separate AI 
 
 Both profiles see the same user (`yourname`) in the same shared environment (`pichkoo`), but each AI peer builds its own observations, conclusions, and behavior patterns. The coder's memory stays code-oriented; the main agent's stays broad.
 
-Host key is derived from the active Pichkoo profile: `pichkoo` (default) or `hermes_<profile>` (e.g. `pichkoo -p coder` -> host key `hermes_coder`). Older `pichkoo.<profile>` host blocks are still read for compatibility and are migrated when the CLI writes profile-scoped Honcho config.
+Host key is derived from the active Pichkoo profile: `pichkoo` (default) or `pichkoo_<profile>` (e.g. `pichkoo -p coder` -> host key `pichkoo_coder`). Older `pichkoo.<profile>` host blocks are still read for compatibility and are migrated when the CLI writes profile-scoped Honcho config.
 
 ### Dialectic & Reasoning
 
@@ -349,7 +349,7 @@ Presets:
       "dialecticMaxChars": 600,
       "saveMessages": true
     },
-    "hermes_coder": {
+    "pichkoo_coder": {
       "enabled": true,
       "aiPeer": "coder",
       "sessionStrategy": "per-repo",

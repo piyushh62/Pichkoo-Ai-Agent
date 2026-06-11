@@ -21,10 +21,10 @@ from pichkoo_cli.config import (
     save_config,
     get_env_value,
     save_env_value,
-    get_hermes_home,  # noqa: F401 — used by test mocks
+    get_pichkoo_home,  # noqa: F401 — used by test mocks
 )
 from pichkoo_cli.colors import Colors, color
-from pichkoo_constants import display_hermes_home
+from pichkoo_constants import display_pichkoo_home
 from tools.mcp_tool import _ENV_VAR_PATTERN
 
 logger = logging.getLogger(__name__)
@@ -193,8 +193,8 @@ def _resolve_mcp_server_config(config: dict) -> dict:
     from tools.mcp_tool import _interpolate_env_vars
 
     try:
-        from pichkoo_cli.env_loader import load_hermes_dotenv
-        load_hermes_dotenv()
+        from pichkoo_cli.env_loader import load_pichkoo_dotenv
+        load_pichkoo_dotenv()
     except Exception:  # pragma: no cover — defensive
         pass
     return _interpolate_env_vars(config)
@@ -382,7 +382,7 @@ def cmd_mcp_add(args):
                     if api_key:
                         api_key = _strip_bearer_prefix(api_key)
                         save_env_value(env_key, api_key)
-                        _success(f"Saved to {display_hermes_home()}/.env as {env_key}")
+                        _success(f"Saved to {display_pichkoo_home()}/.env as {env_key}")
 
                 # Set header with env var interpolation
                 if api_key or existing_key:
@@ -470,7 +470,7 @@ def cmd_mcp_add(args):
     _save_mcp_server(name, server_config)
 
     print()
-    _success(f"Saved '{name}' to {display_hermes_home()}/config.yaml ({tool_count}/{total} tools enabled)")
+    _success(f"Saved '{name}' to {display_pichkoo_home()}/config.yaml ({tool_count}/{total} tools enabled)")
     _info("Start a new session to use these tools.")
 
 

@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { canOpenSessionWindow, openSessionInNewWindow } from './windows'
 
-const desktopWindow = window as unknown as { hermesDesktop?: Window['hermesDesktop'] }
-const initialPichkooDesktop = desktopWindow.hermesDesktop
+const desktopWindow = window as unknown as { pichkooDesktop?: Window['pichkooDesktop'] }
+const initialPichkooDesktop = desktopWindow.pichkooDesktop
 
 const notifyError = vi.fn()
 
@@ -11,10 +11,10 @@ vi.mock('./notifications', () => ({
   notifyError: (...args: unknown[]) => notifyError(...args)
 }))
 
-function installBridge(openSessionWindow?: Window['hermesDesktop']['openSessionWindow']) {
-  desktopWindow.hermesDesktop = {
+function installBridge(openSessionWindow?: Window['pichkooDesktop']['openSessionWindow']) {
+  desktopWindow.pichkooDesktop = {
     ...(openSessionWindow ? { openSessionWindow } : {})
-  } as unknown as Window['hermesDesktop']
+  } as unknown as Window['pichkooDesktop']
 }
 
 beforeEach(() => {
@@ -23,15 +23,15 @@ beforeEach(() => {
 
 afterEach(() => {
   if (initialPichkooDesktop) {
-    desktopWindow.hermesDesktop = initialPichkooDesktop
+    desktopWindow.pichkooDesktop = initialPichkooDesktop
   } else {
-    delete desktopWindow.hermesDesktop
+    delete desktopWindow.pichkooDesktop
   }
 })
 
 describe('canOpenSessionWindow', () => {
   it('is false when the desktop bridge is absent', () => {
-    delete desktopWindow.hermesDesktop
+    delete desktopWindow.pichkooDesktop
     expect(canOpenSessionWindow()).toBe(false)
   })
 
@@ -58,7 +58,7 @@ describe('openSessionInNewWindow', () => {
   })
 
   it('no-ops gracefully when the bridge is absent (web fallback)', async () => {
-    delete desktopWindow.hermesDesktop
+    delete desktopWindow.pichkooDesktop
 
     await openSessionInNewWindow('s1')
 

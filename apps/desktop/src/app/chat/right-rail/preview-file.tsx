@@ -180,9 +180,9 @@ function looksBinaryBytes(bytes: Uint8Array) {
 }
 
 async function readTextPreview(filePath: string) {
-  if (window.hermesDesktop.readFileText) {
+  if (window.pichkooDesktop.readFileText) {
     try {
-      return await window.hermesDesktop.readFileText(filePath)
+      return await window.pichkooDesktop.readFileText(filePath)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
 
@@ -194,7 +194,7 @@ async function readTextPreview(filePath: string) {
 
   // Back-compat for a running Electron process whose preload hasn't been
   // restarted since readFileText was added. readFileDataUrl already existed.
-  const dataUrl = await window.hermesDesktop.readFileDataUrl(filePath)
+  const dataUrl = await window.pichkooDesktop.readFileDataUrl(filePath)
   const [, metadata = '', data = ''] = dataUrl.match(/^data:([^,]*),(.*)$/) || []
   const base64 = metadata.includes(';base64')
   const mimeType = metadata.replace(/;base64$/, '') || undefined
@@ -448,7 +448,7 @@ export function LocalFilePreview({ reloadKey, target }: { reloadKey: number; tar
         if (isImage) {
           // Prefer bytes the caller already handed us (a pasted/dropped
           // screenshot) over re-reading a path that may be transient/unreadable.
-          const dataUrl = target.dataUrl || (await window.hermesDesktop.readFileDataUrl(filePath))
+          const dataUrl = target.dataUrl || (await window.pichkooDesktop.readFileDataUrl(filePath))
 
           if (active) {
             setState({ dataUrl, loading: false })

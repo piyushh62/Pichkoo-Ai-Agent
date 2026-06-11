@@ -88,8 +88,8 @@ E164_RE = re.compile(r"^\+[1-9]\d{6,14}$")
 def _auth_json_path() -> Path:
     """Resolve ``~/.pichkoo/auth.json`` honouring the active Pichkoo profile."""
     try:
-        from pichkoo_constants import get_hermes_home
-        return Path(get_hermes_home()) / "auth.json"
+        from pichkoo_constants import get_pichkoo_home
+        return Path(get_pichkoo_home()) / "auth.json"
     except Exception:
         return Path(os.path.expanduser("~/.pichkoo")) / "auth.json"
 

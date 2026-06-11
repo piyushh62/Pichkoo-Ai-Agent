@@ -45,13 +45,13 @@ def catalog_dir(tmp_path, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def _isolate_hermes_home(tmp_path, monkeypatch):
+def _isolate_pichkoo_home(tmp_path, monkeypatch):
     """Redirect all config I/O to a temp PICHKOO_HOME."""
     hh = tmp_path / "pichkoo-home"
     hh.mkdir()
     monkeypatch.setenv("PICHKOO_HOME", str(hh))
     monkeypatch.setattr(
-        "pichkoo_cli.config.get_hermes_home", lambda: hh
+        "pichkoo_cli.config.get_pichkoo_home", lambda: hh
     )
     monkeypatch.setattr(
         "pichkoo_cli.config.get_config_path", lambda: hh / "config.yaml"
@@ -59,9 +59,9 @@ def _isolate_hermes_home(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "pichkoo_cli.config.get_env_path", lambda: hh / ".env"
     )
-    # mcp_catalog grabs get_hermes_home() lazily through pichkoo_constants
+    # mcp_catalog grabs get_pichkoo_home() lazily through pichkoo_constants
     monkeypatch.setattr(
-        "pichkoo_constants.get_hermes_home", lambda: hh
+        "pichkoo_constants.get_pichkoo_home", lambda: hh
     )
     return hh
 

@@ -1895,7 +1895,7 @@ def test_dispatch_respawn_guard_emits_event_for_skipped_task(
 # Workspace resolution
 # ---------------------------------------------------------------------------
 
-def test_scratch_workspace_created_under_hermes_home(kanban_home):
+def test_scratch_workspace_created_under_pichkoo_home(kanban_home):
     with kb.connect() as conn:
         t = kb.create_task(conn, title="x")
         task = kb.get_task(conn, t)
@@ -2295,12 +2295,12 @@ class TestSharedBoardPaths:
     """`kanban_home`/`kanban_db_path`/`workspaces_root`/`worker_log_path`
     must anchor at the **shared root**, not the active profile's PICHKOO_HOME."""
 
-    def _set_home(self, monkeypatch, tmp_path, hermes_home):
+    def _set_home(self, monkeypatch, tmp_path, pichkoo_home):
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
         monkeypatch.delenv("PICHKOO_KANBAN_HOME", raising=False)
 
-    def test_default_install_anchors_at_home_dot_hermes(
+    def test_default_install_anchors_at_home_dot_pichkoo(
         self, tmp_path, monkeypatch
     ):
         # Standard install: PICHKOO_HOME == ~/.pichkoo, no profile active.
@@ -2370,11 +2370,11 @@ class TestSharedBoardPaths:
         assert dispatcher_ws == worker_ws
         assert dispatcher_log == worker_log
 
-    def test_docker_custom_hermes_home_uses_env_path_directly(
+    def test_docker_custom_pichkoo_home_uses_env_path_directly(
         self, tmp_path, monkeypatch
     ):
         # Docker / custom deployment: PICHKOO_HOME points outside ~/.pichkoo.
-        # `get_default_hermes_root()` returns env_home directly when it
+        # `get_default_pichkoo_root()` returns env_home directly when it
         # is not a `<root>/profiles/<name>` shape and not under
         # `Path.home() / ".pichkoo"`.
         custom_root = tmp_path / "opt" / "pichkoo"
@@ -2388,7 +2388,7 @@ class TestSharedBoardPaths:
         self, tmp_path, monkeypatch
     ):
         # Docker profile shape: PICHKOO_HOME=/opt/pichkoo/profiles/coder;
-        # `get_default_hermes_root()` walks up to /opt/pichkoo because
+        # `get_default_pichkoo_root()` walks up to /opt/pichkoo because
         # the immediate parent dir is named "profiles".
         custom_root = tmp_path / "opt" / "pichkoo"
         profile = custom_root / "profiles" / "coder"
@@ -2398,7 +2398,7 @@ class TestSharedBoardPaths:
         assert kb.kanban_home() == custom_root
         assert kb.kanban_db_path() == custom_root / "kanban.db"
 
-    def test_explicit_override_via_hermes_kanban_home(
+    def test_explicit_override_via_pichkoo_kanban_home(
         self, tmp_path, monkeypatch
     ):
         # Explicit override: PICHKOO_KANBAN_HOME beats every other
@@ -2451,11 +2451,11 @@ class TestSharedBoardPaths:
         assert task is not None
         assert task.title == "cross-profile"
 
-    def test_hermes_kanban_db_pin_beats_kanban_home(
+    def test_pichkoo_kanban_db_pin_beats_kanban_home(
         self, tmp_path, monkeypatch
     ):
         # PICHKOO_KANBAN_DB pins the file path directly and beats both
-        # PICHKOO_KANBAN_HOME and the `get_default_hermes_root()` path.
+        # PICHKOO_KANBAN_HOME and the `get_default_pichkoo_root()` path.
         # This is the env the dispatcher injects into workers.
         default_home = tmp_path / ".pichkoo"
         default_home.mkdir()
@@ -2474,7 +2474,7 @@ class TestSharedBoardPaths:
         # are independent.
         assert kb.workspaces_root() == umbrella / "kanban" / "workspaces"
 
-    def test_hermes_kanban_workspaces_root_pin_beats_kanban_home(
+    def test_pichkoo_kanban_workspaces_root_pin_beats_kanban_home(
         self, tmp_path, monkeypatch
     ):
         # PICHKOO_KANBAN_WORKSPACES_ROOT pins the workspaces root directly.
@@ -2844,7 +2844,7 @@ def test_migrate_add_optional_columns_tolerates_concurrent_migration(kanban_home
 
 
 # ---------------------------------------------------------------------------
-# Dispatcher spawn invocation — _resolve_hermes_argv()
+# Dispatcher spawn invocation — _resolve_pichkoo_argv()
 #
 # Workers spawned by the dispatcher must use a `pichkoo` invocation that does
 # not depend on PATH being set up correctly. cron jobs, systemd User= services,
@@ -2856,18 +2856,18 @@ def test_migrate_add_optional_columns_tolerates_concurrent_migration(kanban_home
 # ---------------------------------------------------------------------------
 
 
-def test_resolve_hermes_argv_prefers_path_shim(monkeypatch):
+def test_resolve_pichkoo_argv_prefers_path_shim(monkeypatch):
     """When `pichkoo` is on PATH, use the shim — preserves familiar ps output."""
     import shutil
     import pichkoo_cli.kanban_db as kb
 
     monkeypatch.delenv("PICHKOO_BIN", raising=False)
     monkeypatch.setattr(shutil, "which", lambda name: "/usr/local/bin/pichkoo")
-    argv = kb._resolve_hermes_argv()
+    argv = kb._resolve_pichkoo_argv()
     assert argv == ["/usr/local/bin/pichkoo"]
 
 
-def test_resolve_hermes_argv_absolutizes_relative_exe_shim(monkeypatch, tmp_path):
+def test_resolve_pichkoo_argv_absolutizes_relative_exe_shim(monkeypatch, tmp_path):
     """A relative executable override must not remain workspace-cwd-dependent."""
     import pichkoo_cli.kanban_db as kb
 
@@ -2875,10 +2875,10 @@ def test_resolve_hermes_argv_absolutizes_relative_exe_shim(monkeypatch, tmp_path
     monkeypatch.setenv("PICHKOO_BIN", ".\\pichkoo.exe")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [os.path.abspath(".\\pichkoo.exe")]
+    assert kb._resolve_pichkoo_argv() == [os.path.abspath(".\\pichkoo.exe")]
 
 
-def test_resolve_hermes_argv_avoids_implicit_windows_batch_shim(monkeypatch, tmp_path):
+def test_resolve_pichkoo_argv_avoids_implicit_windows_batch_shim(monkeypatch, tmp_path):
     """Implicit .cmd/.bat shims use the module fallback, not batch argv[0]."""
     import sys
     import pichkoo_cli.kanban_db as kb
@@ -2891,10 +2891,10 @@ def test_resolve_hermes_argv_avoids_implicit_windows_batch_shim(monkeypatch, tmp
     monkeypatch.setenv("PATHEXT", ".CMD")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
+    assert kb._resolve_pichkoo_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
 
 
-def test_resolve_hermes_argv_honors_hermes_bin_path_override(monkeypatch, tmp_path):
+def test_resolve_pichkoo_argv_honors_pichkoo_bin_path_override(monkeypatch, tmp_path):
     """An explicit path-like PICHKOO_BIN lets service managers pin the executable."""
     import shutil
     import pichkoo_cli.kanban_db as kb
@@ -2905,29 +2905,29 @@ def test_resolve_hermes_argv_honors_hermes_bin_path_override(monkeypatch, tmp_pa
     monkeypatch.setenv("PICHKOO_BIN", str(shim))
     monkeypatch.setattr(shutil, "which", lambda name: None)
 
-    assert kb._resolve_hermes_argv() == [str(shim)]
+    assert kb._resolve_pichkoo_argv() == [str(shim)]
 
 
-def test_resolve_hermes_argv_hermes_bin_bare_name_uses_path(monkeypatch, tmp_path):
+def test_resolve_pichkoo_argv_pichkoo_bin_bare_name_uses_path(monkeypatch, tmp_path):
     """Bare PICHKOO_BIN values keep PATH semantics instead of cwd shadowing."""
     import stat
     import pichkoo_cli.kanban_db as kb
 
-    cwd_hermes = tmp_path / "pichkoo"
-    cwd_hermes.write_text("wrong\n", encoding="utf-8")
-    cwd_hermes.chmod(cwd_hermes.stat().st_mode | stat.S_IXUSR)
-    path_hermes = tmp_path / "bin" / "pichkoo"
-    path_hermes.parent.mkdir()
-    path_hermes.write_text("right\n", encoding="utf-8")
-    path_hermes.chmod(path_hermes.stat().st_mode | stat.S_IXUSR)
+    cwd_pichkoo = tmp_path / "pichkoo"
+    cwd_pichkoo.write_text("wrong\n", encoding="utf-8")
+    cwd_pichkoo.chmod(cwd_pichkoo.stat().st_mode | stat.S_IXUSR)
+    path_pichkoo = tmp_path / "bin" / "pichkoo"
+    path_pichkoo.parent.mkdir()
+    path_pichkoo.write_text("right\n", encoding="utf-8")
+    path_pichkoo.chmod(path_pichkoo.stat().st_mode | stat.S_IXUSR)
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("PATH", str(path_hermes.parent))
+    monkeypatch.setenv("PATH", str(path_pichkoo.parent))
     monkeypatch.setenv("PICHKOO_BIN", "pichkoo")
 
-    assert kb._resolve_hermes_argv() == [str(path_hermes)]
+    assert kb._resolve_pichkoo_argv() == [str(path_pichkoo)]
 
 
-def test_resolve_hermes_argv_hermes_bin_bare_name_ignores_cwd(monkeypatch, tmp_path):
+def test_resolve_pichkoo_argv_pichkoo_bin_bare_name_ignores_cwd(monkeypatch, tmp_path):
     """Bare PICHKOO_BIN does not accept current-directory shadow executables."""
     import sys
     import pichkoo_cli.kanban_db as kb
@@ -2938,10 +2938,10 @@ def test_resolve_hermes_argv_hermes_bin_bare_name_ignores_cwd(monkeypatch, tmp_p
     monkeypatch.setenv("PICHKOO_BIN", "pichkoo")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
+    assert kb._resolve_pichkoo_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
 
 
-def test_resolve_hermes_argv_hermes_bin_bare_cmd_uses_module_fallback(monkeypatch, tmp_path):
+def test_resolve_pichkoo_argv_pichkoo_bin_bare_cmd_uses_module_fallback(monkeypatch, tmp_path):
     """A PATH-resolved PICHKOO_BIN batch shim is not used as worker argv[0]."""
     import sys
     import pichkoo_cli.kanban_db as kb
@@ -2954,10 +2954,10 @@ def test_resolve_hermes_argv_hermes_bin_bare_cmd_uses_module_fallback(monkeypatc
     monkeypatch.setenv("PICHKOO_BIN", "pichkoo")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
+    assert kb._resolve_pichkoo_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
 
 
-def test_resolve_hermes_argv_hermes_bin_unresolved_bare_name_falls_back(monkeypatch):
+def test_resolve_pichkoo_argv_pichkoo_bin_unresolved_bare_name_falls_back(monkeypatch):
     """Unresolved PICHKOO_BIN command names do not delegate cwd search to Popen."""
     import sys
     import pichkoo_cli.kanban_db as kb
@@ -2965,10 +2965,10 @@ def test_resolve_hermes_argv_hermes_bin_unresolved_bare_name_falls_back(monkeypa
     monkeypatch.setenv("PATH", "")
     monkeypatch.setenv("PICHKOO_BIN", "pichkoo")
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
+    assert kb._resolve_pichkoo_argv() == [sys.executable, "-m", "pichkoo_cli.main"]
 
 
-def test_resolve_hermes_argv_falls_back_to_module_form_when_no_path_shim(monkeypatch):
+def test_resolve_pichkoo_argv_falls_back_to_module_form_when_no_path_shim(monkeypatch):
     """When the shim is not on PATH, fall back to `python -m pichkoo_cli.main`.
 
     Pins the correct module name (NOT `pichkoo` — there is no top-level
@@ -2982,11 +2982,11 @@ def test_resolve_hermes_argv_falls_back_to_module_form_when_no_path_shim(monkeyp
 
     monkeypatch.delenv("PICHKOO_BIN", raising=False)
     monkeypatch.setattr(shutil, "which", lambda name: None)
-    argv = kb._resolve_hermes_argv()
+    argv = kb._resolve_pichkoo_argv()
     assert argv == [sys.executable, "-m", "pichkoo_cli.main"]
 
 
-def test_resolve_hermes_argv_module_actually_runs():
+def test_resolve_pichkoo_argv_module_actually_runs():
     """The fallback module name must be importable + runnable.
 
     A unit test that pins the literal string is necessary but not
@@ -3003,7 +3003,7 @@ def test_resolve_hermes_argv_module_actually_runs():
     with mock.patch.dict(os.environ, {}, clear=False):
         os.environ.pop("PICHKOO_BIN", None)
         with mock.patch.object(shutil, "which", return_value=None):
-            argv = kb._resolve_hermes_argv()
+            argv = kb._resolve_pichkoo_argv()
     r = subprocess.run(argv + ["--version"], capture_output=True, text=True, timeout=30)
     assert r.returncode == 0, (
         f"`{' '.join(argv)} --version` failed (rc={r.returncode}); "

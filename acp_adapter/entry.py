@@ -29,7 +29,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from pichkoo_constants import get_hermes_home
+from pichkoo_constants import get_pichkoo_home
 
 
 # Methods clients send as periodic liveness probes. They are not part of the
@@ -95,16 +95,16 @@ def _setup_logging() -> None:
 
 def _load_env() -> None:
     """Load .env from PICHKOO_HOME (default ``~/.pichkoo``)."""
-    from pichkoo_cli.env_loader import load_hermes_dotenv
+    from pichkoo_cli.env_loader import load_pichkoo_dotenv
 
-    hermes_home = get_hermes_home()
-    loaded = load_hermes_dotenv(hermes_home=hermes_home)
+    pichkoo_home = get_pichkoo_home()
+    loaded = load_pichkoo_dotenv(pichkoo_home=pichkoo_home)
     if loaded:
         for env_file in loaded:
             logging.getLogger(__name__).info("Loaded env from %s", env_file)
     else:
         logging.getLogger(__name__).info(
-            "No .env found at %s, using system env", hermes_home / ".env"
+            "No .env found at %s, using system env", pichkoo_home / ".env"
         )
 
 
@@ -142,9 +142,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _print_version() -> None:
-    from pichkoo_cli import __version__ as hermes_version
+    from pichkoo_cli import __version__ as pichkoo_version
 
-    print(hermes_version)
+    print(pichkoo_version)
 
 
 def _run_check() -> None:
@@ -155,12 +155,12 @@ def _run_check() -> None:
 
 
 def _run_setup() -> None:
-    from pichkoo_cli.main import main as hermes_main
+    from pichkoo_cli.main import main as pichkoo_main
 
     old_argv = sys.argv[:]
     try:
         sys.argv = [old_argv[0] if old_argv else "pichkoo", "model"]
-        hermes_main()
+        pichkoo_main()
     finally:
         sys.argv = old_argv
 

@@ -345,7 +345,7 @@ class TestHistoryDisplay:
         assert "Use /resume" in output
         assert "session title" in output
 
-    def test_resume_updates_hermes_session_id_env_and_context(self, tmp_path):
+    def test_resume_updates_pichkoo_session_id_env_and_context(self, tmp_path):
         from gateway.session_context import _UNSET, _VAR_MAP, get_session_env
         from pichkoo_state import SessionDB
 
@@ -491,11 +491,11 @@ class TestRootLevelProviderOverride:
         """model.provider takes priority — root-level provider is only a fallback."""
         import yaml
 
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
-        config_path = hermes_home / "config.yaml"
+        config_path = pichkoo_home / "config.yaml"
         config_path.write_text(yaml.safe_dump({
             "provider": "opencode-go",  # stale root-level key
             "model": {
@@ -505,7 +505,7 @@ class TestRootLevelProviderOverride:
         }))
 
         import cli
-        monkeypatch.setattr(cli, "_hermes_home", hermes_home)
+        monkeypatch.setattr(cli, "_pichkoo_home", pichkoo_home)
         cfg = cli.load_cli_config()
 
         assert cfg["model"]["provider"] == "openrouter"
@@ -514,11 +514,11 @@ class TestRootLevelProviderOverride:
         """Legacy root-level provider still populates model.provider in the CLI loader."""
         import yaml
 
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
-        config_path = hermes_home / "config.yaml"
+        config_path = pichkoo_home / "config.yaml"
         config_path.write_text(yaml.safe_dump({
             "provider": "opencode-go",  # stale root key
             "model": {
@@ -528,7 +528,7 @@ class TestRootLevelProviderOverride:
         }))
 
         import cli
-        monkeypatch.setattr(cli, "_hermes_home", hermes_home)
+        monkeypatch.setattr(cli, "_pichkoo_home", pichkoo_home)
         cfg = cli.load_cli_config()
 
         assert cfg["model"]["provider"] == "opencode-go"
@@ -537,11 +537,11 @@ class TestRootLevelProviderOverride:
         """Legacy root-level base_url still populates model.base_url in the CLI loader."""
         import yaml
 
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
-        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
+        monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
 
-        config_path = hermes_home / "config.yaml"
+        config_path = pichkoo_home / "config.yaml"
         config_path.write_text(yaml.safe_dump({
             "base_url": "https://example.com/v1",
             "model": {
@@ -550,7 +550,7 @@ class TestRootLevelProviderOverride:
         }))
 
         import cli
-        monkeypatch.setattr(cli, "_hermes_home", hermes_home)
+        monkeypatch.setattr(cli, "_pichkoo_home", pichkoo_home)
         cfg = cli.load_cli_config()
 
         assert cfg["model"]["base_url"] == "https://example.com/v1"

@@ -92,7 +92,7 @@ def _build_permission_tool_call(command: str, description: str):
     )
 
 
-def _map_outcome_to_hermes(outcome: object, *, allowed_option_ids: set[str]) -> str:
+def _map_outcome_to_pichkoo(outcome: object, *, allowed_option_ids: set[str]) -> str:
     """Map an ACP permission outcome into Pichkoo approval strings."""
     if not isinstance(outcome, AllowedOutcome):
         return "deny"
@@ -160,7 +160,7 @@ def make_approval_callback(
             return "deny"
 
         allowed_option_ids = {option.option_id for option in options}
-        return _map_outcome_to_hermes(
+        return _map_outcome_to_pichkoo(
             response.outcome,
             allowed_option_ids=allowed_option_ids,
         )

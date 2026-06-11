@@ -557,7 +557,7 @@ export function useMessageStream({
       }
 
       if (document.hidden && sessionId === activeSessionIdRef.current) {
-        void window.hermesDesktop?.notify({
+        void window.pichkooDesktop?.notify({
           title: 'Pichkoo finished',
           body: text.slice(0, 140) || 'The response is ready.'
         })

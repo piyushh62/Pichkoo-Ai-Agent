@@ -1247,13 +1247,13 @@ def _dump_subagent_timeout_diagnostic(
     Returns the absolute path to the diagnostic file, or None on failure.
     """
     try:
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         import datetime as _dt
         import sys as _sys
         import traceback as _traceback
 
-        hermes_home = get_hermes_home()
-        logs_dir = hermes_home / "logs"
+        pichkoo_home = get_pichkoo_home()
+        logs_dir = pichkoo_home / "logs"
         try:
             logs_dir.mkdir(parents=True, exist_ok=True)
         except Exception:

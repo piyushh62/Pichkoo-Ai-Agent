@@ -483,8 +483,8 @@ export function ArtifactsView({ setStatusbarItemGroup: _setStatusbarItemGroup, .
 
   const openArtifact = useCallback(async (href: string) => {
     try {
-      if (window.hermesDesktop?.openExternal) {
-        await window.hermesDesktop.openExternal(href)
+      if (window.pichkooDesktop?.openExternal) {
+        await window.pichkooDesktop.openExternal(href)
       } else {
         window.open(href, '_blank', 'noopener,noreferrer')
       }

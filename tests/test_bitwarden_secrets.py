@@ -39,12 +39,12 @@ def _reset_caches():
 
 
 @pytest.fixture
-def hermes_home(tmp_path, monkeypatch):
+def pichkoo_home(tmp_path, monkeypatch):
     """Point Pichkoo at an isolated home directory."""
     home = tmp_path / ".pichkoo"
     home.mkdir()
     monkeypatch.setenv("PICHKOO_HOME", str(home))
-    # Some modules cache get_hermes_home; clear if needed.
+    # Some modules cache get_pichkoo_home; clear if needed.
     import pichkoo_constants
     if hasattr(pichkoo_constants, "_PICHKOO_HOME_CACHE"):
         pichkoo_constants._PICHKOO_HOME_CACHE = None  # type: ignore[attr-defined]
@@ -163,7 +163,7 @@ def test_safe_extract_member_rejects_absolute_path(tmp_path):
             bw._safe_extract_member(zf, "../../../etc/cron.d/evil", dest)
 
 
-def test_install_bws_rejects_malicious_member(hermes_home, monkeypatch):
+def test_install_bws_rejects_malicious_member(pichkoo_home, monkeypatch):
     # Build an archive whose only matching member escapes the temp dir.
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
@@ -186,7 +186,7 @@ def test_install_bws_rejects_malicious_member(hermes_home, monkeypatch):
         bw.install_bws()
 
 
-def test_install_bws_happy_path(hermes_home, monkeypatch):
+def test_install_bws_happy_path(pichkoo_home, monkeypatch):
     fake_binary = b"#!/bin/sh\necho 'bws fake 2.0.0'\n"
     zip_bytes = _make_fake_zip(fake_binary)
     asset_name = bw._platform_asset_name()
@@ -212,7 +212,7 @@ def test_install_bws_happy_path(hermes_home, monkeypatch):
     assert path.stat().st_mode & stat.S_IXUSR
 
 
-def test_install_bws_checksum_mismatch(hermes_home, monkeypatch):
+def test_install_bws_checksum_mismatch(pichkoo_home, monkeypatch):
     zip_bytes = _make_fake_zip(b"contents")
     asset_name = bw._platform_asset_name()
     wrong_checksum = "0" * 64
@@ -230,7 +230,7 @@ def test_install_bws_checksum_mismatch(hermes_home, monkeypatch):
         bw.install_bws()
 
 
-def test_install_bws_missing_checksum_entry(hermes_home, monkeypatch):
+def test_install_bws_missing_checksum_entry(pichkoo_home, monkeypatch):
     zip_bytes = _make_fake_zip(b"x")
 
     def fake_download(url, dest):
@@ -667,7 +667,7 @@ def test_env_loader_calls_bsm_when_enabled(tmp_path, monkeypatch):
 
 
 def test_disk_cache_written_after_first_fetch(monkeypatch, tmp_path):
-    """First fetch hits bws AND writes a 0600 file under hermes_home/cache/."""
+    """First fetch hits bws AND writes a 0600 file under pichkoo_home/cache/."""
     home = tmp_path / ".pichkoo"
     home.mkdir()
     fake_binary = tmp_path / "bws"

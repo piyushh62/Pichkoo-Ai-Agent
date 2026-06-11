@@ -55,8 +55,8 @@ def _has_system_browser() -> bool:
 
 
 def _has_pichkoo_ai_agent_browser() -> bool:
-    from pichkoo_constants import get_hermes_home
-    home = get_hermes_home()
+    from pichkoo_constants import get_pichkoo_home
+    home = get_pichkoo_home()
     if _IS_WINDOWS:
         # npm -g --prefix puts .cmd shims directly in the prefix dir on Windows
         return (home / "node" / "agent-browser.cmd").is_file()
@@ -130,7 +130,7 @@ def ensure_dependency(
             return False
 
     if shell == "powershell":
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
         ps_bin = shutil.which("powershell") or shutil.which("pwsh")
         if not ps_bin:
             if interactive:
@@ -141,7 +141,7 @@ def ensure_dependency(
             "-ExecutionPolicy", "Bypass",
             "-File", str(script),
             "-Ensure", dep,
-            "-PichkooHome", str(get_hermes_home()),
+            "-PichkooHome", str(get_pichkoo_home()),
         ]
     else:
         cmd = ["bash", str(script), "--ensure", dep]

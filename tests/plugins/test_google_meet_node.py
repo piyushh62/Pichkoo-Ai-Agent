@@ -18,10 +18,10 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def _isolate_home(tmp_path, monkeypatch):
-    hermes_home = tmp_path / ".pichkoo"
-    hermes_home.mkdir()
-    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
-    yield hermes_home
+    pichkoo_home = tmp_path / ".pichkoo"
+    pichkoo_home.mkdir()
+    monkeypatch.setenv("PICHKOO_HOME", str(pichkoo_home))
+    yield pichkoo_home
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +211,7 @@ def test_registry_resolve_by_name(tmp_path):
     assert r.resolve("ghost") is None
 
 
-def test_registry_defaults_to_hermes_home(tmp_path, monkeypatch):
+def test_registry_defaults_to_pichkoo_home(tmp_path, monkeypatch):
     from plugins.google_meet.node.registry import NodeRegistry
 
     # _isolate_home already set PICHKOO_HOME to tmp_path/.pichkoo; the

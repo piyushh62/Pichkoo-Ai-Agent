@@ -90,7 +90,7 @@ def _normalize_env_dict(env: dict | None) -> dict[str, str]:
     return normalized
 
 
-def _load_hermes_env_vars() -> dict[str, str]:
+def _load_pichkoo_env_vars() -> dict[str, str]:
     """Load ~/.pichkoo/.env values without failing Docker command execution."""
     try:
         from pichkoo_cli.config import load_env
@@ -927,11 +927,11 @@ class DockerEnvironment(BaseEnvironment):
         # win over the generic Pichkoo secret blocklist. Only implicit passthrough
         # keys are filtered.
         forward_keys = explicit_forward_keys | (passthrough_keys - _PICHKOO_PROVIDER_ENV_BLOCKLIST)
-        hermes_env = _load_hermes_env_vars() if forward_keys else {}
+        pichkoo_env = _load_pichkoo_env_vars() if forward_keys else {}
         for key in sorted(forward_keys):
             value = os.getenv(key)
             if not value:
-                value = hermes_env.get(key)
+                value = pichkoo_env.get(key)
             if value:
                 exec_env[key] = value
 

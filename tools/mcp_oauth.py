@@ -101,7 +101,7 @@ _SKIP_TOKENS = frozenset({"skip", "cancel", "s", "n", "no", "q", "quit"})
 # _wait_for_callback maps this to OAuthNonInteractiveError ("user_skipped")
 # so the MCP setup path treats it as a non-fatal "continue without this
 # server" rather than a hard failure.
-_USER_SKIPPED_SENTINEL = "__hermes_user_skipped__"
+_USER_SKIPPED_SENTINEL = "__pichkoo_user_skipped__"
 
 
 # ---------------------------------------------------------------------------
@@ -116,8 +116,8 @@ def _get_token_dir() -> Path:
     Layout: ``PICHKOO_HOME/mcp-tokens/``
     """
     try:
-        from pichkoo_constants import get_hermes_home
-        base = Path(get_hermes_home())
+        from pichkoo_constants import get_pichkoo_home
+        base = Path(get_pichkoo_home())
     except ImportError:
         base = Path(os.environ.get("PICHKOO_HOME", str(Path.home() / ".pichkoo")))
     return base / "mcp-tokens"

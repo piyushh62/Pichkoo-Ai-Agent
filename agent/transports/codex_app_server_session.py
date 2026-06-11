@@ -249,7 +249,7 @@ class CodexAppServerSession:
         self._client.initialize(
             client_name="pichkoo",
             client_title="Pichkoo AI Agent",
-            client_version=_get_hermes_version(),
+            client_version=_get_pichkoo_version(),
         )
         # Permission selection is intentionally NOT sent on thread/start.
         # Two reasons (live-tested against codex 0.130.0):
@@ -866,7 +866,7 @@ def _has_turn_aborted_marker(text: str) -> bool:
     return False
 
 
-def _get_hermes_version() -> str:
+def _get_pichkoo_version() -> str:
     """Best-effort Pichkoo version string for codex's userAgent line."""
     try:
         from importlib.metadata import version

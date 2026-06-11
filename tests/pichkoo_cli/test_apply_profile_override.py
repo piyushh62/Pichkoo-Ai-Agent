@@ -18,7 +18,7 @@ from pathlib import Path
 
 
 def _run_apply_profile_override(
-    tmp_path, monkeypatch, *, hermes_home: str | None, active_profile: str | None,
+    tmp_path, monkeypatch, *, pichkoo_home: str | None, active_profile: str | None,
     argv: list[str] | None = None,
 ):
     """Run _apply_profile_override in isolation.
@@ -26,18 +26,18 @@ def _run_apply_profile_override(
     Returns the value of os.environ["PICHKOO_HOME"] after the call,
     or None if unset.
     """
-    hermes_root = tmp_path / ".pichkoo"
-    hermes_root.mkdir(parents=True, exist_ok=True)
+    pichkoo_root = tmp_path / ".pichkoo"
+    pichkoo_root.mkdir(parents=True, exist_ok=True)
 
     if active_profile is not None:
-        (hermes_root / "active_profile").write_text(active_profile)
+        (pichkoo_root / "active_profile").write_text(active_profile)
 
     if active_profile and active_profile != "default":
-        (hermes_root / "profiles" / active_profile).mkdir(parents=True, exist_ok=True)
+        (pichkoo_root / "profiles" / active_profile).mkdir(parents=True, exist_ok=True)
 
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    if hermes_home is not None:
-        monkeypatch.setenv("PICHKOO_HOME", hermes_home)
+    if pichkoo_home is not None:
+        monkeypatch.setenv("PICHKOO_HOME", pichkoo_home)
     else:
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
 
@@ -57,7 +57,7 @@ class TestApplyProfileOverridePichkooHomeGuard:
     profile directory IS trusted as-is.
     """
 
-    def test_hermes_home_at_root_with_active_profile_is_redirected(
+    def test_pichkoo_home_at_root_with_active_profile_is_redirected(
         self, tmp_path, monkeypatch
     ):
         """PICHKOO_HOME=/root/.pichkoo + active_profile=coder must redirect
@@ -67,13 +67,13 @@ class TestApplyProfileOverridePichkooHomeGuard:
         and the user switches to a profile via `pichkoo profile use`.
         Before the fix, the guard returned early and active_profile was ignored.
         """
-        hermes_root = tmp_path / ".pichkoo"
-        hermes_root.mkdir(parents=True, exist_ok=True)
+        pichkoo_root = tmp_path / ".pichkoo"
+        pichkoo_root.mkdir(parents=True, exist_ok=True)
 
         result = _run_apply_profile_override(
             tmp_path,
             monkeypatch,
-            hermes_home=str(hermes_root),
+            pichkoo_home=str(pichkoo_root),
             active_profile="coder",
         )
 
@@ -85,7 +85,7 @@ class TestApplyProfileOverridePichkooHomeGuard:
             f"Expected PICHKOO_HOME to end with 'coder', got: {result!r}"
         )
 
-    def test_hermes_home_already_profile_dir_is_trusted(self, tmp_path, monkeypatch):
+    def test_pichkoo_home_already_profile_dir_is_trusted(self, tmp_path, monkeypatch):
         """PICHKOO_HOME=.../profiles/coder must not be overridden even when
         active_profile says something different.
 
@@ -93,11 +93,11 @@ class TestApplyProfileOverridePichkooHomeGuard:
         with PICHKOO_HOME already set to a specific profile must stay in that
         profile.
         """
-        hermes_root = tmp_path / ".pichkoo"
-        profile_dir = hermes_root / "profiles" / "coder"
+        pichkoo_root = tmp_path / ".pichkoo"
+        profile_dir = pichkoo_root / "profiles" / "coder"
         profile_dir.mkdir(parents=True, exist_ok=True)
 
-        (hermes_root / "active_profile").write_text("other")
+        (pichkoo_root / "active_profile").write_text("other")
 
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("PICHKOO_HOME", str(profile_dir))
@@ -110,29 +110,29 @@ class TestApplyProfileOverridePichkooHomeGuard:
             "PICHKOO_HOME must remain unchanged when already pointing to a profile dir"
         )
 
-    def test_hermes_home_unset_reads_active_profile(self, tmp_path, monkeypatch):
+    def test_pichkoo_home_unset_reads_active_profile(self, tmp_path, monkeypatch):
         """Classic case: PICHKOO_HOME unset + active_profile=coder must set
         PICHKOO_HOME to the profile directory (existing behaviour must not regress).
         """
         result = _run_apply_profile_override(
             tmp_path,
             monkeypatch,
-            hermes_home=None,
+            pichkoo_home=None,
             active_profile="coder",
         )
 
         assert result is not None
         assert "coder" in result
 
-    def test_hermes_home_unset_default_profile_no_redirect(self, tmp_path, monkeypatch):
+    def test_pichkoo_home_unset_default_profile_no_redirect(self, tmp_path, monkeypatch):
         """active_profile=default must not redirect PICHKOO_HOME."""
-        hermes_root = tmp_path / ".pichkoo"
-        hermes_root.mkdir(parents=True, exist_ok=True)
+        pichkoo_root = tmp_path / ".pichkoo"
+        pichkoo_root.mkdir(parents=True, exist_ok=True)
 
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.delenv("PICHKOO_HOME", raising=False)
         monkeypatch.setattr(sys, "argv", ["pichkoo", "gateway", "start"])
-        (hermes_root / "active_profile").write_text("default")
+        (pichkoo_root / "active_profile").write_text("default")
 
         from pichkoo_cli.main import _apply_profile_override
         _apply_profile_override()

@@ -485,7 +485,7 @@ sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))
 
 from gateway.config import Platform, PlatformConfig
 from gateway.session import SessionSource, build_session_key
-from pichkoo_constants import get_default_hermes_root, get_hermes_dir, get_hermes_home
+from pichkoo_constants import get_default_pichkoo_root, get_pichkoo_dir, get_pichkoo_home
 
 
 GATEWAY_SECRET_CAPTURE_UNSUPPORTED_MESSAGE = (
@@ -558,7 +558,7 @@ async def _ssrf_redirect_guard(response):
 # ---------------------------------------------------------------------------
 
 # Default location: {PICHKOO_HOME}/cache/images/ (legacy: image_cache/)
-IMAGE_CACHE_DIR = get_hermes_dir("cache/images", "image_cache")
+IMAGE_CACHE_DIR = get_pichkoo_dir("cache/images", "image_cache")
 
 
 def get_image_cache_dir() -> Path:
@@ -699,7 +699,7 @@ def cleanup_image_cache(max_age_hours: int = 24) -> int:
 # here so the STT tool (OpenAI Whisper) can transcribe them from local files.
 # ---------------------------------------------------------------------------
 
-AUDIO_CACHE_DIR = get_hermes_dir("cache/audio", "audio_cache")
+AUDIO_CACHE_DIR = get_pichkoo_dir("cache/audio", "audio_cache")
 
 
 def get_audio_cache_dir() -> Path:
@@ -792,7 +792,7 @@ async def cache_audio_from_url(url: str, ext: str = ".ogg", retries: int = 2) ->
 # here so the agent can reference them by local file path.
 # ---------------------------------------------------------------------------
 
-VIDEO_CACHE_DIR = get_hermes_dir("cache/videos", "video_cache")
+VIDEO_CACHE_DIR = get_pichkoo_dir("cache/videos", "video_cache")
 
 SUPPORTED_VIDEO_TYPES = {
     ".mp4": "video/mp4",
@@ -825,10 +825,10 @@ def cache_video_from_bytes(data: bytes, ext: str = ".mp4") -> str:
 # here so the agent can reference them by local file path.
 # ---------------------------------------------------------------------------
 
-DOCUMENT_CACHE_DIR = get_hermes_dir("cache/documents", "document_cache")
-SCREENSHOT_CACHE_DIR = get_hermes_dir("cache/screenshots", "browser_screenshots")
-_PICHKOO_HOME = get_hermes_home()
-_PICHKOO_ROOT = get_default_hermes_root()
+DOCUMENT_CACHE_DIR = get_pichkoo_dir("cache/documents", "document_cache")
+SCREENSHOT_CACHE_DIR = get_pichkoo_dir("cache/screenshots", "browser_screenshots")
+_PICHKOO_HOME = get_pichkoo_home()
+_PICHKOO_ROOT = get_default_pichkoo_root()
 MEDIA_DELIVERY_ALLOW_DIRS_ENV = "PICHKOO_MEDIA_ALLOW_DIRS"
 MEDIA_DELIVERY_TRUST_RECENT_ENV = "PICHKOO_MEDIA_TRUST_RECENT_FILES"
 MEDIA_DELIVERY_TRUST_RECENT_SECONDS_ENV = "PICHKOO_MEDIA_TRUST_RECENT_SECONDS"
@@ -959,11 +959,11 @@ def _media_delivery_denied_paths() -> List[Path]:
     # The active Pichkoo profile and shared Pichkoo root both contain control
     # files and credentials. Only cache subdirectories under them are
     # explicitly allowlisted above.
-    for hermes_root in (_PICHKOO_HOME, _PICHKOO_ROOT):
-        denied.append(hermes_root / ".env")
-        denied.append(hermes_root / "auth.json")
-        denied.append(hermes_root / "credentials")
-        denied.append(hermes_root / "config.yaml")
+    for pichkoo_root in (_PICHKOO_HOME, _PICHKOO_ROOT):
+        denied.append(pichkoo_root / ".env")
+        denied.append(pichkoo_root / "auth.json")
+        denied.append(pichkoo_root / "credentials")
+        denied.append(pichkoo_root / "config.yaml")
     return denied
 
 
@@ -4488,7 +4488,7 @@ class BasePlatformAdapter(ABC):
             # session (e.g. deferred background-review notifications).
             #
             # Snapshot the callback generation HERE (after the agent has run),
-            # not at the top of this task.  _hermes_run_generation is set on
+            # not at the top of this task.  _pichkoo_run_generation is set on
             # the interrupt event by GatewayRunner._bind_adapter_run_generation
             # during _handle_message_with_agent — which happens DURING the
             # self._message_handler(event) await above.  Snapshotting earlier
@@ -4497,7 +4497,7 @@ class BasePlatformAdapter(ABC):
             # fresher run's callbacks.
             _callback_generation = getattr(
                 interrupt_event,
-                "_hermes_run_generation",
+                "_pichkoo_run_generation",
                 None,
             )
             if hasattr(self, "pop_post_delivery_callback"):

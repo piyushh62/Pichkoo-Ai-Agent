@@ -43,7 +43,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
 
-from pichkoo_cli.config import get_hermes_home, get_config_path, read_raw_config
+from pichkoo_cli.config import get_pichkoo_home, get_config_path, read_raw_config
 from pichkoo_constants import OPENROUTER_BASE_URL, secure_parent_dir
 from agent.credential_persistence import sanitize_borrowed_credential_payload
 from utils import atomic_replace, atomic_yaml_write, is_truthy_value
@@ -853,7 +853,7 @@ def _oauth_trace(event: str, *, sequence_id: Optional[str] = None, **fields: Any
 # =============================================================================
 
 def _auth_file_path() -> Path:
-    path = get_hermes_home() / "auth.json"
+    path = get_pichkoo_home() / "auth.json"
     # Seat belt: if pytest is running and PICHKOO_HOME resolves to the real
     # user's auth store, refuse rather than silently corrupt it. This catches
     # tests that forgot to monkeypatch PICHKOO_HOME, tests invoked without the
@@ -885,11 +885,11 @@ def _global_auth_file_path() -> Optional[Path]:
     See issue #18594 follow-up (credential_pool shadowing).
     """
     try:
-        from pichkoo_constants import get_default_hermes_root
-        global_root = get_default_hermes_root()
+        from pichkoo_constants import get_default_pichkoo_root
+        global_root = get_default_pichkoo_root()
     except Exception:
         return None
-    profile_home = get_hermes_home()
+    profile_home = get_pichkoo_home()
     try:
         if profile_home.resolve(strict=False) == global_root.resolve(strict=False):
             return None
@@ -914,7 +914,7 @@ def _load_global_auth_store() -> Dict[str, Any]:
     Seat belt: under pytest, refuses to read the real user's
     ``~/.pichkoo/auth.json`` even when PICHKOO_HOME is set to a profile
     path. The hermetic conftest does not redirect ``HOME``, so
-    ``get_default_hermes_root()`` for a profile-shaped PICHKOO_HOME can
+    ``get_default_pichkoo_root()`` for a profile-shaped PICHKOO_HOME can
     still resolve to the real user's home on a dev machine. That would
     leak real credentials into tests. This guard uses the unmodified
     ``HOME`` env var (what ``os.path.expanduser('~')`` would resolve to),
@@ -4416,7 +4416,7 @@ def _poll_for_token(
 #
 # File lives at ${PICHKOO_SHARED_AUTH_DIR}/nous_auth.json, defaulting to
 # ``<pichkoo-root>/shared/nous_auth.json`` where ``<pichkoo-root>`` is what
-# ``get_default_hermes_root()`` returns — ``~/.pichkoo`` on Linux/macOS,
+# ``get_default_pichkoo_root()`` returns — ``~/.pichkoo`` on Linux/macOS,
 # ``%LOCALAPPDATA%\pichkoo`` on native Windows, or the Docker/custom root.
 # It is OUTSIDE any named profile's PICHKOO_HOME so named profiles (which
 # typically live under ``<pichkoo-root>/profiles/<name>/``) all see the
@@ -4438,7 +4438,7 @@ def _nous_shared_auth_dir() -> Path:
     Honors ``PICHKOO_SHARED_AUTH_DIR`` so tests can redirect it to a tmp
     path without touching the real user's home. Defaults to
     ``<pichkoo-root>/shared/``, where ``<pichkoo-root>`` is what
-    :func:`pichkoo_constants.get_default_hermes_root` returns — so
+    :func:`pichkoo_constants.get_default_pichkoo_root` returns — so
     Linux/macOS classic installs land at ``~/.pichkoo/shared/``, native
     Windows installs at ``%LOCALAPPDATA%\\pichkoo\\shared\\``, and
     Docker / custom ``PICHKOO_HOME`` deployments at
@@ -4448,8 +4448,8 @@ def _nous_shared_auth_dir() -> Path:
     override = os.getenv("PICHKOO_SHARED_AUTH_DIR", "").strip()
     if override:
         return Path(override).expanduser()
-    from pichkoo_constants import get_default_hermes_root
-    return get_default_hermes_root() / "shared"
+    from pichkoo_constants import get_default_pichkoo_root
+    return get_default_pichkoo_root() / "shared"
 
 
 def _nous_shared_store_path() -> Path:
@@ -4461,9 +4461,9 @@ def _nous_shared_store_path() -> Path:
     # so forgetting to set it fails loudly instead of writing to the real
     # shared store).
     if os.environ.get("PYTEST_CURRENT_TEST"):
-        from pichkoo_constants import get_default_hermes_root
+        from pichkoo_constants import get_default_pichkoo_root
         real_home_shared = (
-            get_default_hermes_root() / "shared" / NOUS_SHARED_STORE_FILENAME
+            get_default_pichkoo_root() / "shared" / NOUS_SHARED_STORE_FILENAME
         ).resolve(strict=False)
         try:
             resolved = path.resolve(strict=False)
@@ -6504,7 +6504,7 @@ def _login_openai_codex(
     config_path = _update_config_for_provider("openai-codex", creds.get("base_url", DEFAULT_CODEX_BASE_URL))
     print()
     print("Login successful!")
-    from pichkoo_constants import display_hermes_home as _dhh
+    from pichkoo_constants import display_pichkoo_home as _dhh
     print(f"  Auth state: {_dhh()}/auth.json")
     print(f"  Config updated: {config_path} (model.provider=openai-codex)")
 
@@ -6564,7 +6564,7 @@ def _login_xai_oauth(
     config_path = _update_config_for_provider("xai-oauth", creds.get("base_url", DEFAULT_XAI_OAUTH_BASE_URL))
     print()
     print("Login successful!")
-    from pichkoo_constants import display_hermes_home as _dhh
+    from pichkoo_constants import display_pichkoo_home as _dhh
     print(f"  Auth state: {_dhh()}/auth.json")
     print(f"  Config updated: {config_path} (model.provider=xai-oauth)")
 

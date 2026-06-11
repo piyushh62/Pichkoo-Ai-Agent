@@ -63,7 +63,7 @@ function ancestorDirs(root: string, dir: string) {
 }
 
 async function gitRootFor(start: string) {
-  if (!window.hermesDesktop?.gitRoot) {
+  if (!window.pichkooDesktop?.gitRoot) {
     return null
   }
 
@@ -71,7 +71,7 @@ async function gitRootFor(start: string) {
   let cached = gitRootCache.get(key)
 
   if (!cached) {
-    cached = window.hermesDesktop.gitRoot(key)
+    cached = window.pichkooDesktop.gitRoot(key)
     gitRootCache.set(key, cached)
   }
 
@@ -80,18 +80,18 @@ async function gitRootFor(start: string) {
 
 /** Read .gitignore at `dir` if it actually exists — never probe missing files. */
 async function readGitignore(dir: string): Promise<GitignoreRule | null> {
-  if (!window.hermesDesktop?.readDir || !window.hermesDesktop.readFileDataUrl) {
+  if (!window.pichkooDesktop?.readDir || !window.pichkooDesktop.readFileDataUrl) {
     return null
   }
 
   try {
-    const listing = await window.hermesDesktop.readDir(dir)
+    const listing = await window.pichkooDesktop.readDir(dir)
 
     if (!listing.entries.some(e => e.name === '.gitignore' && !e.isDirectory)) {
       return null
     }
 
-    const text = decodeDataUrl(await window.hermesDesktop.readFileDataUrl(`${dir}/.gitignore`))
+    const text = decodeDataUrl(await window.pichkooDesktop.readFileDataUrl(`${dir}/.gitignore`))
 
     return { base: dir, ig: ignore().add(text) }
   } catch {
@@ -138,11 +138,11 @@ async function filterIgnored(entries: PichkooReadDirEntry[], rootPath: string, d
 }
 
 export async function readProjectDir(dirPath: string, rootPath = dirPath): Promise<PichkooReadDirResult> {
-  if (!window.hermesDesktop) {
+  if (!window.pichkooDesktop) {
     return { entries: [], error: 'no-bridge' }
   }
 
-  const result = await window.hermesDesktop.readDir(dirPath)
+  const result = await window.pichkooDesktop.readDir(dirPath)
 
   return { ...result, entries: await filterIgnored(result.entries, rootPath, dirPath) }
 }

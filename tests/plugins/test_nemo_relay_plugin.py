@@ -204,7 +204,7 @@ def test_manifest_fields():
 
 
 def test_nemo_relay_plugin_is_discoverable_as_bundled_plugin(tmp_path, monkeypatch):
-    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path / "hermes_test"))
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path / "pichkoo_test"))
 
     manager = PluginManager()
     manager.discover_and_load()

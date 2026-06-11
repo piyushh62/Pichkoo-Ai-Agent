@@ -33,8 +33,8 @@ def _state_dir() -> Path:
     if override:
         return Path(override)
     # Default: $PICHKOO_HOME/watcher-state/, falling back to ~/.pichkoo/watcher-state/.
-    hermes_home = os.environ.get("PICHKOO_HOME") or str(Path.home() / ".pichkoo")
-    return Path(hermes_home) / "watcher-state"
+    pichkoo_home = os.environ.get("PICHKOO_HOME") or str(Path.home() / ".pichkoo")
+    return Path(pichkoo_home) / "watcher-state"
 
 
 class Watermark:

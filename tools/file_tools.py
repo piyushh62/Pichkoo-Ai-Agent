@@ -291,25 +291,25 @@ _SENSITIVE_PATH_PREFIXES = (
 )
 _SENSITIVE_EXACT_PATHS = {"/var/run/docker.sock", "/run/docker.sock"}
 
-_hermes_config_resolved: str | None = None
-_hermes_config_resolved_loaded = False
+_pichkoo_config_resolved: str | None = None
+_pichkoo_config_resolved_loaded = False
 
 
-def _get_hermes_config_resolved() -> str | None:
+def _get_pichkoo_config_resolved() -> str | None:
     """Return the resolved absolute path of the Pichkoo config file (cached)."""
-    global _hermes_config_resolved, _hermes_config_resolved_loaded
-    if _hermes_config_resolved_loaded:
-        return _hermes_config_resolved
-    _hermes_config_resolved_loaded = True
+    global _pichkoo_config_resolved, _pichkoo_config_resolved_loaded
+    if _pichkoo_config_resolved_loaded:
+        return _pichkoo_config_resolved
+    _pichkoo_config_resolved_loaded = True
     try:
         from pichkoo_cli.config import get_config_path
-        _hermes_config_resolved = str(get_config_path().resolve())
+        _pichkoo_config_resolved = str(get_config_path().resolve())
     except Exception:
         try:
-            _hermes_config_resolved = str(Path("~/.pichkoo/config.yaml").expanduser().resolve())
+            _pichkoo_config_resolved = str(Path("~/.pichkoo/config.yaml").expanduser().resolve())
         except Exception:
-            _hermes_config_resolved = None
-    return _hermes_config_resolved
+            _pichkoo_config_resolved = None
+    return _pichkoo_config_resolved
 
 
 def _check_sensitive_path(filepath: str, task_id: str = "default") -> str | None:
@@ -332,8 +332,8 @@ def _check_sensitive_path(filepath: str, task_id: str = "default") -> str | None
     # approvals.mode and other security settings live here; a malicious or
     # prompt-injected agent could silently disable exec approval by writing to
     # this file.
-    hermes_config = _get_hermes_config_resolved()
-    if hermes_config and (resolved == hermes_config or normalized == hermes_config):
+    pichkoo_config = _get_pichkoo_config_resolved()
+    if pichkoo_config and (resolved == pichkoo_config or normalized == pichkoo_config):
         return (
             f"Refusing to write to Pichkoo config file: {filepath}\n"
             "Agent cannot modify security-sensitive configuration. "
@@ -1545,7 +1545,7 @@ def _handle_write_file(args, **kw):
             "write_file: missing required field 'content'. The tool call included a "
             "path but no content argument — this is almost always a dropped-arg bug "
             "under context pressure. Re-emit the tool call with the full content "
-            "payload, or use execute_code with hermes_tools.write_file() for very "
+            "payload, or use execute_code with pichkoo_tools.write_file() for very "
             "large files."
         )
     if not isinstance(args["content"], str):

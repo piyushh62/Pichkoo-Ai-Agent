@@ -162,7 +162,7 @@ _SSH_SENSITIVE_PATH = r'(?:~|\$home|\$\{home\})/\.ssh(?:/|$)'
 _PICHKOO_ENV_PATH = (
     r'(?:~\/\.pichkoo/|'
     r'(?:\$home|\$\{home\})/\.pichkoo/|'
-    r'(?:\$hermes_home|\$\{hermes_home\})/)'
+    r'(?:\$pichkoo_home|\$\{pichkoo_home\})/)'
     r'\.env\b'
 )
 # ~/.pichkoo/config.yaml IS the security policy: approvals.mode, yolo, and the
@@ -176,7 +176,7 @@ _PICHKOO_ENV_PATH = (
 _PICHKOO_CONFIG_PATH = (
     r'(?:~\/\.pichkoo/|'
     r'(?:\$home|\$\{home\})/\.pichkoo/|'
-    r'(?:\$hermes_home|\$\{hermes_home\})/)'
+    r'(?:\$pichkoo_home|\$\{pichkoo_home\})/)'
     r'config\.yaml\b'
 )
 _PROJECT_ENV_PATH = r'(?:(?:/|\.{1,2}/)?(?:[^\s/"\'`]+/)*\.env(?:\.[^/\s"\'`]+)*)'
@@ -417,8 +417,8 @@ DANGEROUS_PATTERNS = [
     # Gateway lifecycle protection: prevent the agent from killing its own
     # gateway process.  These commands trigger a gateway restart/stop that
     # terminates all running agents mid-work.
-    (r'\bhermes\s+gateway\s+(stop|restart)\b', "stop/restart pichkoo gateway (kills running agents)"),
-    (r'\bhermes\s+update\b', "pichkoo update (restarts gateway, kills running agents)"),
+    (r'\bpichkoo\s+gateway\s+(stop|restart)\b', "stop/restart pichkoo gateway (kills running agents)"),
+    (r'\bpichkoo\s+update\b', "pichkoo update (restarts gateway, kills running agents)"),
     # Docker container lifecycle — any user with docker.sock mounted (a common
     # Docker Compose pattern) gives the agent the ability to restart/stop/kill
     # containers without approval.  These are agent-initiated lifecycle operations
@@ -554,11 +554,11 @@ def _normalize_command_for_detection(command: str) -> str:
     # ~, $HOME, or $PICHKOO_HOME. Done at detection time (not via an import-time
     # pattern snapshot) so it tracks the live PICHKOO_HOME even when that is set
     # after this module is imported — as the hermetic test conftest does.
-    command = _rewrite_resolved_hermes_home(command)
+    command = _rewrite_resolved_pichkoo_home(command)
     return command
 
 
-def _rewrite_resolved_hermes_home(command: str) -> str:
+def _rewrite_resolved_pichkoo_home(command: str) -> str:
     """Rewrite the resolved absolute Pichkoo home prefix to ``~/.pichkoo/``.
 
     Resolves the active ``PICHKOO_HOME`` at call time (and its symlink-resolved
@@ -567,8 +567,8 @@ def _rewrite_resolved_hermes_home(command: str) -> str:
     patterns match. No-op when the path can't be resolved or doesn't appear.
     """
     try:
-        from pichkoo_constants import get_hermes_home
-        home = get_hermes_home().expanduser()
+        from pichkoo_constants import get_pichkoo_home
+        home = get_pichkoo_home().expanduser()
         candidates = [
             str(home).rstrip("/"),
             str(home.resolve(strict=False)).rstrip("/"),

@@ -685,7 +685,7 @@ export default function SystemPage() {
               <div>
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Pichkoo</div>
                 <div className="flex items-center gap-2">
-                  <span>v{stats?.hermes_version}</span>
+                  <span>v{stats?.pichkoo_version}</span>
                   {updateInfo &&
                     (updateInfo.update_available ? (
                       <Badge tone="warning">

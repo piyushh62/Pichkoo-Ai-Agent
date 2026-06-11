@@ -66,7 +66,7 @@ class TestEnvFileReadBlocking:
             error = get_read_block_error(path)
             assert error is None, f"{path} should be allowed"
 
-    def test_allowed_hermes_env(self):
+    def test_allowed_pichkoo_env(self):
         """Pichkoo' own .env inside PICHKOO_HOME is NOT blocked by this rule
         (it's handled by other mechanisms). Only project-local .env is blocked."""
         # Note: pichkoo internal .env is in ~/.pichkoo/.env which is NOT a project-local
@@ -91,24 +91,24 @@ class TestCacheFileReadBlocking:
 
     def test_hub_index_cache_blocked(self, tmp_path):
         """Hub index-cache reads are blocked."""
-        hermes_home = tmp_path / ".pichkoo"
-        cache = hermes_home / "skills" / ".hub" / "index-cache" / "data.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        cache = pichkoo_home / "skills" / ".hub" / "index-cache" / "data.json"
         cache.parent.mkdir(parents=True)
         cache.write_text("{}")
 
-        with patch("agent.file_safety._hermes_home_path", return_value=hermes_home):
+        with patch("agent.file_safety._pichkoo_home_path", return_value=pichkoo_home):
             error = get_read_block_error(str(cache))
             assert error is not None
             assert "internal Pichkoo cache" in error
 
     def test_hub_directory_blocked(self, tmp_path):
         """Hub directory reads are blocked."""
-        hermes_home = tmp_path / ".pichkoo"
-        hub = hermes_home / "skills" / ".hub" / "metadata.json"
+        pichkoo_home = tmp_path / ".pichkoo"
+        hub = pichkoo_home / "skills" / ".hub" / "metadata.json"
         hub.parent.mkdir(parents=True)
         hub.write_text("{}")
 
-        with patch("agent.file_safety._hermes_home_path", return_value=hermes_home):
+        with patch("agent.file_safety._pichkoo_home_path", return_value=pichkoo_home):
             error = get_read_block_error(str(hub))
             assert error is not None
 
@@ -121,12 +121,12 @@ class TestCacheFileReadBlocking:
 class TestCombinedGuards:
     """Both guards should work independently without interference."""
 
-    def test_env_guard_works_regardless_of_hermes_home(self, tmp_path):
+    def test_env_guard_works_regardless_of_pichkoo_home(self, tmp_path):
         """The env basename guard does not depend on PICHKOO_HOME resolution."""
-        hermes_home = tmp_path / ".pichkoo"
-        hermes_home.mkdir()
+        pichkoo_home = tmp_path / ".pichkoo"
+        pichkoo_home.mkdir()
 
-        with patch("agent.file_safety._hermes_home_path", return_value=hermes_home):
+        with patch("agent.file_safety._pichkoo_home_path", return_value=pichkoo_home):
             # Regular project .env should still be blocked
             error = get_read_block_error("/workspace/.env")
             assert error is not None
@@ -137,12 +137,12 @@ class TestCombinedGuards:
 
     def test_cache_guard_still_works_with_env_guard(self, tmp_path):
         """Cache file blocking still works when env guard is active."""
-        hermes_home = tmp_path / ".pichkoo"
-        cache = hermes_home / "skills" / ".hub" / "index-cache" / "x"
+        pichkoo_home = tmp_path / ".pichkoo"
+        cache = pichkoo_home / "skills" / ".hub" / "index-cache" / "x"
         cache.parent.mkdir(parents=True)
         cache.write_text("")
 
-        with patch("agent.file_safety._hermes_home_path", return_value=hermes_home):
+        with patch("agent.file_safety._pichkoo_home_path", return_value=pichkoo_home):
             error = get_read_block_error(str(cache))
             assert error is not None
             assert "internal Pichkoo cache" in error

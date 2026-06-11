@@ -63,7 +63,7 @@ _PICHKOO_MODEL_WARNING = (
 # happen to carry "pichkoo" in their tag but are fully tool-capable.
 #
 # Positive examples the regex must match:
-#   NousResearch/Pichkoo-3-Llama-3.1-70B, pichkoo-4-405b, openrouter/hermes3:70b
+#   NousResearch/Pichkoo-3-Llama-3.1-70B, pichkoo-4-405b, openrouter/pichkoo3:70b
 # Negative examples it must NOT match:
 #   pichkoo-brain:qwen3-14b-ctx16k, qwen3:14b, claude-opus-4-6
 _NOUS_PICHKOO_NON_AGENTIC_RE = re.compile(
@@ -72,7 +72,7 @@ _NOUS_PICHKOO_NON_AGENTIC_RE = re.compile(
 )
 
 
-def is_nous_hermes_non_agentic(model_name: str) -> bool:
+def is_nous_pichkoo_non_agentic(model_name: str) -> bool:
     """Return True if *model_name* is a real Nous Pichkoo 3/4 chat model.
 
     Used to decide whether to surface the non-agentic warning at startup.
@@ -84,9 +84,9 @@ def is_nous_hermes_non_agentic(model_name: str) -> bool:
     return bool(_NOUS_PICHKOO_NON_AGENTIC_RE.search(model_name))
 
 
-def _check_hermes_model_warning(model_name: str) -> str:
+def _check_pichkoo_model_warning(model_name: str) -> str:
     """Return a warning string if *model_name* is a Nous Pichkoo 3/4 chat model."""
-    if is_nous_hermes_non_agentic(model_name):
+    if is_nous_pichkoo_non_agentic(model_name):
         return _PICHKOO_MODEL_WARNING
     return ""
 
@@ -1091,9 +1091,9 @@ def switch_model(
     warnings: list[str] = []
     if validation.get("message"):
         warnings.append(validation["message"])
-    hermes_warn = _check_hermes_model_warning(new_model)
-    if hermes_warn:
-        warnings.append(hermes_warn)
+    pichkoo_warn = _check_pichkoo_model_warning(new_model)
+    if pichkoo_warn:
+        warnings.append(pichkoo_warn)
 
     # --- Build result ---
     return ModelSwitchResult(
@@ -1337,7 +1337,7 @@ def list_authenticated_providers(
     # --- 1. Check Pichkoo-mapped providers ---
     from pichkoo_cli.models import _AGGREGATOR_PROVIDERS as _AGG_PROVIDERS
     from pichkoo_cli.providers import ALIASES as _PROVIDER_ALIAS_TABLE
-    for hermes_id, mdev_id in PROVIDER_TO_MODELS_DEV.items():
+    for pichkoo_id, mdev_id in PROVIDER_TO_MODELS_DEV.items():
         # Skip vendor names that are merely aliases routing through an
         # aggregator (e.g. bare "openai" → "openrouter"). These are NOT
         # directly-routable providers: emitting them as their own picker
@@ -1346,10 +1346,10 @@ def list_authenticated_providers(
         # switching a user off their real provider onto an endpoint they
         # may have no key for (HTTP 401). The user's real provider (e.g.
         # openai-api, or a providers.openai config row) covers this vendor.
-        _alias_target = _PROVIDER_ALIAS_TABLE.get(hermes_id)
+        _alias_target = _PROVIDER_ALIAS_TABLE.get(pichkoo_id)
         if (
             _alias_target
-            and _alias_target != hermes_id
+            and _alias_target != pichkoo_id
             and _alias_target in _AGG_PROVIDERS
         ):
             continue
@@ -1365,7 +1365,7 @@ def list_authenticated_providers(
         # Prefer auth.py PROVIDER_REGISTRY for env var names — it's our
         # source of truth.  models.dev can have wrong mappings (e.g.
         # minimax-cn → MINIMAX_API_KEY instead of MINIMAX_CN_API_KEY).
-        pconfig = PROVIDER_REGISTRY.get(hermes_id)
+        pconfig = PROVIDER_REGISTRY.get(pichkoo_id)
         # Skip non-API-key auth providers here — they are handled in
         # section 2 (PICHKOO_OVERLAYS) with proper auth store checking.
         if pconfig and pconfig.auth_type != "api_key":
@@ -1383,7 +1383,7 @@ def list_authenticated_providers(
             try:
                 from pichkoo_cli.auth import _load_auth_store
                 store = _load_auth_store()
-                if store and store.get("credential_pool", {}).get(hermes_id):
+                if store and store.get("credential_pool", {}).get(pichkoo_id):
                     has_creds = True
             except Exception:
                 pass
@@ -1394,15 +1394,15 @@ def list_authenticated_providers(
         # /model picker sees the SAME list `pichkoo model` would build, with
         # disk caching to keep the picker open snappy. Falls back to the
         # curated static list when the live fetcher returns nothing.
-        model_ids = cached_provider_model_ids(hermes_id)
+        model_ids = cached_provider_model_ids(pichkoo_id)
         if not model_ids:
-            model_ids = curated.get(hermes_id, [])
-            if hermes_id in _MODELS_DEV_PREFERRED:
-                model_ids = _merge_with_models_dev(hermes_id, model_ids)
+            model_ids = curated.get(pichkoo_id, [])
+            if pichkoo_id in _MODELS_DEV_PREFERRED:
+                model_ids = _merge_with_models_dev(pichkoo_id, model_ids)
         total = len(model_ids)
         top = model_ids[:max_models]
 
-        slug = hermes_id
+        slug = pichkoo_id
         pinfo = _mdev_pinfo(mdev_id)
         display_name = pinfo.name if pinfo else mdev_id
 
@@ -1426,26 +1426,26 @@ def list_authenticated_providers(
     # Build reverse mapping: models.dev ID → Pichkoo provider ID.
     # PICHKOO_OVERLAYS keys may be models.dev IDs (e.g. "github-copilot")
     # while _PROVIDER_MODELS and config.yaml use Pichkoo IDs ("copilot").
-    _mdev_to_hermes = {v: k for k, v in PROVIDER_TO_MODELS_DEV.items()}
+    _mdev_to_pichkoo = {v: k for k, v in PROVIDER_TO_MODELS_DEV.items()}
 
     for pid, overlay in PICHKOO_OVERLAYS.items():
         if pid.lower() in seen_slugs:
             continue
 
         # Resolve Pichkoo slug — e.g. "github-copilot" → "copilot"
-        hermes_slug = _mdev_to_hermes.get(pid, pid)
-        if hermes_slug.lower() in seen_slugs:
+        pichkoo_slug = _mdev_to_pichkoo.get(pid, pid)
+        if pichkoo_slug.lower() in seen_slugs:
             continue
 
         # Check if credentials exist
         has_creds = False
         if overlay.auth_type == "aws_sdk":
-            has_creds = _has_aws_sdk_creds_for_listing(hermes_slug)
+            has_creds = _has_aws_sdk_creds_for_listing(pichkoo_slug)
         elif overlay.extra_env_vars:
             has_creds = any(os.environ.get(ev) for ev in overlay.extra_env_vars)
         # Also check api_key_env_vars from PROVIDER_REGISTRY for api_key auth_type
         if not has_creds and overlay.auth_type == "api_key":
-            for _key in (pid, hermes_slug):
+            for _key in (pid, pichkoo_slug):
                 pcfg = _auth_registry.get(_key)
                 if pcfg and pcfg.api_key_env_vars:
                     if any(os.environ.get(ev) for ev in pcfg.api_key_env_vars):
@@ -1460,7 +1460,7 @@ def list_authenticated_providers(
                 from pichkoo_cli.auth import _load_auth_store
                 store = _load_auth_store()
                 providers_store = store.get("providers", {})
-                if store and (pid in providers_store or hermes_slug in providers_store):
+                if store and (pid in providers_store or pichkoo_slug in providers_store):
                     has_creds = True
             except Exception as exc:
                 logger.debug("Auth store check failed for %s: %s", pid, exc)
@@ -1471,11 +1471,11 @@ def list_authenticated_providers(
         if not has_creds:
             try:
                 from agent.credential_pool import load_pool
-                pool = load_pool(hermes_slug)
+                pool = load_pool(pichkoo_slug)
                 if pool.has_credentials():
                     has_creds = True
             except Exception as exc:
-                logger.debug("Credential pool check failed for %s: %s", hermes_slug, exc)
+                logger.debug("Credential pool check failed for %s: %s", pichkoo_slug, exc)
         # Fallback: check external credential files directly.
         # The credential pool gates anthropic behind
         # is_provider_explicitly_configured() to prevent auxiliary tasks
@@ -1483,15 +1483,15 @@ def list_authenticated_providers(
         # But the /model picker is discovery-oriented — we WANT to show
         # providers the user can switch to, even if they aren't currently
         # configured.
-        if not has_creds and hermes_slug == "anthropic":
+        if not has_creds and pichkoo_slug == "anthropic":
             try:
                 from agent.anthropic_adapter import (
                     read_claude_code_credentials,
-                    read_hermes_oauth_credentials,
+                    read_pichkoo_oauth_credentials,
                 )
-                hermes_creds = read_hermes_oauth_credentials()
+                pichkoo_creds = read_pichkoo_oauth_credentials()
                 cc_creds = read_claude_code_credentials()
-                if (hermes_creds and hermes_creds.get("accessToken")) or \
+                if (pichkoo_creds and pichkoo_creds.get("accessToken")) or \
                    (cc_creds and cc_creds.get("accessToken")):
                     has_creds = True
             except Exception as exc:
@@ -1499,7 +1499,7 @@ def list_authenticated_providers(
         if not has_creds:
             continue
 
-        if hermes_slug in {"openai-codex", "copilot", "copilot-acp"}:
+        if pichkoo_slug in {"openai-codex", "copilot", "copilot-acp"}:
             # Use live OAuth-backed discovery so the gateway /model picker
             # matches what the user's authenticated Codex/Copilot backend
             # actually serves — including ChatGPT-Pro-only Codex slugs
@@ -1507,16 +1507,16 @@ def list_authenticated_providers(
             # catalog. ``cached_provider_model_ids()`` falls back to the
             # curated list when the live endpoint is unreachable, so this
             # is safe for unauthenticated and offline cases too.
-            model_ids = cached_provider_model_ids(hermes_slug)
+            model_ids = cached_provider_model_ids(pichkoo_slug)
         # For aws_sdk providers (bedrock), use live discovery so the list
         # reflects the active region (eu.*, ap.*) not the static us.* list.
         elif overlay.auth_type == "aws_sdk":
             try:
-                _ids = cached_provider_model_ids(hermes_slug)
-                model_ids = _ids if _ids else (curated.get(hermes_slug, []) or curated.get(pid, []))
+                _ids = cached_provider_model_ids(pichkoo_slug)
+                model_ids = _ids if _ids else (curated.get(pichkoo_slug, []) or curated.get(pid, []))
             except Exception:
-                model_ids = curated.get(hermes_slug, []) or curated.get(pid, [])
-        elif hermes_slug == "nous":
+                model_ids = curated.get(pichkoo_slug, []) or curated.get(pid, [])
+        elif pichkoo_slug == "nous":
             # Nous serves a large live /v1/models catalog (vendor-prefixed
             # models from many providers, returned alphabetically). The
             # `pichkoo model` picker deliberately shows ONLY the curated agentic
@@ -1557,26 +1557,26 @@ def list_authenticated_providers(
             # Unified pathway — see Section 1 rationale. Fall back to the
             # curated dict (with models.dev merge for preferred providers)
             # when the live fetcher comes up empty.
-            model_ids = cached_provider_model_ids(hermes_slug)
+            model_ids = cached_provider_model_ids(pichkoo_slug)
             if not model_ids:
-                model_ids = curated.get(hermes_slug, []) or curated.get(pid, [])
-                if hermes_slug in _MODELS_DEV_PREFERRED:
-                    model_ids = _merge_with_models_dev(hermes_slug, model_ids)
+                model_ids = curated.get(pichkoo_slug, []) or curated.get(pid, [])
+                if pichkoo_slug in _MODELS_DEV_PREFERRED:
+                    model_ids = _merge_with_models_dev(pichkoo_slug, model_ids)
         total = len(model_ids)
         top = model_ids[:max_models]
 
         results.append({
-            "slug": hermes_slug,
-            "name": get_label(hermes_slug),
-            "is_current": hermes_slug == current_provider or pid == current_provider,
+            "slug": pichkoo_slug,
+            "name": get_label(pichkoo_slug),
+            "is_current": pichkoo_slug == current_provider or pid == current_provider,
             "is_user_defined": False,
             "models": top,
             "total_models": total,
             "source": "pichkoo",
         })
         seen_slugs.add(pid.lower())
-        seen_slugs.add(hermes_slug.lower())
-        _record_builtin_endpoint(hermes_slug)
+        seen_slugs.add(pichkoo_slug.lower())
+        _record_builtin_endpoint(pichkoo_slug)
 
     # --- 2b. Cross-check canonical provider list ---
     # Catches providers that are in CANONICAL_PROVIDERS but weren't found

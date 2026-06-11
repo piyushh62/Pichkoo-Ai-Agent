@@ -30,9 +30,9 @@ def has_xai_credentials() -> bool:
     if os.environ.get("XAI_API_KEY", "").strip():
         return True
     try:
-        from pichkoo_constants import get_hermes_home
+        from pichkoo_constants import get_pichkoo_home
 
-        auth_path = get_hermes_home() / "auth.json"
+        auth_path = get_pichkoo_home() / "auth.json"
         if not auth_path.exists():
             return False
         store = json.loads(auth_path.read_text())
@@ -53,9 +53,9 @@ def get_env_value(name: str, default=None):
     xAI credential resolver.
     """
     try:
-        from pichkoo_cli.config import get_env_value as _hermes_get_env_value
+        from pichkoo_cli.config import get_env_value as _pichkoo_get_env_value
 
-        value = _hermes_get_env_value(name)
+        value = _pichkoo_get_env_value(name)
         if value is not None:
             return value
     except Exception:
@@ -63,7 +63,7 @@ def get_env_value(name: str, default=None):
     return os.environ.get(name, default)
 
 
-def hermes_xai_user_agent() -> str:
+def pichkoo_xai_user_agent() -> str:
     """Return a stable Pichkoo-specific User-Agent for xAI HTTP calls."""
     try:
         from pichkoo_cli import __version__

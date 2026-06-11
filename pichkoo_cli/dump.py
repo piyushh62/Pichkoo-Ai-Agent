@@ -13,9 +13,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from pichkoo_cli.config import get_hermes_home, get_env_path, get_project_root, load_config
-from pichkoo_cli.env_loader import load_hermes_dotenv
-from pichkoo_constants import display_hermes_home
+from pichkoo_cli.config import get_pichkoo_home, get_env_path, get_project_root, load_config
+from pichkoo_cli.env_loader import load_pichkoo_dotenv
+from pichkoo_constants import display_pichkoo_home
 from agent.skill_utils import is_excluded_skill_path
 
 
@@ -25,7 +25,7 @@ def _get_git_commit(project_root: Path) -> str:
     Source installs and dev images resolve this live via ``git rev-parse``.
     The published Docker image excludes ``.git`` from the build context, so
     that lookup always fails — we fall back to the baked-in build SHA written
-    to ``<project_root>/.hermes_build_sha`` by the Dockerfile's
+    to ``<project_root>/.pichkoo_build_sha`` by the Dockerfile's
     ``PICHKOO_GIT_SHA`` build-arg (see ``pichkoo_cli/build_info.py``).
     The output format is identical regardless of source.
     """
@@ -85,9 +85,9 @@ def _gateway_status() -> str:
         return "unknown" if sys.platform.startswith(("linux", "darwin")) else "N/A"
 
 
-def _count_skills(hermes_home: Path) -> int:
+def _count_skills(pichkoo_home: Path) -> int:
     """Count installed skills."""
-    skills_dir = hermes_home / "skills"
+    skills_dir = pichkoo_home / "skills"
     if not skills_dir.is_dir():
         return 0
     count = 0
@@ -105,9 +105,9 @@ def _count_mcp_servers(config: dict) -> int:
     return len(servers)
 
 
-def _cron_summary(hermes_home: Path) -> str:
+def _cron_summary(pichkoo_home: Path) -> str:
     """Return cron jobs summary."""
-    jobs_file = hermes_home / "cron" / "jobs.json"
+    jobs_file = pichkoo_home / "cron" / "jobs.json"
     if not jobs_file.exists():
         return "0"
     try:
@@ -222,13 +222,13 @@ def run_dump(args):
 
     # Load env from .env file so key checks work
     env_path = get_env_path()
-    load_hermes_dotenv(
-        hermes_home=env_path.parent,
+    load_pichkoo_dotenv(
+        pichkoo_home=env_path.parent,
         project_env=get_project_root() / ".env",
     )
 
     project_root = get_project_root()
-    hermes_home = get_hermes_home()
+    pichkoo_home = get_pichkoo_home()
 
     try:
         from pichkoo_cli import __version__, __release_date__
@@ -277,7 +277,7 @@ def run_dump(args):
     lines.append(f"python:           {sys.version.split()[0]}")
     lines.append(f"openai_sdk:       {openai_ver}")
     lines.append(f"profile:          {profile}")
-    lines.append(f"hermes_home:      {display_hermes_home()}")
+    lines.append(f"pichkoo_home:      {display_pichkoo_home()}")
     lines.append(f"model:            {model}")
     lines.append(f"provider:         {provider}")
     lines.append(f"terminal:         {backend}")
@@ -343,8 +343,8 @@ def run_dump(args):
 
     platforms = _configured_platforms()
     lines.append(f"  platforms:          {', '.join(platforms) if platforms else 'none'}")
-    lines.append(f"  cron_jobs:          {_cron_summary(hermes_home)}")
-    lines.append(f"  skills:             {_count_skills(hermes_home)}")
+    lines.append(f"  cron_jobs:          {_cron_summary(pichkoo_home)}")
+    lines.append(f"  skills:             {_count_skills(pichkoo_home)}")
 
     # Config overrides (non-default values)
     overrides = _config_overrides(config)
