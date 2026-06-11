@@ -408,7 +408,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           # Helper: run merge then load with Python, output merged JSON
           merge_and_load() {
             local pichkoo_home="$1"
-            export HERMES_HOME="$pichkoo_home"
+            export PICHKOO_HOME="$pichkoo_home"
             ${configMergeScript} ${nixSettings} "$pichkoo_home/config.yaml"
             ${pichkooVenv}/bin/python3 -c '
 import json, sys

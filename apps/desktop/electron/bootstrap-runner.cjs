@@ -13,8 +13,8 @@
  *     installStamp,        // INSTALL_STAMP from main.cjs (may be null in dev)
  *     activeRoot,          // ACTIVE_HERMES_ROOT
  *     sourceRepoRoot,      // SOURCE_REPO_ROOT (for dev install.ps1 lookup)
- *     pichkooHome,          // HERMES_HOME
- *     logRoot,             // HERMES_HOME/logs
+ *     pichkooHome,          // PICHKOO_HOME
+ *     logRoot,             // PICHKOO_HOME/logs
  *     emit: ev => {...}    // event sink (sender.send or similar)
  *   })
  *
@@ -297,9 +297,9 @@ function spawnPowerShell(scriptPath, args, { emit, stageName, abortSignal, pichk
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...process.env,
-        // Pass HERMES_HOME through so install.ps1 respects the caller's
+        // Pass PICHKOO_HOME through so install.ps1 respects the caller's
         // choice rather than re-computing the default.
-        HERMES_HOME: pichkooHome || process.env.HERMES_HOME || ''
+        PICHKOO_HOME: pichkooHome || process.env.PICHKOO_HOME || ''
       }
     }))
 
@@ -372,7 +372,7 @@ function spawnBash(scriptPath, args, { emit, stageName, abortSignal, pichkooHome
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...process.env,
-        HERMES_HOME: pichkooHome || process.env.HERMES_HOME || ''
+        PICHKOO_HOME: pichkooHome || process.env.PICHKOO_HOME || ''
       }
     })
 

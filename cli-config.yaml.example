@@ -1174,7 +1174,7 @@ display:
 # Update Behavior
 # =============================================================================
 updates:
-  # Create a full HERMES_HOME zip before every `pichkoo update`.
+  # Create a full PICHKOO_HOME zip before every `pichkoo update`.
   # Backups land in ~/.pichkoo/backups/ and can be restored with `pichkoo import`.
   # Off by default because large homes can add minutes to every update.
   pre_update_backup: false

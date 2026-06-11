@@ -48,17 +48,17 @@ const APP = (() => {
   }
 })()
 
-// Default HERMES_HOME for non-sandboxed runs -- matches main.cjs's
+// Default PICHKOO_HOME for non-sandboxed runs -- matches main.cjs's
 // resolvePichkooHome(). On Windows it's %LOCALAPPDATA%\pichkoo; elsewhere
 // it's ~/.pichkoo. The fresh-install sandbox launchFresh() sets its own
-// HERMES_HOME and never touches this.
-const DEFAULT_HERMES_HOME = (() => {
+// PICHKOO_HOME and never touches this.
+const DEFAULT_PICHKOO_HOME = (() => {
   if (PLATFORM === 'win32' && process.env.LOCALAPPDATA) {
     return path.join(process.env.LOCALAPPDATA, 'pichkoo')
   }
   return path.join(os.homedir(), '.pichkoo')
 })()
-const VENV_ROOT = path.join(DEFAULT_HERMES_HOME, 'pichkoo-agent', 'venv')
+const VENV_ROOT = path.join(DEFAULT_PICHKOO_HOME, 'pichkoo-agent', 'venv')
 const FRESH_SANDBOX_ROOT = path.join(os.tmpdir(), 'pichkoo-desktop-fresh-install')
 
 function die(message) {
@@ -254,7 +254,7 @@ function launchFresh() {
   env.HERMES_DESKTOP_IGNORE_EXISTING = '1'
   env.HERMES_DESKTOP_TEST_MODE = 'fresh-install'
   env.HERMES_DESKTOP_USER_DATA_DIR = userDataDir
-  env.HERMES_HOME = pichkooHome
+  env.PICHKOO_HOME = pichkooHome
   delete env.HERMES_DESKTOP_HERMES
   delete env.HERMES_DESKTOP_HERMES_ROOT
 
@@ -269,7 +269,7 @@ function launchFresh() {
   console.log('\nFresh install sandbox:')
   console.log(`  root: ${sandbox}`)
   console.log(`  electron userData: ${userDataDir}`)
-  console.log(`  HERMES_HOME: ${pichkooHome}`)
+  console.log(`  PICHKOO_HOME: ${pichkooHome}`)
   console.log(`  cwd: ${cwd}`)
 
   return { runtimeRoot: path.join(pichkooHome, 'pichkoo-agent', 'venv') }
@@ -383,7 +383,7 @@ function printArtifacts(options = {}) {
 function help() {
   console.log(`Usage:
   npm run test:desktop:existing  # build packaged app, launch with normal PATH/existing Pichkoo
-  npm run test:desktop:fresh     # build packaged app, launch with temp userData + HERMES_HOME
+  npm run test:desktop:fresh     # build packaged app, launch with temp userData + PICHKOO_HOME
   npm run test:desktop:dmg       # (macOS only) build DMG and open it
   npm run test:desktop:nsis      # (win32 only) build NSIS installer
   npm run test:desktop:all       # build installer, validate app payload, print paths

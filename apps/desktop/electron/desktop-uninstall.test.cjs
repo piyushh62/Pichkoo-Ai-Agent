@@ -142,7 +142,7 @@ test('buildPosixCleanupScript waits for the PID, runs the uninstall module, remo
   assert.match(script, /seq 1 60/)
   assert.match(script, /'-m' 'pichkoo_cli\.uninstall' '--mode' 'gui'/)
   assert.match(script, /rm -rf '\/opt\/pichkoo\/linux-unpacked'/)
-  assert.match(script, /export HERMES_HOME='\/home\/x\/\.pichkoo'/)
+  assert.match(script, /export PICHKOO_HOME='\/home\/x\/\.pichkoo'/)
 })
 
 test('buildPosixCleanupScript exports PYTHONPATH when pythonPath is set (lite/full)', () => {

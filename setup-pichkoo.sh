@@ -399,7 +399,7 @@ fi
 # Seed bundled skills into ~/.pichkoo/skills/
 # ============================================================================
 
-HERMES_SKILLS_DIR="${HERMES_HOME:-$HOME/.pichkoo}/skills"
+HERMES_SKILLS_DIR="${PICHKOO_HOME:-$HOME/.pichkoo}/skills"
 mkdir -p "$HERMES_SKILLS_DIR"
 
 echo ""

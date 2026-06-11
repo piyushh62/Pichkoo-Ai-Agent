@@ -212,8 +212,8 @@ if (INSTALL_STAMP) {
   )
 }
 
-// HERMES_HOME — the user-facing root for everything Pichkoo-related. Mirrors
-// scripts/install.ps1's $PichkooHome and scripts/install.sh's $HERMES_HOME.
+// PICHKOO_HOME — the user-facing root for everything Pichkoo-related. Mirrors
+// scripts/install.ps1's $PichkooHome and scripts/install.sh's $PICHKOO_HOME.
 //
 // Defaults:
 //   Windows: %LOCALAPPDATA%\pichkoo (matches install.ps1)
@@ -225,10 +225,10 @@ if (INSTALL_STAMP) {
 // existing config / sessions / .env. New installs go to %LOCALAPPDATA%.
 //
 // HERMES_DESKTOP_USER_DATA_DIR (used by test:desktop:fresh) puts the sandbox
-// HERMES_HOME beneath the throwaway userData dir so a fresh-install run never
+// PICHKOO_HOME beneath the throwaway userData dir so a fresh-install run never
 // touches the user's real ~/.pichkoo / %LOCALAPPDATA%\pichkoo.
 function resolvePichkooHome() {
-  if (process.env.HERMES_HOME) return path.resolve(process.env.HERMES_HOME)
+  if (process.env.PICHKOO_HOME) return path.resolve(process.env.PICHKOO_HOME)
   if (USER_DATA_OVERRIDE) return path.join(path.resolve(USER_DATA_OVERRIDE), 'pichkoo-home')
   if (IS_WINDOWS && process.env.LOCALAPPDATA) {
     const localappdata = path.join(process.env.LOCALAPPDATA, 'pichkoo')
@@ -241,11 +241,11 @@ function resolvePichkooHome() {
   return path.join(app.getPath('home'), '.pichkoo')
 }
 
-const HERMES_HOME = resolvePichkooHome()
+const PICHKOO_HOME = resolvePichkooHome()
 // ACTIVE_HERMES_ROOT — the canonical mutable Pichkoo install. Same path
 // install.ps1 / install.sh use, so a desktop-only user and a CLI-only user end
 // up with identical layouts and can share one install.
-const ACTIVE_HERMES_ROOT = path.join(HERMES_HOME, 'pichkoo-agent')
+const ACTIVE_HERMES_ROOT = path.join(PICHKOO_HOME, 'pichkoo-agent')
 // VENV_ROOT — venv lives inside the repo, exactly like install.ps1 does it.
 const VENV_ROOT = path.join(ACTIVE_HERMES_ROOT, 'venv')
 // BOOTSTRAP_COMPLETE_MARKER — written by the first-launch bootstrap runner
@@ -266,7 +266,7 @@ const DESKTOP_CONNECTION_CONFIG_PATH = path.join(app.getPath('userData'), 'conne
 const DESKTOP_UPDATE_CONFIG_PATH = path.join(app.getPath('userData'), 'updates.json')
 // active-profile.json records which Pichkoo profile the desktop launches its
 // local backend as. When set, startPichkoo() passes `pichkoo --profile <name>
-// dashboard …`, which deterministically pins HERMES_HOME (see
+// dashboard …`, which deterministically pins PICHKOO_HOME (see
 // _apply_profile_override in pichkoo_cli/main.py) and bypasses the sticky
 // ~/.pichkoo/active_profile file. Unset (null) preserves the legacy behavior:
 // no --profile flag, so the backend honors active_profile / default.
@@ -278,10 +278,10 @@ const PROFILE_NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
 // tracks main. User can also override at runtime via
 // pichkooDesktop.updates.setBranch().
 const DEFAULT_UPDATE_BRANCH = 'main'
-// desktop.log lives under HERMES_HOME/logs/ so it sits next to agent.log,
+// desktop.log lives under PICHKOO_HOME/logs/ so it sits next to agent.log,
 // errors.log, gateway.log produced by pichkoo_logging.setup_logging — one log
 // directory per user, regardless of which UI surface produced the line.
-const DESKTOP_LOG_PATH = path.join(HERMES_HOME, 'logs', 'desktop.log')
+const DESKTOP_LOG_PATH = path.join(PICHKOO_HOME, 'logs', 'desktop.log')
 const DESKTOP_LOG_FLUSH_MS = 120
 const DESKTOP_LOG_BUFFER_MAX_CHARS = 64 * 1024
 // Bound desktop.log on disk. It is an append-only forensic log, so a boot loop
@@ -1418,7 +1418,7 @@ async function readCommitLog(cwd, branch) {
 let updateInFlight = false
 
 // Resolve the staged updater binary. The Tauri installer copies itself to
-// HERMES_HOME/pichkoo-setup.exe on a successful install (see
+// PICHKOO_HOME/pichkoo-setup.exe on a successful install (see
 // apps/bootstrap-installer paths::copy_self_to_pichkoo_home). That binary owns
 // ALL repo mutation — running `pichkoo update` + rebuilding the desktop — so
 // the desktop never touches its own bits while running. Returns null when the
@@ -1426,7 +1426,7 @@ let updateInFlight = false
 // installer); callers degrade gracefully.
 function resolveUpdaterBinary() {
   const name = IS_WINDOWS ? 'pichkoo-setup.exe' : 'pichkoo-setup'
-  const candidate = path.join(HERMES_HOME, name)
+  const candidate = path.join(PICHKOO_HOME, name)
   return fileExists(candidate) ? candidate : null
 }
 
@@ -1602,7 +1602,7 @@ async function applyUpdates(opts = {}) {
     if (!updater) {
       // No staged updater binary — this is a CLI-installed user (they ran
       // `pichkoo desktop`, never the Tauri installer that self-copies
-      // pichkoo-setup.exe into HERMES_HOME). They DO have a working `pichkoo`
+      // pichkoo-setup.exe into PICHKOO_HOME). They DO have a working `pichkoo`
       // on PATH / in the venv, so the correct path is the one-liner in their
       // native medium. We show the EXACT command, branch-pinned to the
       // checkout they're on — bare `pichkoo update` defaults to main and would
@@ -1648,11 +1648,11 @@ async function applyUpdates(opts = {}) {
     // Detached so the updater outlives this process — it needs us GONE before
     // `pichkoo update` will run (the venv shim is locked while we live).
     const child = spawn(updater, updaterArgs, {
-      cwd: HERMES_HOME,
+      cwd: PICHKOO_HOME,
       env: {
         ...process.env,
-        HERMES_HOME,
-        PATH: [path.join(HERMES_HOME, 'node', 'bin'), venvBin, process.env.PATH].filter(Boolean).join(path.delimiter)
+        PICHKOO_HOME,
+        PATH: [path.join(PICHKOO_HOME, 'node', 'bin'), venvBin, process.env.PATH].filter(Boolean).join(path.delimiter)
       },
       detached: true,
       stdio: 'ignore',
@@ -1736,11 +1736,11 @@ async function applyUpdatesPosixInApp() {
 
   // Put the Pichkoo-managed Node and the venv on PATH so `pichkoo desktop`'s
   // npm build can find them on a machine with no system Node.
-  const extraPath = [path.join(HERMES_HOME, 'node', 'bin'), path.join(updateRoot, 'venv', 'bin')]
+  const extraPath = [path.join(PICHKOO_HOME, 'node', 'bin'), path.join(updateRoot, 'venv', 'bin')]
     .filter(Boolean)
     .join(path.delimiter)
   const env = {
-    HERMES_HOME,
+    PICHKOO_HOME,
     PATH: [extraPath, process.env.PATH].filter(Boolean).join(path.delimiter)
   }
 
@@ -2285,8 +2285,8 @@ async function ensureRuntime(backend) {
       installStamp: backend.installStamp,
       activeRoot: backend.activeRoot,
       sourceRepoRoot: SOURCE_REPO_ROOT,
-      pichkooHome: HERMES_HOME,
-      logRoot: path.join(HERMES_HOME, 'logs'),
+      pichkooHome: PICHKOO_HOME,
+      logRoot: path.join(PICHKOO_HOME, 'logs'),
       abortSignal: bootstrapAbortController.signal,
       onEvent: ev => {
         // Tee every bootstrap event to (a) the desktop log for forensics
@@ -2321,7 +2321,7 @@ async function ensureRuntime(backend) {
       const bootstrapError = new Error(
         `Pichkoo bootstrap failed${bootstrapResult.failedStage ? ` at stage '${bootstrapResult.failedStage}'` : ''}: ` +
           `${bootstrapResult.error || 'unknown error'}. ` +
-          `Check ${path.join(HERMES_HOME, 'logs', 'desktop.log')} for the full transcript.`
+          `Check ${path.join(PICHKOO_HOME, 'logs', 'desktop.log')} for the full transcript.`
       )
       bootstrapError.isBootstrapFailure = true
       bootstrapError.failedStage = bootstrapResult.failedStage || null
@@ -3931,7 +3931,7 @@ function writeDesktopConnectionConfig(config) {
 }
 
 // Returns the desktop's chosen profile name, or null when unset. "default" is
-// a valid stored value (pins the root HERMES_HOME explicitly); null means "no
+// a valid stored value (pins the root PICHKOO_HOME explicitly); null means "no
 // preference" and preserves the legacy launch (no --profile flag).
 function readActiveDesktopProfile() {
   try {
@@ -4489,7 +4489,7 @@ async function spawnPoolBackend(profile, entry) {
 
   const port = await pickPort()
   const token = crypto.randomBytes(32).toString('base64url')
-  // --profile wins over the inherited HERMES_HOME env (see _apply_profile_override
+  // --profile wins over the inherited PICHKOO_HOME env (see _apply_profile_override
   // step 3 in pichkoo_cli/main.py), so the child re-homes to this profile.
   const dashboardArgs = ['--profile', profile, 'dashboard', '--no-open', '--host', '127.0.0.1', '--port', String(port)]
   const backend = await ensureRuntime(resolvePichkooBackend(dashboardArgs))
@@ -4502,7 +4502,7 @@ async function spawnPoolBackend(profile, entry) {
     cwd: pichkooCwd,
     env: {
       ...process.env,
-      HERMES_HOME,
+      PICHKOO_HOME,
       ...backend.env,
       // Pin the gateway's tool/terminal cwd to the same directory we chose for
       // the child process. Inherited TERMINAL_CWD (or a stale config bridge)
@@ -4683,7 +4683,7 @@ async function startPichkoo() {
     const dashboardArgs = ['dashboard', '--no-open', '--host', '127.0.0.1', '--port', String(port)]
     // Pin the desktop's chosen profile via the global --profile flag. This is
     // deterministic (it wins over the sticky ~/.pichkoo/active_profile file) and
-    // resolves HERMES_HOME the same way `pichkoo -p <name>` does on the CLI. An
+    // resolves PICHKOO_HOME the same way `pichkoo -p <name>` does on the CLI. An
     // unset preference keeps the legacy launch so existing installs are
     // unaffected.
     const activeProfile = readActiveDesktopProfile()
@@ -4702,15 +4702,15 @@ async function startPichkoo() {
       cwd: pichkooCwd,
       env: {
         ...process.env,
-        // Explicitly pin HERMES_HOME for the child so Python's get_pichkoo_home()
+        // Explicitly pin PICHKOO_HOME for the child so Python's get_pichkoo_home()
         // resolves to the SAME location our resolvePichkooHome() picked. Without
         // this pin, Python falls back to ~/.pichkoo on every platform — fine on
         // mac/linux (where our default matches), but on Windows our default is
         // %LOCALAPPDATA%\pichkoo, which differs from C:\Users\<u>\.pichkoo.
         // Mismatch would split config / sessions / .env / logs across two
-        // directories. install.ps1 sets HERMES_HOME via setx; the desktop
+        // directories. install.ps1 sets PICHKOO_HOME via setx; the desktop
         // can't reliably do that, so we set it inline for every spawn.
-        HERMES_HOME,
+        PICHKOO_HOME,
         ...backend.env,
         TERMINAL_CWD: pichkooCwd,
         HERMES_DASHBOARD_SESSION_TOKEN: token,
@@ -5179,7 +5179,7 @@ ipcMain.handle('pichkoo:profile:set', async (_event, name) => {
   const next = writeActiveDesktopProfile(name)
 
   // Switching profiles is a backend re-home: relaunch the dashboard under the
-  // new HERMES_HOME. Pool backends keep their own homes, so only the primary
+  // new PICHKOO_HOME. Pool backends keep their own homes, so only the primary
   // is torn down.
   await teardownPrimaryBackendAndWait()
   mainWindow?.reload()
@@ -5969,7 +5969,7 @@ async function getUninstallSummary() {
   // Fast JS-side fallback used when the agent venv is gone (lite client) or the
   // probe fails — the renderer still needs *something* to render options from.
   const fallback = () => ({
-    pichkoo_home: HERMES_HOME,
+    pichkoo_home: PICHKOO_HOME,
     agent_installed: isPichkooSourceRoot(agentRoot) && fileExists(py),
     gui_installed: true,
     source_built_artifacts: [],
@@ -5995,7 +5995,7 @@ async function getUninstallSummary() {
     try {
       const child = spawn(py, ['-m', 'pichkoo_cli.main', 'uninstall', '--gui-summary'], hiddenWindowsChildOptions({
         cwd: agentRoot,
-        env: { ...process.env, HERMES_HOME, NO_COLOR: '1' },
+        env: { ...process.env, PICHKOO_HOME, NO_COLOR: '1' },
         stdio: ['ignore', 'pipe', 'ignore']
       }))
       child.stdout.on('data', chunk => {
@@ -6086,7 +6086,7 @@ async function runDesktopUninstall(mode) {
     agentRoot: ACTIVE_HERMES_ROOT,
     uninstallArgs,
     appPath: removeBundle,
-    pichkooHome: HERMES_HOME
+    pichkooHome: PICHKOO_HOME
   }
 
   let scriptPath

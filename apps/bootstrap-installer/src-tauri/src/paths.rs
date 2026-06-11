@@ -3,7 +3,7 @@
 //! Mirrors `pichkoo_constants.get_pichkoo_home()` from the Python CLI:
 //!   Windows: %LOCALAPPDATA%\pichkoo
 //!   macOS:   ~/.pichkoo
-//!   Linux:   ~/.pichkoo  (override via $HERMES_HOME)
+//!   Linux:   ~/.pichkoo  (override via $PICHKOO_HOME)
 //!
 //! NOTE (macOS): Python's get_pichkoo_home(), scripts/install.sh, and the
 //! Electron desktop's resolvePichkooHome() ALL use ~/.pichkoo on macOS — there
@@ -21,9 +21,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tracing_appender::non_blocking::WorkerGuard;
 
-/// Returns the canonical Pichkoo home directory, respecting $HERMES_HOME if set.
+/// Returns the canonical Pichkoo home directory, respecting $PICHKOO_HOME if set.
 pub fn pichkoo_home() -> PathBuf {
-    if let Ok(override_path) = std::env::var("HERMES_HOME") {
+    if let Ok(override_path) = std::env::var("PICHKOO_HOME") {
         if !override_path.trim().is_empty() {
             return PathBuf::from(override_path);
         }
@@ -63,7 +63,7 @@ pub fn bootstrap_cache_dir() -> PathBuf {
 /// Stable location the installer copies itself to after a successful install.
 /// The desktop app re-invokes this with `--update`, and the start-menu /
 /// desktop shortcuts can point users back to it. Lives directly under
-/// HERMES_HOME so it survives repo checkout deletion (unlike anything under
+/// PICHKOO_HOME so it survives repo checkout deletion (unlike anything under
 /// pichkoo-agent/).
 ///
 /// On Windows this is `%LOCALAPPDATA%\pichkoo\pichkoo-setup.exe`; on other
@@ -106,7 +106,7 @@ pub fn copy_self_to_pichkoo_home() -> std::io::Result<()> {
     }
     std::fs::copy(&src, &dest)?;
     repair_macos_installer_helper(&dest);
-    tracing::info!(?src, ?dest, "copied installer to HERMES_HOME");
+    tracing::info!(?src, ?dest, "copied installer to PICHKOO_HOME");
     Ok(())
 }
 
@@ -145,7 +145,7 @@ pub fn likely_bootstrap_marker(install_root: &Path) -> PathBuf {
     install_root.join(".pichkoo-bootstrap-complete")
 }
 
-/// Initializes tracing to bootstrap-installer.log under HERMES_HOME/logs/.
+/// Initializes tracing to bootstrap-installer.log under PICHKOO_HOME/logs/.
 /// Returns a guard that flushes the appender on drop — keep it alive for
 /// the lifetime of the process.
 pub fn init_logging() -> Option<WorkerGuard> {

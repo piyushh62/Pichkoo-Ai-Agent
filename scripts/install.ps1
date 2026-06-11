@@ -23,8 +23,8 @@ param(
     # exact ref.  Precedence: Commit > Tag > Branch.
     [string]$Commit = "",
     [string]$Tag = "",
-    [string]$PichkooHome = $(if ($env:HERMES_HOME) { $env:HERMES_HOME } else { "$env:LOCALAPPDATA\pichkoo" }),
-    [string]$InstallDir = $(if ($env:HERMES_HOME) { "$env:HERMES_HOME\pichkoo-agent" } else { "$env:LOCALAPPDATA\pichkoo\pichkoo-agent" }),
+    [string]$PichkooHome = $(if ($env:PICHKOO_HOME) { $env:PICHKOO_HOME } else { "$env:LOCALAPPDATA\pichkoo" }),
+    [string]$InstallDir = $(if ($env:PICHKOO_HOME) { "$env:PICHKOO_HOME\pichkoo-agent" } else { "$env:LOCALAPPDATA\pichkoo\pichkoo-agent" }),
 
     # --- Stage protocol (additive; default invocation behaves as before) ----
     # See the "Stage protocol" section near the bottom of the file for the
@@ -404,7 +404,7 @@ function Resolve-UvCmd {
     }
 
     # Fall back to PATH (covers edge cases where the installer ran in a
-    # sibling process and HERMES_HOME wasn't propagated).
+    # sibling process and PICHKOO_HOME wasn't propagated).
     if (Get-Command uv -ErrorAction SilentlyContinue) {
         $script:UvCmd = "uv"
         return
@@ -1629,15 +1629,15 @@ function Set-PathVariable {
         Write-Info "PATH already configured"
     }
     
-    # Set HERMES_HOME so the Python code finds config/data in the right place.
+    # Set PICHKOO_HOME so the Python code finds config/data in the right place.
     # Only needed on Windows where we install to %LOCALAPPDATA%\pichkoo instead
     # of the Unix default ~/.pichkoo
-    $currentPichkooHome = [Environment]::GetEnvironmentVariable("HERMES_HOME", "User")
+    $currentPichkooHome = [Environment]::GetEnvironmentVariable("PICHKOO_HOME", "User")
     if (-not $currentPichkooHome -or $currentPichkooHome -ne $PichkooHome) {
-        [Environment]::SetEnvironmentVariable("HERMES_HOME", $PichkooHome, "User")
-        Write-Success "Set HERMES_HOME=$PichkooHome"
+        [Environment]::SetEnvironmentVariable("PICHKOO_HOME", $PichkooHome, "User")
+        Write-Success "Set PICHKOO_HOME=$PichkooHome"
     }
-    $env:HERMES_HOME = $PichkooHome
+    $env:PICHKOO_HOME = $PichkooHome
     
     # Update current session
     $env:Path = "$pichkooBin;$env:Path"
@@ -1725,7 +1725,7 @@ function Write-BootstrapMarker {
 function Copy-ConfigTemplates {
     Write-Info "Setting up configuration files..."
     
-    # Create the HERMES_HOME directory structure ($PichkooHome, default %LOCALAPPDATA%\pichkoo)
+    # Create the PICHKOO_HOME directory structure ($PichkooHome, default %LOCALAPPDATA%\pichkoo)
     New-Item -ItemType Directory -Force -Path "$PichkooHome\cron" | Out-Null
     New-Item -ItemType Directory -Force -Path "$PichkooHome\sessions" | Out-Null
     New-Item -ItemType Directory -Force -Path "$PichkooHome\logs" | Out-Null

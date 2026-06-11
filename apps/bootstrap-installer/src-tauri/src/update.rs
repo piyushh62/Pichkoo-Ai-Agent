@@ -592,7 +592,7 @@ fn resolve_pichkoo(install_root: &Path) -> Option<PathBuf> {
 fn update_child_env(install_root: &Path) -> Vec<(String, OsString)> {
     let pichkoo_home = crate::paths::pichkoo_home();
     let mut envs = vec![(
-        "HERMES_HOME".to_string(),
+        "PICHKOO_HOME".to_string(),
         pichkoo_home.as_os_str().to_os_string(),
     )];
     if let Some(path) = path_with_prepended_entries(&[

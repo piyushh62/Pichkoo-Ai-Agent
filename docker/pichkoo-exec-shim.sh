@@ -7,7 +7,7 @@
 # The s6 image runs the supervised gateway/main process as the unprivileged
 # `pichkoo` user (UID 10000). When an operator runs `docker exec <c> pichkoo ...`
 # the default UID is root (0), and any file the command writes under
-# $HERMES_HOME — auth.json, .env, config.yaml — ends up root-owned and
+# $PICHKOO_HOME — auth.json, .env, config.yaml — ends up root-owned and
 # unreadable to the supervised gateway. The most common manifestation: the
 # user runs `docker exec <c> pichkoo login`, this writes
 # /opt/data/auth.json as root:root mode 0600, and from then on the gateway
@@ -22,7 +22,7 @@
 # This shim sits at /opt/pichkoo/bin/pichkoo and is placed earliest on PATH.
 # When invoked as root, it drops to the pichkoo user (via s6-setuidgid)
 # before exec'ing the real venv binary, so anything that writes under
-# $HERMES_HOME is uid-aligned with the supervised processes. When invoked
+# $PICHKOO_HOME is uid-aligned with the supervised processes. When invoked
 # as any non-root UID — including the supervised processes themselves,
 # `docker exec --user pichkoo`, kanban subagents, etc. — it short-circuits
 # straight to the venv binary with no privilege change. Net: one extra

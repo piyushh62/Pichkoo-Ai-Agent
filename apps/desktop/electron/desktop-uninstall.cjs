@@ -133,7 +133,7 @@ function buildPosixCleanupScript({ desktopPid, pythonExe, pythonPath, agentRoot,
     '    sleep 0.5',
     '  done',
     'fi',
-    `export HERMES_HOME=${q(pichkooHome)}`
+    `export PICHKOO_HOME=${q(pichkooHome)}`
   ]
   if (pythonPath) {
     lines.push(`export PYTHONPATH=${q(pythonPath)}\${PYTHONPATH:+:$PYTHONPATH}`)
@@ -178,7 +178,7 @@ function buildWindowsCleanupScript({ desktopPid, pythonExe, pythonPath, agentRoo
   const lines = [
     '@echo off',
     'setlocal enableextensions',
-    `set "HERMES_HOME=${String(pichkooHome).replace(/"/g, '')}"`,
+    `set "PICHKOO_HOME=${String(pichkooHome).replace(/"/g, '')}"`,
     `set "PID=${pid}"`
   ]
   if (pythonPath) {
