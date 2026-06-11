@@ -36,13 +36,13 @@ from utils import atomic_replace
 logger = logging.getLogger(__name__)
 
 
-HERMES_HOME = get_hermes_home()
-SKILLS_DIR = HERMES_HOME / "skills"
+PICHKOO_HOME = get_hermes_home()
+SKILLS_DIR = PICHKOO_HOME / "skills"
 MANIFEST_FILE = SKILLS_DIR / ".bundled_manifest"
 
 # Marker file written by `pichkoo profile create --no-skills` (named profiles)
 # and by the installer's `--no-skills` flag (the default ~/.pichkoo profile).
-# When present in HERMES_HOME, sync_skills() is a no-op so neither the
+# When present in PICHKOO_HOME, sync_skills() is a no-op so neither the
 # installer, `pichkoo update`, nor a direct sync re-injects bundled skills.
 # Delete the file to opt back in. Mirrors
 # pichkoo_cli.profiles.NO_BUNDLED_SKILLS_MARKER (kept as a literal here to
@@ -53,7 +53,7 @@ NO_BUNDLED_SKILLS_MARKER = ".no-bundled-skills"
 def _get_bundled_dir() -> Path:
     """Locate the bundled skills/ directory.
 
-    Checks HERMES_BUNDLED_SKILLS env var first (set by Nix wrapper),
+    Checks PICHKOO_BUNDLED_SKILLS env var first (set by Nix wrapper),
     then a wheel-installed data dir, then falls back to the relative
     path from this source file.
     """
@@ -464,7 +464,7 @@ def sync_skills(quiet: bool = False) -> dict:
     # empty-result shape with skipped_opt_out lets callers report "opted out"
     # instead of "synced 0 / failed". This is the default-profile counterpart
     # to seed_profile_skills()'s marker check for named profiles.
-    if (HERMES_HOME / NO_BUNDLED_SKILLS_MARKER).exists():
+    if (PICHKOO_HOME / NO_BUNDLED_SKILLS_MARKER).exists():
         if not quiet:
             print("  (skipped — profile opted out of bundled skills via .no-bundled-skills)")
         return {
@@ -753,7 +753,7 @@ def reset_bundled_skill(name: str, restore: bool = False) -> dict:
 def set_bundled_skills_opt_out(enabled: bool) -> dict:
     """Toggle the .no-bundled-skills opt-out marker for the active profile.
 
-    When ``enabled`` is True, writes HERMES_HOME/.no-bundled-skills so the
+    When ``enabled`` is True, writes PICHKOO_HOME/.no-bundled-skills so the
     installer, ``pichkoo update``, and any direct sync stop seeding bundled
     skills. When False, removes the marker so seeding resumes on the next
     sync. This is the on-disk-state half of ``pichkoo skills opt-out`` /
@@ -764,11 +764,11 @@ def set_bundled_skills_opt_out(enabled: bool) -> dict:
         dict with keys: ok (bool), changed (bool), marker (str path),
                         message (str).
     """
-    marker = HERMES_HOME / NO_BUNDLED_SKILLS_MARKER
+    marker = PICHKOO_HOME / NO_BUNDLED_SKILLS_MARKER
     existed = marker.exists()
     try:
         if enabled:
-            HERMES_HOME.mkdir(parents=True, exist_ok=True)
+            PICHKOO_HOME.mkdir(parents=True, exist_ok=True)
             marker.write_text(
                 "This profile opted out of bundled-skill seeding "
                 "(`pichkoo skills opt-out`).\n"
@@ -802,7 +802,7 @@ def set_bundled_skills_opt_out(enabled: bool) -> dict:
 
 def is_bundled_skills_opt_out() -> bool:
     """Return True if the active profile carries the opt-out marker."""
-    return (HERMES_HOME / NO_BUNDLED_SKILLS_MARKER).exists()
+    return (PICHKOO_HOME / NO_BUNDLED_SKILLS_MARKER).exists()
 
 
 def remove_pristine_bundled_skills(dry_run: bool = False) -> dict:

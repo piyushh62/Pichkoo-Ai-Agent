@@ -248,4 +248,4 @@ curl -X POST -H "Content-Type: application/json" -H "X-Pichkoo-Session-Token: $T
   http://localhost:PORT/api/model/set
 ```
 
-The session token is injected into the dashboard HTML at startup and rotates on every server restart. Grab it from the browser devtools (`window.__HERMES_SESSION_TOKEN__`) if you're scripting against a running dashboard.
+The session token is injected into the dashboard HTML at startup and rotates on every server restart. Grab it from the browser devtools (`window.__PICHKOO_SESSION_TOKEN__`) if you're scripting against a running dashboard.

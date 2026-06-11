@@ -18,7 +18,7 @@ Pichkoo 在三个位置扫描图像生成后端：
 
 1. **内置** — `<repo>/plugins/image_gen/<name>/`（以 `kind: backend` 自动加载，始终可用）
 2. **用户** — `~/.pichkoo/plugins/image_gen/<name>/`（通过 `plugins.enabled` 选择启用）
-3. **Pip** — 声明了 `hermes_agent.plugins` 入口点的包
+3. **Pip** — 声明了 `pichkoo_ai_agent.plugins` 入口点的包
 
 每个插件的 `register(ctx)` 函数调用 `ctx.register_image_gen_provider(...)` — 将其注册到 `agent/image_gen_registry.py` 中的注册表。活跃 provider 由 `config.yaml` 中的 `image_gen.provider` 指定；`pichkoo tools` 会引导用户完成选择。
 
@@ -145,7 +145,7 @@ class MyBackendImageGenProvider(ImageGenProvider):
 
             # Two shapes supported:
             #   - URL string: return it as `image`
-            #   - base64 data: save under $HERMES_HOME/cache/images/ via save_b64_image()
+            #   - base64 data: save under $PICHKOO_HOME/cache/images/ via save_b64_image()
             if result.get("image_b64"):
                 path = save_b64_image(
                     result["image_b64"],
@@ -239,7 +239,7 @@ error_response(
 
 ## 处理 base64 与 URL 输出
 
-部分后端返回图像 URL（fal、Replicate）；其他后端返回 base64 载荷（OpenAI gpt-image-2）。对于 base64 情况，使用 `save_b64_image()` — 它将文件写入 `$HERMES_HOME/cache/images/<prefix>_<timestamp>_<uuid>.<ext>` 并返回绝对 `Path`。将该路径（转为 `str`）作为 `image=` 传入 `success_response()`。Gateway 投递（Telegram 图片气泡、Discord 附件）同时识别 URL 和绝对路径。
+部分后端返回图像 URL（fal、Replicate）；其他后端返回 base64 载荷（OpenAI gpt-image-2）。对于 base64 情况，使用 `save_b64_image()` — 它将文件写入 `$PICHKOO_HOME/cache/images/<prefix>_<timestamp>_<uuid>.<ext>` 并返回绝对 `Path`。将该路径（转为 `str`）作为 `image=` 传入 `success_response()`。Gateway 投递（Telegram 图片气泡、Discord 附件）同时识别 URL 和绝对路径。
 
 ## 用户覆盖
 
@@ -248,16 +248,16 @@ error_response(
 ## 测试
 
 ```bash
-export HERMES_HOME=/tmp/pichkoo-imggen-test
-mkdir -p $HERMES_HOME/plugins/image_gen/my-backend
+export PICHKOO_HOME=/tmp/pichkoo-imggen-test
+mkdir -p $PICHKOO_HOME/plugins/image_gen/my-backend
 # …copy __init__.py + plugin.yaml into that dir…
 
 export MY_BACKEND_API_KEY=your-test-key
 pichkoo plugins enable my-backend
 
 # Pick it as the active provider
-echo "image_gen:" >> $HERMES_HOME/config.yaml
-echo "  provider: my-backend" >> $HERMES_HOME/config.yaml
+echo "image_gen:" >> $PICHKOO_HOME/config.yaml
+echo "  provider: my-backend" >> $PICHKOO_HOME/config.yaml
 
 # Exercise it
 pichkoo -z "Generate an image of a corgi in a spacesuit"
@@ -275,7 +275,7 @@ pichkoo -z "Generate an image of a corgi in a spacesuit"
 
 ```toml
 # pyproject.toml
-[project.entry-points."hermes_agent.plugins"]
+[project.entry-points."pichkoo_ai_agent.plugins"]
 my-backend-imggen = "my_backend_imggen_package"
 ```
 

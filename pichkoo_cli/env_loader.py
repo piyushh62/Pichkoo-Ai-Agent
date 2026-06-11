@@ -1,4 +1,4 @@
-"""Helpers for loading Hermes .env files consistently across entrypoints."""
+"""Helpers for loading Pichkoo .env files consistently across entrypoints."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ _WARNED_KEYS: set[str] = set()
 # the .env case and they don't know Bitwarden is wired up).
 _SECRET_SOURCES: dict[str, str] = {}
 
-# HERMES_HOME paths we've already pulled external secrets for during this
+# PICHKOO_HOME paths we've already pulled external secrets for during this
 # process.  ``load_hermes_dotenv()`` is called at module-import time from
 # several hot modules (cli.py, pichkoo_cli/main.py, run_agent.py,
 # trajectory_compressor.py, gateway/run.py, ...), so without this guard the
@@ -53,7 +53,7 @@ def get_secret_source(env_var: str) -> str | None:
 
 
 def reset_secret_source_cache() -> None:
-    """Forget which HERMES_HOME paths have already had external secrets applied.
+    """Forget which PICHKOO_HOME paths have already had external secrets applied.
 
     The first call to ``_apply_external_secret_sources(home_path)`` in a
     process pulls from Bitwarden (or other configured backend), records the
@@ -169,7 +169,7 @@ def _sanitize_env_file_if_needed(path: Path) -> None:
     copy-pasting API keys from terminals or rich-text editors.
 
     We delegate to ``pichkoo_cli.config._sanitize_env_lines`` which
-    already knows all valid Hermes env-var names and can split
+    already knows all valid Pichkoo env-var names and can split
     concatenated lines correctly.
     """
     if not path.exists():
@@ -214,7 +214,7 @@ def load_hermes_dotenv(
     hermes_home: str | os.PathLike | None = None,
     project_env: str | os.PathLike | None = None,
 ) -> list[Path]:
-    """Load Hermes environment files with user config taking precedence.
+    """Load Pichkoo environment files with user config taking precedence.
 
     Behavior:
     - `~/.pichkoo/.env` overrides stale shell-exported values when present.
@@ -224,7 +224,7 @@ def load_hermes_dotenv(
     """
     loaded: list[Path] = []
 
-    home_path = Path(hermes_home or os.getenv("HERMES_HOME", Path.home() / ".pichkoo"))
+    home_path = Path(hermes_home or os.getenv("PICHKOO_HOME", Path.home() / ".pichkoo"))
     user_env = home_path / ".env"
     project_env_path = Path(project_env) if project_env else None
 
@@ -251,7 +251,7 @@ def _apply_external_secret_sources(home_path: Path) -> None:
     """Pull secrets from external sources (currently Bitwarden) into env.
 
     Runs AFTER dotenv loads so .env values are visible (we use them to
-    locate the access token) but BEFORE the rest of Hermes reads
+    locate the access token) but BEFORE the rest of Pichkoo reads
     ``os.environ`` for credentials.  Any failure here is logged and
     swallowed — external secret sources must never block startup.
 

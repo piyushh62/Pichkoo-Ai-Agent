@@ -344,7 +344,7 @@ The registry of record is `pichkoo_cli/commands.py` — every consumer
 ```
 ~/.pichkoo/config.yaml       Main configuration
 ~/.pichkoo/.env              API keys and secrets
-$HERMES_HOME/skills/        Installed skills
+$PICHKOO_HOME/skills/        Installed skills
 ~/.pichkoo/sessions/         Gateway routing index, request dumps, *.jsonl transcripts (and optional per-session JSON snapshots when sessions.write_json_snapshots: true)
 ~/.pichkoo/state.db          Canonical session store (SQLite + FTS5)
 ~/.pichkoo/logs/             Gateway and error logs
@@ -441,7 +441,7 @@ Enable/disable via `pichkoo tools` (interactive) or `pichkoo tools enable/disabl
 | `rl` | Reinforcement learning tools (off by default) |
 | `moa` | Mixture of Agents (off by default) |
 
-Full enumeration lives in `toolsets.py` as the `TOOLSETS` dict; `_HERMES_CORE_TOOLS` is the default bundle most platforms inherit from.
+Full enumeration lives in `toolsets.py` as the `TOOLSETS` dict; `_PICHKOO_CORE_TOOLS` is the default bundle most platforms inherit from.
 
 Tool changes take effect on `/reset` (new session). They do NOT apply mid-conversation to preserve prompt caching.
 
@@ -459,7 +459,7 @@ Secret redaction is **on by default** — tool output (terminal stdout, `read_fi
 pichkoo config set security.redact_secrets true       # keep enabled globally
 ```
 
-**Restart required.** `security.redact_secrets` is snapshotted at import time — toggling it mid-session (e.g. via `export HERMES_REDACT_SECRETS=false` from a tool call) will NOT take effect for the running process. Tell the user to change it in config from a terminal, then start a new session. This is deliberate — it prevents an LLM from flipping the toggle on itself mid-task.
+**Restart required.** `security.redact_secrets` is snapshotted at import time — toggling it mid-session (e.g. via `export PICHKOO_REDACT_SECRETS=false` from a tool call) will NOT take effect for the running process. Tell the user to change it in config from a terminal, then start a new session. This is deliberate — it prevents an LLM from flipping the toggle on itself mid-task.
 
 Disable only when you deliberately need raw credential-like strings for debugging or redactor development:
 ```bash
@@ -490,7 +490,7 @@ pichkoo config set approvals.mode off         # bypass everything (not recommend
 
 Per-invocation bypass without changing config:
 - `pichkoo --yolo …`
-- `export HERMES_YOLO_MODE=1`
+- `export PICHKOO_YOLO_MODE=1`
 
 Note: YOLO / `approvals.mode: off` does NOT turn off secret redaction. They are independent.
 
@@ -689,7 +689,7 @@ User docs: https://pichkoo-agent.nousresearch.com/docs/user-guide/features/curat
 
 Durable SQLite board for multi-profile / multi-worker collaboration.
 Users drive it via `pichkoo kanban <verb>`; dispatcher-spawned workers
-see a focused `kanban_*` toolset gated by `HERMES_KANBAN_TASK`, and
+see a focused `kanban_*` toolset gated by `PICHKOO_KANBAN_TASK`, and
 orchestrator profiles can opt into the broader `kanban` toolset. Normal
 sessions still have zero `kanban_*` schema footprint unless configured.
 
@@ -709,7 +709,7 @@ sessions still have zero `kanban_*` schema footprint unless configured.
   (default 2; configurable via `kanban.failure_limit` or per-task
   `max_retries`).
 - **Isolation:** board is the hard boundary (workers get
-  `HERMES_KANBAN_BOARD` pinned in env); tenant is a soft namespace
+  `PICHKOO_KANBAN_BOARD` pinned in env); tenant is a soft namespace
   within a board for workspace-path + memory-key isolation.
 
 User docs: https://pichkoo-agent.nousresearch.com/docs/user-guide/features/kanban
@@ -892,7 +892,7 @@ pichkoo-agent/
 ├── run_agent.py          # AIAgent — core conversation loop
 ├── model_tools.py        # Tool discovery and dispatch
 ├── toolsets.py           # Toolset definitions
-├── cli.py                # Interactive CLI (HermesCLI)
+├── cli.py                # Interactive CLI (PichkooCLI)
 ├── pichkoo_state.py       # SQLite session store
 ├── agent/                # Prompt builder, context compression, memory, model routing, credential pooling, skill dispatch
 ├── pichkoo_cli/           # CLI subcommands, config, setup, commands
@@ -934,7 +934,7 @@ registry.register(
 )
 ```
 
-**2. Add to `toolsets.py`** → `_HERMES_CORE_TOOLS` list.
+**2. Add to `toolsets.py`** → `_PICHKOO_CORE_TOOLS` list.
 
 Auto-discovery: any `tools/*.py` file with a top-level `registry.register()` call is imported automatically — no manual list needed.
 
@@ -967,7 +967,7 @@ python -m pytest tests/ -o 'addopts=' -q   # Full suite
 python -m pytest tests/tools/ -q            # Specific area
 ```
 
-- Tests auto-redirect `HERMES_HOME` to temp dirs — never touch real `~/.pichkoo/`
+- Tests auto-redirect `PICHKOO_HOME` to temp dirs — never touch real `~/.pichkoo/`
 - Run full suite before pushing any change
 - Use `-o 'addopts='` to clear any baked-in pytest flags
 

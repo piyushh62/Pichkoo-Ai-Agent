@@ -1,4 +1,4 @@
-"""nemo_relay — optional Hermes plugin for NeMo Relay observability."""
+"""nemo_relay — optional Pichkoo plugin for NeMo Relay observability."""
 
 from __future__ import annotations
 
@@ -54,7 +54,7 @@ class _Settings:
     atif_output_directory: str = ""
     atif_filename_template: str = "pichkoo-atif-{session_id}.json"
     atif_subagent_export_mode: str = "embedded"
-    atif_agent_name: str = "Hermes Agent"
+    atif_agent_name: str = "Pichkoo AI Agent"
     atif_agent_version: str = "unknown"
     atif_model_name: str = "unknown"
 
@@ -295,7 +295,7 @@ class _Runtime:
         # NeMo Relay's native managed execution may wrap a failing callback as an
         # internal runtime error, hiding the real downstream provider/tool
         # exception. Capture the original here and re-raise it after managed
-        # execution so Hermes retry classification still sees it. The LLM and tool
+        # execution so Pichkoo retry classification still sees it. The LLM and tool
         # paths share this scaffolding; they differ only in payload normalization,
         # response shaping, and the Relay call itself.
         raw_response: dict[str, Any] = {"set": False, "value": None}
@@ -642,7 +642,7 @@ def _get_runtime() -> Optional[_Runtime]:
 
 
 def _load_settings() -> _Settings:
-    plugins_toml_path = _env("HERMES_NEMO_RELAY_PLUGINS_TOML")
+    plugins_toml_path = _env("PICHKOO_NEMO_RELAY_PLUGINS_TOML")
     plugins_config = _load_plugins_config(plugins_toml_path)
     adaptive_config = _enabled_component_config(plugins_config, "adaptive")
     return _Settings(
@@ -650,17 +650,17 @@ def _load_settings() -> _Settings:
         plugins_config=plugins_config,
         adaptive_enabled=adaptive_config is not None,
         adaptive_mode=_adaptive_mode(adaptive_config),
-        atof_enabled=_env_bool("HERMES_NEMO_RELAY_ATOF_ENABLED"),
-        atof_output_directory=_env("HERMES_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY"),
-        atof_filename=_env("HERMES_NEMO_RELAY_ATOF_FILENAME") or "pichkoo-atof.jsonl",
-        atof_mode=_env("HERMES_NEMO_RELAY_ATOF_MODE") or "append",
-        atif_enabled=_env_bool("HERMES_NEMO_RELAY_ATIF_ENABLED"),
-        atif_output_directory=_env("HERMES_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY"),
-        atif_filename_template=_env("HERMES_NEMO_RELAY_ATIF_FILENAME_TEMPLATE") or "pichkoo-atif-{session_id}.json",
+        atof_enabled=_env_bool("PICHKOO_NEMO_RELAY_ATOF_ENABLED"),
+        atof_output_directory=_env("PICHKOO_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY"),
+        atof_filename=_env("PICHKOO_NEMO_RELAY_ATOF_FILENAME") or "pichkoo-atof.jsonl",
+        atof_mode=_env("PICHKOO_NEMO_RELAY_ATOF_MODE") or "append",
+        atif_enabled=_env_bool("PICHKOO_NEMO_RELAY_ATIF_ENABLED"),
+        atif_output_directory=_env("PICHKOO_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY"),
+        atif_filename_template=_env("PICHKOO_NEMO_RELAY_ATIF_FILENAME_TEMPLATE") or "pichkoo-atif-{session_id}.json",
         atif_subagent_export_mode=_atif_subagent_export_mode(),
-        atif_agent_name=_env("HERMES_NEMO_RELAY_ATIF_AGENT_NAME") or "Hermes Agent",
-        atif_agent_version=_env("HERMES_NEMO_RELAY_ATIF_AGENT_VERSION") or "unknown",
-        atif_model_name=_env("HERMES_NEMO_RELAY_ATIF_MODEL_NAME") or "unknown",
+        atif_agent_name=_env("PICHKOO_NEMO_RELAY_ATIF_AGENT_NAME") or "Pichkoo AI Agent",
+        atif_agent_version=_env("PICHKOO_NEMO_RELAY_ATIF_AGENT_VERSION") or "unknown",
+        atif_model_name=_env("PICHKOO_NEMO_RELAY_ATIF_MODEL_NAME") or "unknown",
     )
 
 
@@ -725,7 +725,7 @@ def _env(name: str) -> str:
 
 
 def _atif_subagent_export_mode() -> str:
-    mode = _env("HERMES_NEMO_RELAY_ATIF_SUBAGENT_EXPORT_MODE").lower()
+    mode = _env("PICHKOO_NEMO_RELAY_ATIF_SUBAGENT_EXPORT_MODE").lower()
     return "all" if mode == "all" else "embedded"
 
 
@@ -842,7 +842,7 @@ def _value(obj: Any, key: str, default: Any = None) -> Any:
 
 
 def _original_downstream_error(exc: Exception) -> BaseException:
-    # Hermes wraps downstream execution failures in a local/private exception
+    # Pichkoo wraps downstream execution failures in a local/private exception
     # class, so detect the wrapper by shape instead of importing it here.
     original = getattr(exc, "original", None)
     if exc.__class__.__name__ == "_DownstreamExecutionError" and isinstance(original, BaseException):
@@ -856,7 +856,7 @@ def _is_relay_wrapped_callback_error(exc: Exception, callback_error: Exception |
     # trailing traceback/suffix in a future Relay version doesn't silently defeat
     # the unwrap; the class-name + message prefix still discriminates the real
     # downstream failure from unrelated Relay-internal errors. If Relay drops the
-    # leading ``internal error:`` shape entirely, this returns False and Hermes
+    # leading ``internal error:`` shape entirely, this returns False and Pichkoo
     # falls back to surfacing Relay's error (the pre-fix behavior) rather than
     # masking it.
     if callback_error is None or not isinstance(exc, RuntimeError):

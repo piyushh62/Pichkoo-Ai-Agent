@@ -16,12 +16,12 @@ import pytest
 
 @pytest.fixture
 def hermes_home(monkeypatch, tmp_path):
-    """Isolate HERMES_HOME and clear module-level caches afterward so the
+    """Isolate PICHKOO_HOME and clear module-level caches afterward so the
     real shell-out side effects from _handle_patch don't leak into
     subsequent tests (see test_line_ending_preservation.py for details)."""
     home = tmp_path / "pichkoo"
     home.mkdir()
-    monkeypatch.setenv("HERMES_HOME", str(home))
+    monkeypatch.setenv("PICHKOO_HOME", str(home))
     yield home
     try:
         from tools.file_tools import clear_file_ops_cache, _read_tracker_lock, _read_tracker

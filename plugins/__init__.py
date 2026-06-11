@@ -1,1 +1,1 @@
-# Hermes plugins package
+# Pichkoo plugins package

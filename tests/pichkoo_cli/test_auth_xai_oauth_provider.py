@@ -1,4 +1,4 @@
-"""Tests for xAI Grok OAuth — tokens stored in Hermes auth store (~/.pichkoo/auth.json)."""
+"""Tests for xAI Grok OAuth — tokens stored in Pichkoo auth store (~/.pichkoo/auth.json)."""
 
 import base64
 import json
@@ -45,7 +45,7 @@ def _setup_hermes_auth(
     refresh_token: str = "refresh",
     discovery: dict | None = None,
 ):
-    """Write xAI OAuth tokens into the Hermes auth store at the given root."""
+    """Write xAI OAuth tokens into the Pichkoo auth store at the given root."""
     hermes_home.mkdir(parents=True, exist_ok=True)
     state = {
         "tokens": {
@@ -234,8 +234,8 @@ def test_xai_oauth_authorize_url_includes_plan_generic():
     assert params["plan"] == "generic"
 
 
-def test_xai_oauth_authorize_url_includes_referrer_hermes_agent():
-    """Attribution: xAI's OAuth server can identify Hermes-originated logins
+def test_xai_oauth_authorize_url_includes_referrer_pichkoo_ai_agent():
+    """Attribution: xAI's OAuth server can identify Pichkoo-originated logins
     via the referrer query param. Must always be present on the authorize URL."""
     url = _xai_oauth_build_authorize_url(
         authorization_endpoint="https://auth.x.ai/oauth2/authorize",
@@ -415,7 +415,7 @@ def test_save_and_read_xai_oauth_tokens_roundtrip(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     _save_xai_oauth_tokens(
         {
@@ -439,7 +439,7 @@ def test_read_xai_oauth_tokens_missing(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     with pytest.raises(AuthError) as exc:
         _read_xai_oauth_tokens()
@@ -450,7 +450,7 @@ def test_read_xai_oauth_tokens_missing(tmp_path, monkeypatch):
 def test_read_xai_oauth_tokens_missing_access_token(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     _setup_hermes_auth(hermes_home, access_token="")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     with pytest.raises(AuthError) as exc:
         _read_xai_oauth_tokens()
@@ -461,7 +461,7 @@ def test_read_xai_oauth_tokens_missing_access_token(tmp_path, monkeypatch):
 def test_read_xai_oauth_tokens_missing_refresh_token(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     _setup_hermes_auth(hermes_home, refresh_token="")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     with pytest.raises(AuthError) as exc:
         _read_xai_oauth_tokens()
@@ -478,8 +478,8 @@ def test_resolve_xai_runtime_credentials_returns_singleton_state(tmp_path, monke
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_XAI_BASE_URL", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.delenv("PICHKOO_XAI_BASE_URL", raising=False)
     monkeypatch.delenv("XAI_BASE_URL", raising=False)
 
     creds = resolve_xai_oauth_runtime_credentials()
@@ -499,7 +499,7 @@ def test_resolve_xai_runtime_credentials_refreshes_expiring_token(tmp_path, monk
         refresh_token="rt-old",
         discovery={"token_endpoint": "https://auth.x.ai/oauth2/token"},
     )
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     new_access = _jwt_with_exp(int(time.time()) + 3600)
     called = {"count": 0}
@@ -526,7 +526,7 @@ def test_resolve_xai_runtime_credentials_force_refresh(tmp_path, monkeypatch):
         access_token=fresh,
         discovery={"token_endpoint": "https://auth.x.ai/oauth2/token"},
     )
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     forced = _jwt_with_exp(int(time.time()) + 7200)
     called = {"count": 0}
@@ -548,8 +548,8 @@ def test_resolve_xai_runtime_credentials_honours_env_base_url(tmp_path, monkeypa
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.setenv("HERMES_XAI_BASE_URL", "https://custom.x.ai/v1/")
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_XAI_BASE_URL", "https://custom.x.ai/v1/")
 
     creds = resolve_xai_oauth_runtime_credentials()
     assert creds["base_url"] == "https://custom.x.ai/v1"
@@ -559,7 +559,7 @@ def test_resolve_xai_runtime_credentials_honours_env_base_url(tmp_path, monkeypa
 # Inference base-URL host guard (xai-oauth bearer leak protection)
 #
 # The xAI OAuth bearer is a high-value, long-lived SuperGrok credential.
-# ``XAI_BASE_URL`` / ``HERMES_XAI_BASE_URL`` are a credential-leak vector
+# ``XAI_BASE_URL`` / ``PICHKOO_XAI_BASE_URL`` are a credential-leak vector
 # unless the host is pinned to the xAI origin. These tests cover the
 # accept/reject matrix for `_xai_validate_inference_base_url` and confirm
 # the runtime resolver falls back to the default on rejection rather than
@@ -671,9 +671,9 @@ def test_resolve_xai_runtime_credentials_rejects_off_origin_env_base_url(tmp_pat
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
     monkeypatch.setenv("XAI_BASE_URL", "https://attacker.example/v1")
-    monkeypatch.delenv("HERMES_XAI_BASE_URL", raising=False)
+    monkeypatch.delenv("PICHKOO_XAI_BASE_URL", raising=False)
 
     with caplog.at_level("WARNING"):
         creds = resolve_xai_oauth_runtime_credentials()
@@ -725,7 +725,7 @@ def test_resolve_credentials_quarantines_dead_tokens_on_terminal_refresh_failure
     """
     hermes_home = tmp_path / "pichkoo"
     _seed_xai_oauth_state(hermes_home, dict(_STALE_XAI_OAUTH_STATE), active_provider="nous")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     def _terminal_refresh(tokens, **kwargs):
         raise AuthError(
@@ -775,7 +775,7 @@ def test_resolve_credentials_does_not_quarantine_on_transient_refresh_failure(
     """
     hermes_home = tmp_path / "pichkoo"
     _seed_xai_oauth_state(hermes_home, dict(_STALE_XAI_OAUTH_STATE))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     def _transient_refresh(tokens, **kwargs):
         raise AuthError(
@@ -809,7 +809,7 @@ def test_get_xai_oauth_auth_status_logged_in_via_singleton(tmp_path, monkeypatch
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     status = get_xai_oauth_auth_status()
     assert status["logged_in"] is True
@@ -821,7 +821,7 @@ def test_get_xai_oauth_auth_status_logged_out(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     status = get_xai_oauth_auth_status()
     assert status["logged_in"] is False
@@ -1040,7 +1040,7 @@ def test_xai_oauth_discovery_raises_typed_error_on_non_object_payload(monkeypatc
 
 def test_refresh_xai_oauth_pure_rejects_non_https_token_endpoint(monkeypatch):
     """A poisoned auth.json (from MITM during initial discovery, or an older
-    Hermes that didn't validate) must not be silently honored on the refresh
+    Pichkoo that didn't validate) must not be silently honored on the refresh
     hot path. A non-HTTPS ``token_endpoint`` would leak the refresh_token in
     cleartext on every refresh; refuse before the POST."""
     # No HTTP stub installed — refresh must fail at validation, not at POST.
@@ -1174,7 +1174,7 @@ def test_credential_pool_seeds_xai_oauth_from_singleton(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh, refresh_token="rt-1")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     pool = load_pool("xai-oauth")
     assert pool.has_credentials()
@@ -1202,7 +1202,7 @@ def test_credential_pool_does_not_seed_when_singleton_missing_access_token(tmp_p
         },
     }
     (hermes_home / "auth.json").write_text(json.dumps(auth_store))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     pool = load_pool("xai-oauth")
     assert not pool.has_credentials()
@@ -1216,7 +1216,7 @@ def test_credential_pool_seed_respects_suppression(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     # Suppress the source — mimic `pichkoo auth remove`.
     from pichkoo_cli.auth import suppress_credential_source
@@ -1248,7 +1248,7 @@ def test_auth_remove_xai_oauth_clears_singleton_and_sticks(tmp_path, monkeypatch
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh, refresh_token="rt-1")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     # Confirm pre-state: pool sees the seeded entry, auth.json has the singleton.
     pool = load_pool("xai-oauth")
@@ -1273,7 +1273,7 @@ def test_auth_remove_xai_oauth_clears_singleton_and_sticks(tmp_path, monkeypatch
     assert not pool_after.has_credentials(), (
         "Removal must stick across load_pool() calls — without the "
         "loopback_pkce RemovalStep, the seed function reads the singleton "
-        "and rebuilds the entry on every Hermes invocation."
+        "and rebuilds the entry on every Pichkoo invocation."
     )
 
 
@@ -1292,7 +1292,7 @@ def test_pool_sync_back_writes_to_singleton(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     expired = _jwt_with_exp(int(time.time()) - 10)
     _setup_hermes_auth(hermes_home, access_token=expired, refresh_token="rt-old")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     new_access = _jwt_with_exp(int(time.time()) + 3600)
 
@@ -1336,8 +1336,8 @@ def test_runtime_provider_uses_pool_entry_for_xai_oauth(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_XAI_BASE_URL", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.delenv("PICHKOO_XAI_BASE_URL", raising=False)
     monkeypatch.delenv("XAI_BASE_URL", raising=False)
 
     runtime = resolve_runtime_provider(requested="xai-oauth")
@@ -1356,8 +1356,8 @@ def test_runtime_provider_default_base_url_when_pool_entry_missing_url(tmp_path,
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_XAI_BASE_URL", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.delenv("PICHKOO_XAI_BASE_URL", raising=False)
     monkeypatch.delenv("XAI_BASE_URL", raising=False)
 
     fresh = _jwt_with_exp(int(time.time()) + 3600)
@@ -1402,7 +1402,7 @@ def test_pool_entry_needs_refresh_when_jwt_within_skew(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     # Token expires in 30s — well inside the 120s skew window.
     near_expiry = _jwt_with_exp(int(time.time()) + 30)
@@ -1431,7 +1431,7 @@ def test_pool_entry_no_refresh_for_fresh_jwt(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     pool = load_pool("xai-oauth")
@@ -1460,7 +1460,7 @@ def test_pool_select_proactively_refreshes_expiring_token(tmp_path, monkeypatch)
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     near_expiry = _jwt_with_exp(int(time.time()) + 30)
     new_access = _jwt_with_exp(int(time.time()) + 3600)
@@ -1514,7 +1514,7 @@ def test_pool_try_refresh_current_handles_xai_oauth(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     # Even a "fresh-looking" token gets force-refreshed via try_refresh_current.
     # We simulate the scenario where the server rejected the token (401)
@@ -1569,7 +1569,7 @@ def test_pool_refresh_marks_entry_exhausted_on_failure(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     def _fake_refresh_fail(*args, **kwargs):
         raise AuthError("refresh_token_reused", code="xai_refresh_failed", relogin_required=True)
@@ -1607,7 +1607,7 @@ def test_pool_seeded_entry_sync_back_after_refresh(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     near_expiry = _jwt_with_exp(int(time.time()) + 30)
     _setup_hermes_auth(hermes_home, access_token=near_expiry, refresh_token="rt-singleton")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     new_access = _jwt_with_exp(int(time.time()) + 3600)
 
@@ -1636,7 +1636,7 @@ def test_pool_seeded_entry_sync_back_after_refresh(tmp_path, monkeypatch):
 
 
 def test_pool_refresh_adopts_singleton_tokens_when_consumed_elsewhere(tmp_path, monkeypatch):
-    """Multi-process race: another Hermes process refreshed the singleton
+    """Multi-process race: another Pichkoo process refreshed the singleton
     (rotating the refresh_token) while this process held a stale in-memory
     pool entry.  ``_refresh_entry`` must adopt the fresher singleton tokens
     BEFORE spending its own (now-consumed) refresh_token, otherwise the
@@ -1645,13 +1645,13 @@ def test_pool_refresh_adopts_singleton_tokens_when_consumed_elsewhere(tmp_path, 
 
     Mirrors the proactive sync codex/nous already perform for the same
     reason, and is what makes the pool actually safe to share across
-    profiles + Hermes processes."""
+    profiles + Pichkoo processes."""
     from agent.credential_pool import load_pool
 
     hermes_home = tmp_path / "pichkoo"
     in_memory_at = _jwt_with_exp(int(time.time()) + 30)  # near-expiry
     _setup_hermes_auth(hermes_home, access_token=in_memory_at, refresh_token="rt-stale")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     # Load the pool once so the in-memory entry is seeded with rt-stale.
     pool = load_pool("xai-oauth")
@@ -1704,7 +1704,7 @@ def test_pool_refresh_recovers_when_other_process_already_refreshed(tmp_path, mo
     hermes_home = tmp_path / "pichkoo"
     in_memory_at = _jwt_with_exp(int(time.time()) + 30)
     _setup_hermes_auth(hermes_home, access_token=in_memory_at, refresh_token="rt-shared")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     pool = load_pool("xai-oauth")
 
@@ -1752,7 +1752,7 @@ def test_pool_exhausted_xai_entry_recovers_after_singleton_refresh(tmp_path, mon
     hermes_home = tmp_path / "pichkoo"
     stale_at = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=stale_at, refresh_token="rt-stale")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     pool = load_pool("xai-oauth")
     seeded = pool.entries()[0]
@@ -1806,7 +1806,7 @@ def test_pool_manual_xai_entry_not_synced_from_singleton(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     singleton_at = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=singleton_at, refresh_token="rt-singleton")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     pool = load_pool("xai-oauth")
 
@@ -1844,7 +1844,7 @@ def test_pool_manual_entry_does_not_sync_back_to_singleton(tmp_path, monkeypatch
     # Singleton has its own tokens (separate login).
     singleton_at = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=singleton_at, refresh_token="rt-singleton")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     manual_at_old = _jwt_with_exp(int(time.time()) + 30)
     manual_at_new = _jwt_with_exp(int(time.time()) + 7200)
@@ -1913,8 +1913,8 @@ def test_auxiliary_client_routes_xai_oauth_through_responses_api(tmp_path, monke
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_XAI_BASE_URL", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.delenv("PICHKOO_XAI_BASE_URL", raising=False)
     monkeypatch.delenv("XAI_BASE_URL", raising=False)
 
     client, model = resolve_provider_client("xai-oauth", model="grok-4")
@@ -1941,7 +1941,7 @@ def test_auxiliary_client_xai_oauth_returns_none_when_unauthenticated(tmp_path, 
     hermes_home = tmp_path / "pichkoo"
     hermes_home.mkdir(parents=True, exist_ok=True)
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     client, model = resolve_provider_client("xai-oauth", model="grok-4")
     assert client is None
@@ -1957,7 +1957,7 @@ def test_auxiliary_client_xai_oauth_requires_explicit_model(tmp_path, monkeypatc
     hermes_home = tmp_path / "pichkoo"
     fresh = _jwt_with_exp(int(time.time()) + 3600)
     _setup_hermes_auth(hermes_home, access_token=fresh)
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     client, model = resolve_provider_client("xai-oauth", model=None)
     assert client is None
@@ -1982,7 +1982,7 @@ def test_pool_sync_back_preserves_active_provider(tmp_path, monkeypatch):
     hermes_home = tmp_path / "pichkoo"
     near_expiry = _jwt_with_exp(int(time.time()) + 30)
     _setup_hermes_auth(hermes_home, access_token=near_expiry, refresh_token="rt-xai")
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
     # Simulate a multi-provider user whose actual chosen provider is
     # OpenRouter — xai-oauth tokens exist in the singleton but are NOT

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { canOpenSessionWindow, openSessionInNewWindow } from './windows'
 
 const desktopWindow = window as unknown as { hermesDesktop?: Window['hermesDesktop'] }
-const initialHermesDesktop = desktopWindow.hermesDesktop
+const initialPichkooDesktop = desktopWindow.hermesDesktop
 
 const notifyError = vi.fn()
 
@@ -22,8 +22,8 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  if (initialHermesDesktop) {
-    desktopWindow.hermesDesktop = initialHermesDesktop
+  if (initialPichkooDesktop) {
+    desktopWindow.hermesDesktop = initialPichkooDesktop
   } else {
     delete desktopWindow.hermesDesktop
   }

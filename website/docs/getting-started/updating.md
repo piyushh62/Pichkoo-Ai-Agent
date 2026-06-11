@@ -83,7 +83,7 @@ Want to know if an update is available before pulling? Run `pichkoo update --che
 
 ### Full pre-update backup: `--backup`
 
-For high-value profiles (production gateways, shared team installs) you can opt into a full pre-pull backup of `HERMES_HOME` (config, auth, sessions, skills, pairing):
+For high-value profiles (production gateways, shared team installs) you can opt into a full pre-pull backup of `PICHKOO_HOME` (config, auth, sessions, skills, pairing):
 
 ```bash
 pichkoo update --backup

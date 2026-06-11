@@ -58,7 +58,7 @@ bash scripts/setup_open_webui.sh
 ```bash
 OPEN_WEBUI_NAME='My Pichkoo UI' \
 OPEN_WEBUI_ENABLE_SIGNUP=true \
-HERMES_API_MODEL_NAME='My Pichkoo AI Agent' \
+PICHKOO_API_MODEL_NAME='My Pichkoo AI Agent' \
 bash scripts/setup_open_webui.sh
 ```
 

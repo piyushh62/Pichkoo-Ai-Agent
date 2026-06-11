@@ -245,7 +245,7 @@ class TestSpawnEnvIsolation:
     def test_kanban_worker_adds_only_kanban_writable_root(self, monkeypatch):
         """Codex-runtime Kanban workers need to write board state outside
         their scratch/worktree workspace, but should not fall back to
-        danger-full-access. Hermes passes a narrow app-server config override
+        danger-full-access. Pichkoo passes a narrow app-server config override
         for the Kanban root only.
         """
         import subprocess
@@ -277,10 +277,10 @@ class TestSpawnEnvIsolation:
 
         monkeypatch.setattr(subprocess, "Popen", FakePopen)
         monkeypatch.setenv("HOME", "/users/alice")
-        monkeypatch.setenv("HERMES_HOME", "/users/alice/.pichkoo/profiles/backend-worker")
-        monkeypatch.setenv("HERMES_KANBAN_TASK", "t_smoke")
+        monkeypatch.setenv("PICHKOO_HOME", "/users/alice/.pichkoo/profiles/backend-worker")
+        monkeypatch.setenv("PICHKOO_KANBAN_TASK", "t_smoke")
         monkeypatch.setenv(
-            "HERMES_KANBAN_DB",
+            "PICHKOO_KANBAN_DB",
             "/users/alice/.pichkoo/kanban/boards/smoke/kanban.db",
         )
 

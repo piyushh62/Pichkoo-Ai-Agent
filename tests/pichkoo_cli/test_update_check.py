@@ -29,7 +29,7 @@ def test_check_for_updates_uses_cache(tmp_path, monkeypatch):
     cache_file = tmp_path / ".update_check"
     cache_file.write_text(json.dumps({"ts": time.time(), "behind": 3, "ver": __version__}))
 
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
     with patch("pichkoo_cli.banner.subprocess.run") as mock_run:
         result = check_for_updates()
 
@@ -58,8 +58,8 @@ def test_check_for_updates_invalidates_on_version_change(tmp_path, monkeypatch):
         json.dumps({"ts": time.time(), "behind": 1, "rev": None, "ver": "0.0.1-old"})
     )
 
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    monkeypatch.delenv("HERMES_REVISION", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
+    monkeypatch.delenv("PICHKOO_REVISION", raising=False)
     with patch("pichkoo_cli.banner.subprocess.run") as mock_run, \
          patch("pichkoo_cli.banner.check_via_pypi", return_value=0) as mock_pypi:
         result = banner.check_for_updates()
@@ -88,7 +88,7 @@ def test_check_for_updates_expired_cache(tmp_path, monkeypatch):
 
     mock_result = MagicMock(returncode=0, stdout="5\n")
 
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
     with patch("pichkoo_cli.banner.subprocess.run", return_value=mock_result) as mock_run:
         result = check_for_updates()
 
@@ -106,7 +106,7 @@ def test_check_for_updates_no_git_dir(tmp_path, monkeypatch):
     fake_banner.touch()
 
     monkeypatch.setattr(banner, "__file__", str(fake_banner))
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
     with patch("pichkoo_cli.banner.subprocess.run") as mock_run:
         with patch("pichkoo_cli.banner.check_via_pypi", return_value=0):
             result = banner.check_for_updates()
@@ -115,15 +115,15 @@ def test_check_for_updates_no_git_dir(tmp_path, monkeypatch):
 
 
 def test_check_for_updates_fallback_to_project_root(tmp_path, monkeypatch):
-    """Dev install: falls back to Path(__file__).parent.parent when HERMES_HOME has no git repo."""
+    """Dev install: falls back to Path(__file__).parent.parent when PICHKOO_HOME has no git repo."""
     import pichkoo_cli.banner as banner
 
     project_root = Path(banner.__file__).parent.parent.resolve()
     if not (project_root / ".git").exists():
         pytest.skip("Not running from a git checkout")
 
-    # Point HERMES_HOME at a temp dir with no pichkoo-agent/.git
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    # Point PICHKOO_HOME at a temp dir with no pichkoo-agent/.git
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
     with patch("pichkoo_cli.banner.subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(returncode=0, stdout="0\n")
         result = banner.check_for_updates()
@@ -135,7 +135,7 @@ def test_check_for_updates_docker_returns_none(tmp_path, monkeypatch):
     """Inside the Docker image, check_for_updates() must short-circuit to None.
 
     Regression: the published image excludes .git (.dockerignore) and sets no
-    HERMES_REVISION (nix-only), so without a docker guard check_for_updates()
+    PICHKOO_REVISION (nix-only), so without a docker guard check_for_updates()
     falls through to check_via_pypi(), whose version-mismatch flag (1) gets
     rendered by both the Rich banner and the Ink TUI badge as a phantom
     "1 commit behind" — despite there being no git repo or commit math in the
@@ -145,7 +145,7 @@ def test_check_for_updates_docker_returns_none(tmp_path, monkeypatch):
     """
     import pichkoo_cli.banner as banner
 
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
     cache_file = tmp_path / ".update_check"
 
     with patch("pichkoo_cli.config.detect_install_method", return_value="docker"), \
@@ -174,8 +174,8 @@ def test_check_for_updates_non_docker_still_checks(tmp_path, monkeypatch):
     fake_banner.parent.mkdir(parents=True, exist_ok=True)
     fake_banner.touch()
     monkeypatch.setattr(banner, "__file__", str(fake_banner))
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    monkeypatch.delenv("HERMES_REVISION", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
+    monkeypatch.delenv("PICHKOO_REVISION", raising=False)
 
     with patch("pichkoo_cli.config.detect_install_method", return_value="pip"), \
          patch("pichkoo_cli.banner.subprocess.run") as mock_run, \
@@ -224,7 +224,7 @@ def test_invalidate_update_cache_clears_all_profiles(tmp_path):
         (p / ".update_check").write_text('{"ts":1,"behind":50}')
 
     with patch.object(Path, "home", return_value=tmp_path), \
-         patch.dict(os.environ, {"HERMES_HOME": str(default_home)}):
+         patch.dict(os.environ, {"PICHKOO_HOME": str(default_home)}):
         _invalidate_update_cache()
 
     # All three caches should be gone
@@ -242,7 +242,7 @@ def test_invalidate_update_cache_no_profiles_dir(tmp_path):
     (default_home / ".update_check").write_text('{"ts":1,"behind":5}')
 
     with patch.object(Path, "home", return_value=tmp_path), \
-         patch.dict(os.environ, {"HERMES_HOME": str(default_home)}):
+         patch.dict(os.environ, {"PICHKOO_HOME": str(default_home)}):
         _invalidate_update_cache()
 
     assert not (default_home / ".update_check").exists()

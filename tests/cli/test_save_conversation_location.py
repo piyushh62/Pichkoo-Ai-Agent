@@ -24,7 +24,7 @@ def hermes_home(tmp_path, monkeypatch):
     home = tmp_path / ".pichkoo"
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setenv("HERMES_HOME", str(home))
+    monkeypatch.setenv("PICHKOO_HOME", str(home))
     # Clear any cached hermes_home computation
     import pichkoo_constants
     if hasattr(pichkoo_constants, "_hermes_home_cache"):
@@ -49,7 +49,7 @@ def test_save_conversation_writes_under_hermes_home(hermes_home, tmp_path, monke
     work.mkdir()
     monkeypatch.chdir(work)
 
-    # Import fresh to pick up the HERMES_HOME fixture
+    # Import fresh to pick up the PICHKOO_HOME fixture
     for mod in [m for m in sys.modules if m.startswith("cli") or m == "pichkoo_constants"]:
         sys.modules.pop(mod, None)
 
@@ -61,7 +61,7 @@ def test_save_conversation_writes_under_hermes_home(hermes_home, tmp_path, monke
     ])
 
     # Call the unbound method against our stub.
-    cli.HermesCLI.save_conversation(stub)
+    cli.PichkooCLI.save_conversation(stub)
 
     # File must NOT be in CWD
     cwd_leak = list(work.glob("hermes_conversation_*.json"))
@@ -93,7 +93,7 @@ def test_save_conversation_empty_history_does_nothing(hermes_home, capsys):
     import cli
 
     stub = _make_stub_cli([])
-    cli.HermesCLI.save_conversation(stub)
+    cli.PichkooCLI.save_conversation(stub)
 
     saved_dir = hermes_home / "sessions" / "saved"
     assert not saved_dir.exists() or not list(saved_dir.iterdir())

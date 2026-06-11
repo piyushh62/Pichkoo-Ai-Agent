@@ -1,6 +1,6 @@
 """Audit log for dashboard-auth events.
 
-Profile-aware location: ``$HERMES_HOME/logs/dashboard-auth.log``.
+Profile-aware location: ``$PICHKOO_HOME/logs/dashboard-auth.log``.
 Format: one JSON object per line. Token-like fields are stripped before
 serialisation to avoid leaking refresh tokens or JWTs to disk.
 
@@ -50,13 +50,13 @@ class AuditEvent(enum.Enum):
 
 
 def _resolve_log_path() -> Path:
-    """``$HERMES_HOME/logs/dashboard-auth.log`` with the standard fallback.
+    """``$PICHKOO_HOME/logs/dashboard-auth.log`` with the standard fallback.
 
     Mirrors ``pichkoo_constants.get_hermes_home`` semantics: env var wins,
     else ``~/.pichkoo``. A local copy avoids an import cycle with the
     middleware which lives below ``pichkoo_cli``.
     """
-    home = os.environ.get("HERMES_HOME") or str(Path.home() / ".pichkoo")
+    home = os.environ.get("PICHKOO_HOME") or str(Path.home() / ".pichkoo")
     return Path(home) / "logs" / "dashboard-auth.log"
 
 

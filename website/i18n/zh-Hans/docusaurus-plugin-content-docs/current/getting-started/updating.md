@@ -53,7 +53,7 @@ pip install --upgrade pichkoo-agent    # 或：uv pip install --upgrade pichkoo-
 
 ### 完整更新前备份：`--backup`
 
-对于高价值 profile（生产环境 gateway、团队共享安装），可选择在拉取前对 `HERMES_HOME`（配置、认证、会话、技能、配对数据）进行完整备份：
+对于高价值 profile（生产环境 gateway、团队共享安装），可选择在拉取前对 `PICHKOO_HOME`（配置、认证、会话、技能、配对数据）进行完整备份：
 
 ```bash
 pichkoo update --backup

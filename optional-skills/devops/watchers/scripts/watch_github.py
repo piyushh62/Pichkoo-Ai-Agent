@@ -5,7 +5,7 @@ Usage (via cron with --no-agent):
 
     pichkoo cron create pichkoo-issues \\
       --schedule "*/5 * * * *" --no-agent \\
-      --script "$HERMES_HOME/skills/devops/watchers/scripts/watch_github.py" \\
+      --script "$PICHKOO_HOME/skills/devops/watchers/scripts/watch_github.py" \\
       --script-args "--name pichkoo-issues --repo NousResearch/pichkoo-agent --scope issues"
 
 Set GITHUB_TOKEN (or GH_TOKEN) in ~/.pichkoo/.env to avoid the 60 req/hr
@@ -112,7 +112,7 @@ def main() -> int:
 
     headers = {
         "Accept": "application/vnd.github+json",
-        "User-Agent": "Hermes-Watcher/1.0",
+        "User-Agent": "Pichkoo-Watcher/1.0",
     }
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if token:

@@ -13,7 +13,7 @@ import type {
   DesktopUpdateStatus,
   DesktopVersionInfo
 } from '@/global'
-import { checkHermesUpdate, getActionStatus, updateHermes } from '@/pichkoo'
+import { checkPichkooUpdate, getActionStatus, updatePichkoo } from '@/pichkoo'
 import { translateNow } from '@/i18n'
 import { persistString, storedString } from '@/lib/storage'
 import { dismissNotification, notify } from '@/store/notifications'
@@ -106,7 +106,7 @@ export function reportBackendContract(contract: number | undefined): void {
   }
 
   notify({
-    action: { label: translateNow('notifications.updateHermes'), onClick: () => void applyBackendUpdate() },
+    action: { label: translateNow('notifications.updatePichkoo'), onClick: () => void applyBackendUpdate() },
     durationMs: 0,
     id: SKEW_TOAST_ID,
     kind: 'warning',
@@ -214,7 +214,7 @@ export async function checkBackendUpdates(): Promise<DesktopUpdateStatus | null>
   $backendUpdateChecking.set(true)
 
   try {
-    const status = mapBackendCheck(await checkHermesUpdate(true))
+    const status = mapBackendCheck(await checkPichkooUpdate(true))
     $backendUpdateStatus.set(status)
     maybeNotifyUpdateAvailable(status)
 
@@ -312,7 +312,7 @@ async function waitForBackendReturn(): Promise<boolean> {
   for (let attempt = 0; attempt < BACKEND_RETURN_MAX_ATTEMPTS; attempt += 1) {
     await new Promise(resolve => globalThis.setTimeout(resolve, BACKEND_RETURN_POLL_MS))
     try {
-      await checkHermesUpdate()
+      await checkPichkooUpdate()
 
       return true
     } catch {
@@ -348,7 +348,7 @@ export async function applyBackendUpdate(): Promise<DesktopUpdateApplyResult> {
   $backendUpdateApply.set({ ...IDLE, applying: true, stage: 'prepare', message: translateNow('updates.applyStatus.preparing') })
 
   try {
-    const started = await updateHermes()
+    const started = await updatePichkoo()
 
     if (!started.ok) {
       const message = (started as { message?: string }).message || translateNow('updates.applyStatus.notAvailable')

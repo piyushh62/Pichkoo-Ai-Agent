@@ -1,6 +1,6 @@
-"""Tests for the cross-Hermes-profile write guard in agent/file_safety.
+"""Tests for the cross-Pichkoo-profile write guard in agent/file_safety.
 
-The guard fires when a tool tries to write into another Hermes profile's
+The guard fires when a tool tries to write into another Pichkoo profile's
 skills/plugins/cron/memories directory. It's a soft guard — defense in
 depth, NOT a security boundary — but it prevents the agent from silently
 corrupting a profile that belongs to a different session.
@@ -18,14 +18,14 @@ import pytest
 
 
 # ---------------------------------------------------------------------------
-# Helpers — set up a fake Hermes root with two profiles, monkeypatch the
+# Helpers — set up a fake Pichkoo root with two profiles, monkeypatch the
 # resolver helpers so the classifier sees the test layout.
 # ---------------------------------------------------------------------------
 
 
 @pytest.fixture
 def fake_hermes(tmp_path, monkeypatch):
-    """Build a fake Hermes layout:
+    """Build a fake Pichkoo layout:
 
         <tmp>/
           skills/foo/SKILL.md           # default profile
@@ -95,7 +95,7 @@ class TestResolveActiveProfileName:
         assert _resolve_active_profile_name() == "pichkoo-security"
 
     def test_falls_back_to_default_on_resolution_failure(self, fake_hermes, monkeypatch):
-        """If HERMES_HOME resolution raises, return 'default' rather than crashing the tool."""
+        """If PICHKOO_HOME resolution raises, return 'default' rather than crashing the tool."""
         import agent.file_safety as fs
 
         def _boom():
@@ -164,7 +164,7 @@ class TestClassifyCrossProfileTarget:
     def test_non_hermes_path_returns_none(self, fake_hermes, monkeypatch, tmp_path):
         _set_active_home(monkeypatch, fake_hermes["security_home"])
         from agent.file_safety import classify_cross_profile_target
-        # Path outside any Hermes root
+        # Path outside any Pichkoo root
         assert classify_cross_profile_target(str(tmp_path / "random.txt")) is None
 
     def test_hermes_config_not_classified_as_cross_profile(self, fake_hermes, monkeypatch):

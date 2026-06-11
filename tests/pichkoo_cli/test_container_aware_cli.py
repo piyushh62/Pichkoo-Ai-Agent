@@ -23,11 +23,11 @@ from pichkoo_cli.config import (
 
 @pytest.fixture
 def container_env(tmp_path, monkeypatch):
-    """Set up a fake HERMES_HOME with .container-mode file."""
+    """Set up a fake PICHKOO_HOME with .container-mode file."""
     hermes_home = tmp_path / ".pichkoo"
     hermes_home.mkdir()
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_DEV", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.delenv("PICHKOO_DEV", raising=False)
 
     container_mode = hermes_home / ".container-mode"
     container_mode.write_text(
@@ -64,8 +64,8 @@ def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
     """Returns None when .container-mode doesn't exist (native mode)."""
     hermes_home = tmp_path / ".pichkoo"
     hermes_home.mkdir()
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-    monkeypatch.delenv("HERMES_DEV", raising=False)
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
+    monkeypatch.delenv("PICHKOO_DEV", raising=False)
 
     with patch("pichkoo_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -74,8 +74,8 @@ def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
 
 
 def test_get_container_exec_info_skipped_when_hermes_dev(container_env, monkeypatch):
-    """Returns None when HERMES_DEV=1 is set (dev mode bypass)."""
-    monkeypatch.setenv("HERMES_DEV", "1")
+    """Returns None when PICHKOO_DEV=1 is set (dev mode bypass)."""
+    monkeypatch.setenv("PICHKOO_DEV", "1")
 
     with patch("pichkoo_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -84,8 +84,8 @@ def test_get_container_exec_info_skipped_when_hermes_dev(container_env, monkeypa
 
 
 def test_get_container_exec_info_not_skipped_when_hermes_dev_zero(container_env, monkeypatch):
-    """HERMES_DEV=0 does NOT trigger bypass — only '1' does."""
-    monkeypatch.setenv("HERMES_DEV", "0")
+    """PICHKOO_DEV=0 does NOT trigger bypass — only '1' does."""
+    monkeypatch.setenv("PICHKOO_DEV", "0")
 
     with patch("pichkoo_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -107,7 +107,7 @@ def test_get_container_exec_info_defaults():
         with patch("pichkoo_constants.is_container", return_value=False), \
              patch.dict(get_container_exec_info.__globals__, {"get_hermes_home": lambda: hermes_home}), \
              patch.dict(os.environ, {}, clear=False):
-            os.environ.pop("HERMES_DEV", None)
+            os.environ.pop("PICHKOO_DEV", None)
             info = get_container_exec_info()
 
         assert info is not None

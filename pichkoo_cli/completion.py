@@ -97,7 +97,7 @@ def generate_bash(parser: argparse.ArgumentParser) -> str:
 
     cases_str = "\n".join(cases)
 
-    return f"""# Hermes Agent bash completion
+    return f"""# Pichkoo AI Agent bash completion
 # Add to ~/.bashrc:
 #   eval "$(pichkoo completion bash)"
 
@@ -200,7 +200,7 @@ def generate_zsh(parser: argparse.ArgumentParser) -> str:
     sub_cases_str = "\n".join(sub_cases)
 
     return f"""#compdef pichkoo
-# Hermes Agent zsh completion
+# Pichkoo AI Agent zsh completion
 # Add to ~/.zshrc:
 #   eval "$(pichkoo completion zsh)"
 
@@ -254,7 +254,7 @@ def generate_fish(parser: argparse.ArgumentParser) -> str:
     top_cmds_str = " ".join(top_cmds)
 
     lines: list[str] = [
-        "# Hermes Agent fish completion",
+        "# Pichkoo AI Agent fish completion",
         "# Add to your config:",
         "#   pichkoo completion fish | source",
         "",

@@ -10,7 +10,7 @@ Launched by ``pichkoo meet node run``.
 Token handling
 --------------
 On first boot we mint 32 hex chars of entropy and persist them at
-``$HERMES_HOME/workspace/meetings/node_token.json``. Subsequent boots
+``$PICHKOO_HOME/workspace/meetings/node_token.json``. Subsequent boots
 reuse the same token so previously-approved gateways don't need to be
 re-paired. The operator copies this token out-of-band to the gateway
 via ``pichkoo meet node approve <name> <url> <token>``.

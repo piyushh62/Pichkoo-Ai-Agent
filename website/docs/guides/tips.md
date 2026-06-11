@@ -82,7 +82,7 @@ Create an `AGENTS.md` in your project root with architecture decisions, coding c
 
 ### SOUL.md: Customize Personality
 
-Want Pichkoo to have a stable default voice? Edit `~/.pichkoo/SOUL.md` (or `$HERMES_HOME/SOUL.md` if you use a custom Pichkoo home). Pichkoo now seeds a starter SOUL automatically and uses that global file as the instance-wide personality source.
+Want Pichkoo to have a stable default voice? Edit `~/.pichkoo/SOUL.md` (or `$PICHKOO_HOME/SOUL.md` if you use a custom Pichkoo home). Pichkoo now seeds a starter SOUL automatically and uses that global file as the instance-wide personality source.
 
 For a full walkthrough, see [Use SOUL.md with Pichkoo](/guides/use-soul-with-pichkoo).
 

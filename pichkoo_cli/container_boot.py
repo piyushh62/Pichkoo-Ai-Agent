@@ -2,7 +2,7 @@
 
 Service directories under /run/service/ live on **tmpfs** and are wiped
 on every container restart. Profile directories under
-``$HERMES_HOME/profiles/<name>/`` live on the persistent VOLUME, and
+``$PICHKOO_HOME/profiles/<name>/`` live on the persistent VOLUME, and
 each one records its gateway's last state in ``gateway_state.json``.
 This module bridges the two: on every container boot, walk the
 persistent profiles, recreate the s6 service slots, and auto-start
@@ -10,7 +10,7 @@ only those whose last recorded state was ``running``.
 
 Wired into the image as /etc/cont-init.d/02-reconcile-profiles by the
 Dockerfile (Phase 4 Task 4.0). Runs as root after 01-pichkoo-setup
-(the stage2 hook) has chowned the volume and seeded $HERMES_HOME, but
+(the stage2 hook) has chowned the volume and seeded $PICHKOO_HOME, but
 before s6-rc starts user services.
 
 Without this module, every ``docker restart`` would silently wipe
@@ -62,7 +62,7 @@ def reconcile_profile_gateways(
     """Recreate s6 service registrations for every persistent profile.
 
     Always registers a ``gateway-default`` slot for the root profile
-    (the implicit profile that lives at the top of ``$HERMES_HOME``,
+    (the implicit profile that lives at the top of ``$PICHKOO_HOME``,
     not under ``profiles/``). The dispatcher in ``pichkoo_cli.gateway``
     maps an empty profile suffix to ``gateway-default``, so this slot
     is what ``pichkoo gateway start`` (no ``-p``) targets. Without it,
@@ -71,12 +71,12 @@ def reconcile_profile_gateways(
     ``CalledProcessError`` → traceback to the user (PR #30136 review).
 
     The default slot's prior state is read from
-    ``$HERMES_HOME/gateway_state.json`` (sibling to the profile root,
+    ``$PICHKOO_HOME/gateway_state.json`` (sibling to the profile root,
     not under ``profiles/``); stale runtime files there are swept the
     same way as for named profiles.
 
     Args:
-        hermes_home: The container's HERMES_HOME (typically /opt/data).
+        hermes_home: The container's PICHKOO_HOME (typically /opt/data).
             Profiles live under ``<hermes_home>/profiles/<name>/``;
             the default profile lives at ``<hermes_home>`` itself.
         scandir: The s6 dynamic scandir (typically /run/service). Service
@@ -177,7 +177,7 @@ def _maybe_migrate_legacy_gateway_run_state(
     if state_file.exists():
         return None
 
-    if os.environ.get("HERMES_GATEWAY_NO_SUPERVISE", "").lower() in ("1", "true", "yes"):
+    if os.environ.get("PICHKOO_GATEWAY_NO_SUPERVISE", "").lower() in ("1", "true", "yes"):
         return None
 
     argv = tuple(container_argv) if container_argv is not None else _read_container_argv()
@@ -329,7 +329,7 @@ def _register_service(scandir: Path, profile: str, *, start: bool) -> None:
 def _write_reconcile_log(
     hermes_home: Path, actions: list[ReconcileAction],
 ) -> None:
-    """Append one line per profile to $HERMES_HOME/logs/container-boot.log.
+    """Append one line per profile to $PICHKOO_HOME/logs/container-boot.log.
 
     Operators inspect this to debug "why didn't my profile come back
     up". Keeping a separate log file (vs. mixing into agent.log) lets
@@ -378,7 +378,7 @@ _LOG_ROTATE_BYTES = 256 * 1024
 
 def main() -> int:
     """Entry point invoked from /etc/cont-init.d/02-reconcile-profiles."""
-    hermes_home = Path(os.environ.get("HERMES_HOME", "/opt/data"))
+    hermes_home = Path(os.environ.get("PICHKOO_HOME", "/opt/data"))
     scandir = Path(os.environ.get("S6_PROFILE_GATEWAY_SCANDIR", "/run/service"))
     actions = reconcile_profile_gateways(
         hermes_home=hermes_home, scandir=scandir,

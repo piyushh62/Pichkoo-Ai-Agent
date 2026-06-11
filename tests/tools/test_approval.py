@@ -150,7 +150,7 @@ class TestSessionKeyContext:
     def test_context_session_key_overrides_process_env(self):
         token = approval_module.set_current_session_key("alice")
         try:
-            with mock_patch.dict("os.environ", {"HERMES_SESSION_KEY": "bob"}, clear=False):
+            with mock_patch.dict("os.environ", {"PICHKOO_SESSION_KEY": "bob"}, clear=False):
                 assert approval_module.get_current_session_key() == "alice"
         finally:
             approval_module.reset_current_session_key(token)
@@ -370,12 +370,12 @@ class TestTeePattern:
         assert key is not None
 
     def test_tee_custom_hermes_home_env(self):
-        dangerous, key, desc = detect_dangerous_command("echo x | tee $HERMES_HOME/.env")
+        dangerous, key, desc = detect_dangerous_command("echo x | tee $PICHKOO_HOME/.env")
         assert dangerous is True
         assert key is not None
 
     def test_tee_quoted_custom_hermes_home_env(self):
-        dangerous, key, desc = detect_dangerous_command('echo x | tee "$HERMES_HOME/.env"')
+        dangerous, key, desc = detect_dangerous_command('echo x | tee "$PICHKOO_HOME/.env"')
         assert dangerous is True
         assert key is not None
 
@@ -390,7 +390,7 @@ class TestTeePattern:
         assert key is None
 
 
-class TestHermesConfigWriteProtection:
+class TestPichkooConfigWriteProtection:
     """Terminal-side pairing for the file_tools write_file/patch deny on
     ~/.pichkoo/config.yaml (#14639). config.yaml IS the security policy
     (approvals.mode/yolo live there, mtime-keyed cache reloads mid-session),
@@ -442,7 +442,7 @@ class TestHermesConfigWriteProtection:
         assert "pichkoo config" in desc.lower() or "in-place" in desc.lower()
 
     def test_custom_hermes_home(self):
-        dangerous, key, desc = detect_dangerous_command("echo x | tee $HERMES_HOME/config.yaml")
+        dangerous, key, desc = detect_dangerous_command("echo x | tee $PICHKOO_HOME/config.yaml")
         assert dangerous is True
 
     def test_perl_in_place_config(self):
@@ -517,7 +517,7 @@ class TestHermesConfigWriteProtection:
         assert dangerous is False
 
     def test_normal_yaml_write_safe(self):
-        # A non-Hermes config.yaml in a project dir is handled by the project
+        # A non-Pichkoo config.yaml in a project dir is handled by the project
         # patterns, but a plain temp write must not false-positive.
         dangerous, key, desc = detect_dangerous_command("echo data > /tmp/scratch.txt")
         assert dangerous is False
@@ -551,7 +551,7 @@ class TestSensitiveRedirectPattern:
     """Detect shell redirection writes to sensitive user-managed paths."""
 
     def test_redirect_to_custom_hermes_home_env(self):
-        dangerous, key, desc = detect_dangerous_command("echo x > $HERMES_HOME/.env")
+        dangerous, key, desc = detect_dangerous_command("echo x > $PICHKOO_HOME/.env")
         assert dangerous is True
         assert key is not None
 
@@ -1478,18 +1478,18 @@ class TestApprovalTimeoutIsNotConsent:
 
         self._saved_env = {
             k: os.environ.get(k)
-            for k in ("HERMES_GATEWAY_SESSION", "HERMES_CRON_SESSION",
-                      "HERMES_YOLO_MODE",
-                      "HERMES_SESSION_KEY", "HERMES_INTERACTIVE")
+            for k in ("PICHKOO_GATEWAY_SESSION", "PICHKOO_CRON_SESSION",
+                      "PICHKOO_YOLO_MODE",
+                      "PICHKOO_SESSION_KEY", "PICHKOO_INTERACTIVE")
         }
-        os.environ.pop("HERMES_YOLO_MODE", None)
-        os.environ.pop("HERMES_INTERACTIVE", None)
-        # HERMES_CRON_SESSION takes priority over HERMES_GATEWAY_SESSION in
+        os.environ.pop("PICHKOO_YOLO_MODE", None)
+        os.environ.pop("PICHKOO_INTERACTIVE", None)
+        # PICHKOO_CRON_SESSION takes priority over PICHKOO_GATEWAY_SESSION in
         # _is_gateway_approval_context(); a leaked value from a parent cron
         # process would force the cron path and break these gateway tests.
-        os.environ.pop("HERMES_CRON_SESSION", None)
-        os.environ["HERMES_GATEWAY_SESSION"] = "1"
-        os.environ["HERMES_SESSION_KEY"] = self.SESSION_KEY
+        os.environ.pop("PICHKOO_CRON_SESSION", None)
+        os.environ["PICHKOO_GATEWAY_SESSION"] = "1"
+        os.environ["PICHKOO_SESSION_KEY"] = self.SESSION_KEY
 
     def teardown_method(self):
         from tools import approval as mod

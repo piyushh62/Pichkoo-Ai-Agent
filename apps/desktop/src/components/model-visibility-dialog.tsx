@@ -6,7 +6,7 @@ import { BrailleSpinner } from '@/components/ui/braille-spinner'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
-import type { HermesGateway } from '@/pichkoo'
+import type { PichkooGateway } from '@/pichkoo'
 import { getGlobalModelOptions } from '@/pichkoo'
 import { useI18n } from '@/i18n'
 import { displayModelName, modelDisplayParts } from '@/lib/model-status-label'
@@ -20,7 +20,7 @@ import {
 import type { ModelOptionProvider, ModelOptionsResponse } from '@/types/pichkoo'
 
 interface ModelVisibilityDialogProps {
-  gw?: HermesGateway
+  gw?: PichkooGateway
   onOpenChange: (open: boolean) => void
   onOpenProviders: () => void
   open: boolean

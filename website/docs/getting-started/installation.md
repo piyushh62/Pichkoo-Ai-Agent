@@ -44,9 +44,9 @@ Where the installer puts things depends on whether you're installing as a normal
 |---|---|---|---|
 | pip install | Python site-packages | `~/.local/bin/pichkoo` (console_scripts) | `~/.pichkoo/` |
 | Per-user (git installer) | `~/.pichkoo/pichkoo-agent/` | `~/.local/bin/pichkoo` (symlink) | `~/.pichkoo/` |
-| Root-mode (`sudo curl … \| sudo bash`) | `/usr/local/lib/pichkoo-agent/` | `/usr/local/bin/pichkoo` | `/root/.pichkoo/` (or `$HERMES_HOME`) |
+| Root-mode (`sudo curl … \| sudo bash`) | `/usr/local/lib/pichkoo-agent/` | `/usr/local/bin/pichkoo` | `/root/.pichkoo/` (or `$PICHKOO_HOME`) |
 
-The root-mode **FHS layout** (`/usr/local/lib/…`, `/usr/local/bin/pichkoo`) matches where other system-wide developer tools land on Linux. It's useful for shared-machine deployments where one system install should serve every user. Per-user config (auth, skills, sessions) still lives under each user's `~/.pichkoo/` or explicit `HERMES_HOME`.
+The root-mode **FHS layout** (`/usr/local/lib/…`, `/usr/local/bin/pichkoo`) matches where other system-wide developer tools land on Linux. It's useful for shared-machine deployments where one system install should serve every user. Per-user config (auth, skills, sessions) still lives under each user's `~/.pichkoo/` or explicit `PICHKOO_HOME`.
 
 ### After Installation
 

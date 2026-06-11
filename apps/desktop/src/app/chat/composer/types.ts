@@ -1,4 +1,4 @@
-import type { HermesGateway } from '@/pichkoo'
+import type { PichkooGateway } from '@/pichkoo'
 import type { ComposerAttachment } from '@/store/composer'
 
 import type { DroppedFile } from '../hooks/use-composer-actions'
@@ -33,7 +33,7 @@ export interface ChatBarProps {
   focusKey?: string | null
   maxRecordingSeconds?: number
   state: ChatBarState
-  gateway?: HermesGateway | null
+  gateway?: PichkooGateway | null
   queueSessionKey?: string | null
   sessionId?: string | null
   cwd?: string | null

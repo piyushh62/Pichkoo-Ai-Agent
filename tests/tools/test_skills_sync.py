@@ -717,21 +717,21 @@ class TestSyncSkills:
 
 class TestGetBundledDir:
     def test_env_var_override(self, tmp_path, monkeypatch):
-        """HERMES_BUNDLED_SKILLS env var overrides the default path resolution."""
+        """PICHKOO_BUNDLED_SKILLS env var overrides the default path resolution."""
         custom_dir = tmp_path / "custom_skills"
         custom_dir.mkdir()
-        monkeypatch.setenv("HERMES_BUNDLED_SKILLS", str(custom_dir))
+        monkeypatch.setenv("PICHKOO_BUNDLED_SKILLS", str(custom_dir))
         assert _get_bundled_dir() == custom_dir
 
     def test_default_without_env_var(self, monkeypatch):
         """Without the env var, falls back to relative path from __file__."""
-        monkeypatch.delenv("HERMES_BUNDLED_SKILLS", raising=False)
+        monkeypatch.delenv("PICHKOO_BUNDLED_SKILLS", raising=False)
         result = _get_bundled_dir()
         assert result.name == "skills"
 
     def test_env_var_empty_string_ignored(self, monkeypatch):
-        """Empty HERMES_BUNDLED_SKILLS should fall back to default."""
-        monkeypatch.setenv("HERMES_BUNDLED_SKILLS", "")
+        """Empty PICHKOO_BUNDLED_SKILLS should fall back to default."""
+        monkeypatch.setenv("PICHKOO_BUNDLED_SKILLS", "")
         result = _get_bundled_dir()
         assert result.name == "skills"
 
@@ -975,7 +975,7 @@ class TestNoBundledSkillsOptOut:
         with patch("tools.skills_sync._get_bundled_dir", return_value=bundled), \
              patch("tools.skills_sync.SKILLS_DIR", skills_dir), \
              patch("tools.skills_sync.MANIFEST_FILE", manifest_file), \
-             patch("tools.skills_sync.HERMES_HOME", hermes_home):
+             patch("tools.skills_sync.PICHKOO_HOME", hermes_home):
             result = sync_skills(quiet=True)
 
         # Opt-out signalled, nothing copied, nothing written to disk.
@@ -996,7 +996,7 @@ class TestNoBundledSkillsOptOut:
              patch("tools.skills_sync._get_optional_dir", return_value=bundled.parent / "optional-skills"), \
              patch("tools.skills_sync.SKILLS_DIR", skills_dir), \
              patch("tools.skills_sync.MANIFEST_FILE", manifest_file), \
-             patch("tools.skills_sync.HERMES_HOME", hermes_home):
+             patch("tools.skills_sync.PICHKOO_HOME", hermes_home):
             result = sync_skills(quiet=True)
 
         assert result.get("skipped_opt_out") is not True
@@ -1021,7 +1021,7 @@ class TestOptOutToggleAndRemove:
         )
         home = tmp_path / "home"
         home.mkdir()
-        with patch("tools.skills_sync.HERMES_HOME", home):
+        with patch("tools.skills_sync.PICHKOO_HOME", home):
             assert is_bundled_skills_opt_out() is False
             r = set_bundled_skills_opt_out(True)
             assert r["ok"] and r["changed"]
@@ -1047,7 +1047,7 @@ class TestOptOutToggleAndRemove:
              patch("tools.skills_sync._get_optional_dir", return_value=bundled.parent / "optional-skills"), \
              patch("tools.skills_sync.SKILLS_DIR", skills_dir), \
              patch("tools.skills_sync.MANIFEST_FILE", manifest_file), \
-             patch("tools.skills_sync.HERMES_HOME", home):
+             patch("tools.skills_sync.PICHKOO_HOME", home):
             sync_skills(quiet=True)
             # User edits 'beta'
             (skills_dir / "beta" / "SKILL.md").write_text("---\nname: beta\n---\nEDITED\n")

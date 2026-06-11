@@ -249,7 +249,7 @@ class TestSend:
         assert call_args[0][0] == "https://dingtalk.example/webhook"
         payload = call_args[1]["json"]
         assert payload["msgtype"] == "markdown"
-        assert payload["markdown"]["title"] == "Hermes"
+        assert payload["markdown"]["title"] == "Pichkoo"
         assert payload["markdown"]["text"] == "Hello!"
 
     @pytest.mark.asyncio
@@ -701,7 +701,7 @@ class TestMentionPatterns:
         adapter = _make_gating_adapter(
             monkeypatch, extra={"mention_patterns": ["^pichkoo"]}
         )
-        assert adapter._message_matches_mention_patterns("HERMES help") is True
+        assert adapter._message_matches_mention_patterns("PICHKOO help") is True
 
     def test_invalid_regex_is_skipped_not_raised(self, monkeypatch):
         adapter = _make_gating_adapter(

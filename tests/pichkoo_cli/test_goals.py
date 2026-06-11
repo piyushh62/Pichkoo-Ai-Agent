@@ -15,15 +15,15 @@ import pytest
 
 @pytest.fixture
 def hermes_home(tmp_path, monkeypatch):
-    """Isolated HERMES_HOME so SessionDB.state_meta writes don't clobber the real one."""
+    """Isolated PICHKOO_HOME so SessionDB.state_meta writes don't clobber the real one."""
     from pathlib import Path
 
     home = tmp_path / ".pichkoo"
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setenv("HERMES_HOME", str(home))
+    monkeypatch.setenv("PICHKOO_HOME", str(home))
 
-    # Bust the goal-module's DB cache for each test so it re-resolves HERMES_HOME.
+    # Bust the goal-module's DB cache for each test so it re-resolves PICHKOO_HOME.
     from pichkoo_cli import goals
 
     goals._DB_CACHE.clear()

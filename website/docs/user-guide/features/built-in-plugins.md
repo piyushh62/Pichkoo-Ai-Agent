@@ -17,8 +17,8 @@ The `PluginManager` scans four sources, in order:
 
 1. **Bundled** — `<repo>/plugins/<name>/` (what this page documents)
 2. **User** — `~/.pichkoo/plugins/<name>/`
-3. **Project** — `./.pichkoo/plugins/<name>/` (requires `HERMES_ENABLE_PROJECT_PLUGINS=1`)
-4. **Pip entry points** — `hermes_agent.plugins`
+3. **Project** — `./.pichkoo/plugins/<name>/` (requires `PICHKOO_ENABLE_PROJECT_PLUGINS=1`)
+4. **Pip entry points** — `pichkoo_ai_agent.plugins`
 
 On name collision, later sources win — a user plugin named `disk-cleanup` would replace the bundled one.
 
@@ -78,7 +78,7 @@ Auto-tracks and removes ephemeral files created during sessions — test scripts
 
 | Hook | Behaviour |
 |---|---|
-| `post_tool_call` | When `write_file` / `terminal` / `patch` creates a file matching `test_*`, `tmp_*`, or `*.test.*` inside `HERMES_HOME` or `/tmp/pichkoo-*`, track it silently as `test` / `temp` / `cron-output`. |
+| `post_tool_call` | When `write_file` / `terminal` / `patch` creates a file matching `test_*`, `tmp_*`, or `*.test.*` inside `PICHKOO_HOME` or `/tmp/pichkoo-*`, track it silently as `test` / `temp` / `cron-output`. |
 | `on_session_end` | If any test files were auto-tracked during the turn, run the safe `quick` cleanup and log a one-line summary. Stays silent otherwise. |
 
 **Deletion rules:**
@@ -88,7 +88,7 @@ Auto-tracks and removes ephemeral files created during sessions — test scripts
 | `test` | every session end | Never |
 | `temp` | >7 days since tracked | Never |
 | `cron-output` | >14 days since tracked | Never |
-| empty dirs under HERMES_HOME | always | Never |
+| empty dirs under PICHKOO_HOME | always | Never |
 | `research` | >30 days, beyond 10 newest | Always (deep only) |
 | `chrome-profile` | >14 days since tracked | Always (deep only) |
 | files >500 MB | never auto | Always (deep only) |
@@ -104,7 +104,7 @@ Auto-tracks and removes ephemeral files created during sessions — test scripts
 /disk-cleanup forget <path>              # stop tracking (does not delete)
 ```
 
-**State** — everything lives at `$HERMES_HOME/disk-cleanup/`:
+**State** — everything lives at `$PICHKOO_HOME/disk-cleanup/`:
 
 | File | Contents |
 |---|---|
@@ -112,7 +112,7 @@ Auto-tracks and removes ephemeral files created during sessions — test scripts
 | `tracked.json.bak` | Atomic-write backup of the above |
 | `cleanup.log` | Append-only audit trail of every track / skip / reject / delete |
 
-**Safety** — cleanup only ever touches paths under `HERMES_HOME` or `/tmp/pichkoo-*`. Windows mounts (`/mnt/c/...`) are rejected. Well-known top-level state dirs (`logs/`, `memories/`, `sessions/`, `cron/`, `cache/`, `skills/`, `plugins/`, `disk-cleanup/` itself) are never removed even when empty — a fresh install does not get gutted on first session end.
+**Safety** — cleanup only ever touches paths under `PICHKOO_HOME` or `/tmp/pichkoo-*`. Windows mounts (`/mnt/c/...`) are rejected. Well-known top-level state dirs (`logs/`, `memories/`, `sessions/`, `cron/`, `cache/`, `skills/`, `plugins/`, `disk-cleanup/` itself) are never removed even when empty — a fresh install does not get gutted on first session end.
 
 **Enabling:** `pichkoo plugins enable disk-cleanup` (or check the box in `pichkoo plugins`).
 
@@ -164,9 +164,9 @@ pichkoo plugins enable observability/langfuse
 Then put the credentials in `~/.pichkoo/.env`:
 
 ```bash
-HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-...
-HERMES_LANGFUSE_SECRET_KEY=sk-lf-...
-HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or your self-hosted URL
+PICHKOO_LANGFUSE_PUBLIC_KEY=pk-lf-...
+PICHKOO_LANGFUSE_SECRET_KEY=sk-lf-...
+PICHKOO_LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or your self-hosted URL
 ```
 
 **How it works:**
@@ -176,7 +176,7 @@ HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or your self-hosted URL
 | `pre_api_request` / `pre_llm_call` | Open (or reuse) a per-turn root span "Pichkoo turn". Start a `generation` child observation for this API call with serialized recent messages as input. |
 | `post_api_request` / `post_llm_call` | Close the generation, attach `usage_details`, `cost_details`, `finish_reason`, assistant output + tool calls. If no tool calls and non-empty content, close the turn. |
 | `pre_tool_call` | Start a `tool` child observation with sanitized `args`. |
-| `post_tool_call` | Close the tool observation with sanitized `result`. `read_file` payloads get summarized (head + tail + omitted-line count) so a huge file read stays under `HERMES_LANGFUSE_MAX_CHARS`. |
+| `post_tool_call` | Close the tool observation with sanitized `result`. `read_file` payloads get summarized (head + tail + omitted-line count) so a huge file read stays under `PICHKOO_LANGFUSE_MAX_CHARS`. |
 
 Session grouping keys off the Pichkoo session ID (or task ID for sub-agents) via `langfuse.propagate_attributes`, so everything in a single `pichkoo chat` session lives under one Langfuse session.
 
@@ -191,11 +191,11 @@ pichkoo chat -q "hello"              # check the Langfuse UI for a "Pichkoo turn
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `HERMES_LANGFUSE_ENV` | — | Environment tag on traces (`production`, `staging`, …) |
-| `HERMES_LANGFUSE_RELEASE` | — | Release/version tag |
-| `HERMES_LANGFUSE_SAMPLE_RATE` | `1.0` | Sampling rate passed to the SDK (0.0–1.0) |
-| `HERMES_LANGFUSE_MAX_CHARS` | `12000` | Per-field truncation for message content / tool args / tool results |
-| `HERMES_LANGFUSE_DEBUG` | `false` | Verbose plugin logging to `agent.log` |
+| `PICHKOO_LANGFUSE_ENV` | — | Environment tag on traces (`production`, `staging`, …) |
+| `PICHKOO_LANGFUSE_RELEASE` | — | Release/version tag |
+| `PICHKOO_LANGFUSE_SAMPLE_RATE` | `1.0` | Sampling rate passed to the SDK (0.0–1.0) |
+| `PICHKOO_LANGFUSE_MAX_CHARS` | `12000` | Per-field truncation for message content / tool args / tool results |
+| `PICHKOO_LANGFUSE_DEBUG` | `false` | Verbose plugin logging to `agent.log` |
 
 Pichkoo-prefixed and standard SDK env vars (`LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`) are both accepted — Pichkoo-prefixed wins when both are set.
 
@@ -242,7 +242,7 @@ Adds a **Steam-style achievements tab to the dashboard** — 60+ collectible, ti
 - Scans your entire `~/.pichkoo/state.db` session history on the dashboard backend
 - Per-session stats are cached by `(started_at, last_active)` fingerprint, so only new or changed sessions re-analyze on subsequent scans
 - First-ever scan runs in a background thread — the dashboard never blocks waiting for it, even on databases with thousands of sessions
-- Unlock state is persisted to `$HERMES_HOME/plugins/pichkoo-achievements/state.json`
+- Unlock state is persisted to `$PICHKOO_HOME/plugins/pichkoo-achievements/state.json`
 
 **Tier progression:** Copper → Silver → Gold → Diamond → Olympian. Each card exposes a "What counts" section listing the exact metric being tracked.
 
@@ -265,7 +265,7 @@ Adds a **Steam-style achievements tab to the dashboard** — 60+ collectible, ti
 | `POST /rescan` | Manual synchronous rescan (blocks; use when the user clicks the rescan button) |
 | `POST /reset-state` | Clear unlock history and cached snapshot |
 
-**State files** — live under `$HERMES_HOME/plugins/pichkoo-achievements/`:
+**State files** — live under `$PICHKOO_HOME/plugins/pichkoo-achievements/`:
 
 | File | Contents |
 |---|---|
@@ -282,7 +282,7 @@ Adds a **Steam-style achievements tab to the dashboard** — 60+ collectible, ti
 
 **Enabling:** Nothing to enable — `pichkoo-achievements` is a dashboard-only plugin (no lifecycle hooks, no model-visible tools). It auto-registers as a tab in `pichkoo dashboard` on first launch. The `plugins.enabled` config only gates lifecycle/tool plugins; dashboard plugins are discovered purely via their `dashboard/manifest.json`.
 
-**Opting out:** Delete or rename `plugins/pichkoo-achievements/dashboard/manifest.json`, or override it with a user plugin of the same name in `~/.pichkoo/plugins/pichkoo-achievements/` that ships no dashboard. The plugin's state files under `$HERMES_HOME/plugins/pichkoo-achievements/` survive — reinstalling preserves your unlock history.
+**Opting out:** Delete or rename `plugins/pichkoo-achievements/dashboard/manifest.json`, or override it with a user plugin of the same name in `~/.pichkoo/plugins/pichkoo-achievements/` that ships no dashboard. The plugin's state files under `$PICHKOO_HOME/plugins/pichkoo-achievements/` survive — reinstalling preserves your unlock history.
 
 ## Adding a bundled plugin
 

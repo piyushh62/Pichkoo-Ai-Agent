@@ -29,7 +29,7 @@ _DEP_CHECKS = {
     "browser": lambda: (
         shutil.which("agent-browser") is not None
         or _has_system_browser()
-        or _has_hermes_agent_browser()
+        or _has_pichkoo_ai_agent_browser()
     ),
     "ripgrep": lambda: shutil.which("rg") is not None,
     "ffmpeg": lambda: shutil.which("ffmpeg") is not None,
@@ -54,13 +54,13 @@ def _has_system_browser() -> bool:
     return False
 
 
-def _has_hermes_agent_browser() -> bool:
+def _has_pichkoo_ai_agent_browser() -> bool:
     from pichkoo_constants import get_hermes_home
     home = get_hermes_home()
     if _IS_WINDOWS:
         # npm -g --prefix puts .cmd shims directly in the prefix dir on Windows
         return (home / "node" / "agent-browser.cmd").is_file()
-    # install.sh installs globally into $HERMES_HOME/node/bin/ via npm -g --prefix
+    # install.sh installs globally into $PICHKOO_HOME/node/bin/ via npm -g --prefix
     # Also check legacy node_modules/.bin/ path for git-clone installs.
     return (
         (home / "node" / "bin" / "agent-browser").is_file()
@@ -141,7 +141,7 @@ def ensure_dependency(
             "-ExecutionPolicy", "Bypass",
             "-File", str(script),
             "-Ensure", dep,
-            "-HermesHome", str(get_hermes_home()),
+            "-PichkooHome", str(get_hermes_home()),
         ]
     else:
         cmd = ["bash", str(script), "--ensure", dep]

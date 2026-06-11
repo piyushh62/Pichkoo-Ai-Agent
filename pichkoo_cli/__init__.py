@@ -1,5 +1,5 @@
 """
-Hermes CLI - Unified command-line interface for Hermes Agent.
+Pichkoo CLI - Unified command-line interface for Pichkoo AI Agent.
 
 Provides subcommands for:
 - pichkoo chat          - Interactive chat (same as ./pichkoo)

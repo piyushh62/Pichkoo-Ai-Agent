@@ -20,7 +20,7 @@ def build_dashboard_parser(
     dashboard_parser = subparsers.add_parser(
         "dashboard",
         help="Start the web UI dashboard",
-        description="Launch the Hermes Agent web dashboard for managing config, API keys, and sessions",
+        description="Launch the Pichkoo AI Agent web dashboard for managing config, API keys, and sessions",
     )
     dashboard_parser.add_argument(
         "--port", type=int, default=9119, help="Port (default 9119)"
@@ -61,13 +61,13 @@ def build_dashboard_parser(
         action="store_true",
         help="List running pichkoo dashboard processes and exit",
     )
-    # Backward-compat shim: older Hermes desktop app shells (<= 0.15.x) spawn the
+    # Backward-compat shim: older Pichkoo desktop app shells (<= 0.15.x) spawn the
     # backend as `pichkoo dashboard --no-open --tui --host ... --port ...`. The
     # `--tui` flag was removed from this subcommand in cae6b5486 (embedded chat is
     # always on now). When a user's CLI updates past that commit but their desktop
     # app binary has not, argparse used to hard-error with "unrecognized arguments:
     # --tui" and exit(2) — the backend died before becoming ready and the GUI just
-    # showed "Hermes couldn't start" with no actionable cause. Accept and silently
+    # showed "Pichkoo couldn't start" with no actionable cause. Accept and silently
     # ignore the flag so an old app + new CLI degrades gracefully instead of
     # bricking. Hidden from --help; safe to delete once the floor app version is
     # well past 0.16.0.
@@ -91,7 +91,7 @@ def build_dashboard_parser(
         description=(
             "Register this install as a self-hosted dashboard with your Nous "
             "Portal account. Creates an OAuth client, writes "
-            "HERMES_DASHBOARD_OAUTH_CLIENT_ID into ~/.pichkoo/.env, and prints "
+            "PICHKOO_DASHBOARD_OAUTH_CLIENT_ID into ~/.pichkoo/.env, and prints "
             "how to engage the login gate. Requires being logged in (pichkoo setup)."
         ),
     )
@@ -116,7 +116,7 @@ def build_dashboard_parser(
         help=(
             "Override the Nous Portal base URL for registration (default: the "
             "portal you logged into). The access token must be valid at this "
-            "portal. Also settable via HERMES_DASHBOARD_PORTAL_URL. Mainly for "
+            "portal. Also settable via PICHKOO_DASHBOARD_PORTAL_URL. Mainly for "
             "testing against a staging/preview portal."
         ),
     )

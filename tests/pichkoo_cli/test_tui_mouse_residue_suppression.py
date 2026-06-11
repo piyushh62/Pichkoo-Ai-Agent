@@ -1,7 +1,7 @@
 """Tests for the TUI-hot-path mouse-residue suppression.
 
 The Python launcher (`pichkoo --tui …`) has a ~100–300ms cold-start window
-where stdin is still in cooked + echo mode. If a previous Hermes session
+where stdin is still in cooked + echo mode. If a previous Pichkoo session
 left DEC mouse-tracking asserted, any mouse motion during that window
 echoes literal ``^[[<…M`` text into the user's scrollback.
 
@@ -29,8 +29,8 @@ EXPECTED = (
 class TestEarlyMouseDisable:
     def test_writes_disable_sequence_when_tui_flag_in_argv(self, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["pichkoo", "--tui", "-c", "abc"])
-        monkeypatch.delenv("HERMES_TUI", raising=False)
-        monkeypatch.delenv("HERMES_TUI_NO_EARLY_DISABLE", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI_NO_EARLY_DISABLE", raising=False)
 
         with patch("os.isatty", return_value=True), patch("os.write") as mock_write:
             _suppress_mouse_residue_early()
@@ -39,8 +39,8 @@ class TestEarlyMouseDisable:
 
     def test_writes_disable_sequence_when_hermes_tui_env_set(self, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["pichkoo"])
-        monkeypatch.setenv("HERMES_TUI", "1")
-        monkeypatch.delenv("HERMES_TUI_NO_EARLY_DISABLE", raising=False)
+        monkeypatch.setenv("PICHKOO_TUI", "1")
+        monkeypatch.delenv("PICHKOO_TUI_NO_EARLY_DISABLE", raising=False)
 
         with patch("os.isatty", return_value=True), patch("os.write") as mock_write:
             _suppress_mouse_residue_early()
@@ -49,8 +49,8 @@ class TestEarlyMouseDisable:
 
     def test_no_op_on_non_tui_invocation(self, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["pichkoo", "--version"])
-        monkeypatch.delenv("HERMES_TUI", raising=False)
-        monkeypatch.delenv("HERMES_TUI_NO_EARLY_DISABLE", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI_NO_EARLY_DISABLE", raising=False)
 
         with patch("os.write") as mock_write:
             _suppress_mouse_residue_early()
@@ -59,8 +59,8 @@ class TestEarlyMouseDisable:
 
     def test_respects_diagnostic_escape_hatch(self, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["pichkoo", "--tui"])
-        monkeypatch.delenv("HERMES_TUI", raising=False)
-        monkeypatch.setenv("HERMES_TUI_NO_EARLY_DISABLE", "1")
+        monkeypatch.delenv("PICHKOO_TUI", raising=False)
+        monkeypatch.setenv("PICHKOO_TUI_NO_EARLY_DISABLE", "1")
 
         with patch("os.write") as mock_write:
             _suppress_mouse_residue_early()
@@ -71,8 +71,8 @@ class TestEarlyMouseDisable:
         # `pichkoo --tui … >log` or CI capture: pipe is fd 1, not a TTY. The
         # bytes can't reach a terminal and would just pollute the log.
         monkeypatch.setattr(sys, "argv", ["pichkoo", "--tui"])
-        monkeypatch.delenv("HERMES_TUI", raising=False)
-        monkeypatch.delenv("HERMES_TUI_NO_EARLY_DISABLE", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI_NO_EARLY_DISABLE", raising=False)
 
         with patch("os.isatty", return_value=False), patch("os.write") as mock_write:
             _suppress_mouse_residue_early()
@@ -81,8 +81,8 @@ class TestEarlyMouseDisable:
 
     def test_oserror_is_swallowed(self, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["pichkoo", "--tui"])
-        monkeypatch.delenv("HERMES_TUI", raising=False)
-        monkeypatch.delenv("HERMES_TUI_NO_EARLY_DISABLE", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI", raising=False)
+        monkeypatch.delenv("PICHKOO_TUI_NO_EARLY_DISABLE", raising=False)
 
         def boom(*_a, **_k):
             raise OSError("stdout closed")

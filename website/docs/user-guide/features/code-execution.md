@@ -219,28 +219,28 @@ terminal:
 
 See the [Security guide](/user-guide/security#environment-variable-passthrough) for full details.
 
-### `HERMES_*` variables in the child
+### `PICHKOO_*` variables in the child
 
-The child process receives only a small, fixed set of operational `HERMES_*`
+The child process receives only a small, fixed set of operational `PICHKOO_*`
 variables by exact name:
 
-- `HERMES_HOME`
-- `HERMES_PROFILE`
-- `HERMES_CONFIG`
-- `HERMES_ENV`
+- `PICHKOO_HOME`
+- `PICHKOO_PROFILE`
+- `PICHKOO_CONFIG`
+- `PICHKOO_ENV`
 
-(plus `HERMES_RPC_DIR` / `HERMES_RPC_SOCKET` / `TZ` / `HOME`, which Pichkoo
+(plus `PICHKOO_RPC_DIR` / `PICHKOO_RPC_SOCKET` / `TZ` / `HOME`, which Pichkoo
 injects explicitly so the RPC channel works).
 
 :::note Behavior change
-Earlier versions passed **any** variable whose name began with `HERMES_`
+Earlier versions passed **any** variable whose name began with `PICHKOO_`
 through to the child. That broad prefix was removed for security hardening: it
-could leak `HERMES_*`-named configuration that doesn't match a secret substring
-(for example `HERMES_BASE_URL`, `HERMES_KANBAN_DB`, or a `HERMES_*_WEBHOOK`
+could leak `PICHKOO_*`-named configuration that doesn't match a secret substring
+(for example `PICHKOO_BASE_URL`, `PICHKOO_KANBAN_DB`, or a `PICHKOO_*_WEBHOOK`
 endpoint) into arbitrary sandboxed code.
 
 If an `execute_code` script — or a repo/plugin module it imports at import time
-— relied on a `HERMES_*` variable outside the four operational names above, it
+— relied on a `PICHKOO_*` variable outside the four operational names above, it
 will now find that variable **unset** in the child. The drop is intentional,
 not a bug.
 :::
@@ -256,8 +256,8 @@ be re-allowed this way):
    ```yaml
    terminal:
      env_passthrough:
-       - HERMES_KANBAN_DB
-       - HERMES_BASE_URL
+       - PICHKOO_KANBAN_DB
+       - PICHKOO_BASE_URL
    ```
 
 2. **Per-skill, in the skill's frontmatter** — declare it so it is registered
@@ -265,15 +265,15 @@ be re-allowed this way):
 
    ```yaml
    required_environment_variables:
-     - HERMES_KANBAN_DB
+     - PICHKOO_KANBAN_DB
    ```
 
-**Diagnosing it.** When the child drops one or more non-allowlisted `HERMES_*`
+**Diagnosing it.** When the child drops one or more non-allowlisted `PICHKOO_*`
 variables, Pichkoo emits a one-line `debug` log naming them and pointing at the
 `env_passthrough` escape hatch. Run with debug logging (`pichkoo logs --level
 DEBUG`, or check `~/.pichkoo/logs/agent.log`) and look for
-`execute_code: dropped N non-allowlisted HERMES_* var(s)` if a script behaves
-as though a `HERMES_*` variable is missing.
+`execute_code: dropped N non-allowlisted PICHKOO_* var(s)` if a script behaves
+as though a `PICHKOO_*` variable is missing.
 
 Pichkoo always writes the script and the auto-generated `hermes_tools.py` RPC stub into a temp staging directory that is cleaned up after execution. In `strict` mode the script also *runs* there; in `project` mode it runs in the session's working directory (the staging directory stays on `PYTHONPATH` so imports still resolve). The child process runs in its own process group so it can be cleanly killed on timeout or interruption.
 

@@ -28,7 +28,7 @@ def hermes_home(tmp_path, monkeypatch):
     home = tmp_path / ".pichkoo"
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setenv("HERMES_HOME", str(home))
+    monkeypatch.setenv("PICHKOO_HOME", str(home))
     yield home
 
 

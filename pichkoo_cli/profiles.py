@@ -1,7 +1,7 @@
 """
-Profile management for multiple isolated Hermes instances.
+Profile management for multiple isolated Pichkoo instances.
 
-Each profile is a fully independent HERMES_HOME directory with its own
+Each profile is a fully independent PICHKOO_HOME directory with its own
 config.yaml, .env, memory, sessions, skills, gateway, cron, and logs.
 Profiles live under ``~/.pichkoo/profiles/<name>/`` by default.
 
@@ -121,7 +121,7 @@ def _clone_all_copytree_ignore(source_dir: Path):
 
     Two categories:
       1. Root-level entries in ``_CLONE_ALL_DEFAULT_EXCLUDE_ROOT`` — known
-         Hermes infrastructure directories that only the default profile
+         Pichkoo infrastructure directories that only the default profile
          (``~/.pichkoo``) ever contains.  Gated on ``source_dir`` actually
          being the default profile so a named-profile source never has its
          own data silently dropped.
@@ -196,8 +196,8 @@ _RESERVED_NAMES = frozenset({
     "pichkoo", "default", "test", "tmp", "root", "sudo",
 })
 
-# Hermes subcommands that cannot be used as profile names/aliases
-_HERMES_SUBCOMMANDS = frozenset({
+# Pichkoo subcommands that cannot be used as profile names/aliases
+_PICHKOO_SUBCOMMANDS = frozenset({
     "chat", "model", "gateway", "setup", "whatsapp", "login", "logout",
     "status", "cron", "doctor", "dump", "config", "pairing", "skills", "tools",
     "mcp", "sessions", "insights", "version", "update", "uninstall",
@@ -212,23 +212,23 @@ _HERMES_SUBCOMMANDS = frozenset({
 def _get_profiles_root() -> Path:
     """Return the directory where named profiles are stored.
 
-    Anchored to the pichkoo root, NOT to the current HERMES_HOME
+    Anchored to the pichkoo root, NOT to the current PICHKOO_HOME
     (which may itself be a profile).  This ensures ``coder profile list``
     can see all profiles.
 
-    In Docker/custom deployments where HERMES_HOME points outside
-    ``~/.pichkoo``, profiles live under ``HERMES_HOME/profiles/`` so
+    In Docker/custom deployments where PICHKOO_HOME points outside
+    ``~/.pichkoo``, profiles live under ``PICHKOO_HOME/profiles/`` so
     they persist on the mounted volume.
     """
     return _get_default_hermes_home() / "profiles"
 
 
 def _get_default_hermes_home() -> Path:
-    """Return the default (pre-profile) HERMES_HOME path.
+    """Return the default (pre-profile) PICHKOO_HOME path.
 
     In standard deployments this is ``~/.pichkoo``.
-    In Docker/custom deployments where HERMES_HOME is outside ``~/.pichkoo``
-    (e.g. ``/opt/data``), returns HERMES_HOME directly.
+    In Docker/custom deployments where PICHKOO_HOME is outside ``~/.pichkoo``
+    (e.g. ``/opt/data``), returns PICHKOO_HOME directly.
     """
     from pichkoo_constants import get_default_hermes_root
     return get_default_hermes_root()
@@ -291,13 +291,13 @@ def validate_profile_name(name: str) -> None:
     if name in _RESERVED_NAMES:
         raise ValueError(
             f"Profile name {name!r} is reserved — it collides with either "
-            f"the Hermes installation itself or a common system binary.  "
+            f"the Pichkoo installation itself or a common system binary.  "
             f"Pick a different name."
         )
 
 
 def get_profile_dir(name: str) -> Path:
-    """Resolve a profile name to its HERMES_HOME directory."""
+    """Resolve a profile name to its PICHKOO_HOME directory."""
     canon = normalize_profile_name(name)
     if canon == "default":
         return _get_default_hermes_home()
@@ -324,7 +324,7 @@ def check_alias_collision(name: str) -> Optional[str]:
     canon = normalize_profile_name(name)
     if canon in _RESERVED_NAMES:
         return f"'{canon}' is a reserved name"
-    if canon in _HERMES_SUBCOMMANDS:
+    if canon in _PICHKOO_SUBCOMMANDS:
         return f"'{canon}' conflicts with a pichkoo subcommand"
 
     # Check existing commands in PATH
@@ -574,7 +574,7 @@ def _count_skills(profile_dir: Path) -> int:
 # ---------------------------------------------------------------------------
 #
 # We keep this file deliberately tiny and separate from the profile's
-# ``config.yaml``. ``config.yaml`` is the user-facing Hermes config
+# ``config.yaml``. ``config.yaml`` is the user-facing Pichkoo config
 # (~5000 lines of defaults); ``profile.yaml`` is metadata ABOUT the
 # profile itself (its role, who described it). Mixing them makes both
 # harder to read.
@@ -885,7 +885,7 @@ def create_profile(
 def seed_profile_skills(profile_dir: Path, quiet: bool = False) -> Optional[dict]:
     """Seed bundled skills into a profile via subprocess.
 
-    Uses subprocess because sync_skills() caches HERMES_HOME at module level.
+    Uses subprocess because sync_skills() caches PICHKOO_HOME at module level.
     Returns the sync result dict, or None on failure.
 
     Profiles that opted out of bundled skills (via ``pichkoo profile create
@@ -906,7 +906,7 @@ def seed_profile_skills(profile_dir: Path, quiet: bool = False) -> Optional[dict
             [sys.executable, "-c",
              "import json; from tools.skills_sync import sync_skills; "
              "r = sync_skills(quiet=True); print(json.dumps(r))"],
-            env={**os.environ, "HERMES_HOME": str(profile_dir)},
+            env={**os.environ, "PICHKOO_HOME": str(profile_dir)},
             cwd=str(project_root),
             capture_output=True, text=True, timeout=60,
         )
@@ -1161,10 +1161,10 @@ def _cleanup_gateway_service(name: str, profile_dir: Path) -> None:
     import platform as _platform
 
     # Derive service name for this profile
-    # Temporarily set HERMES_HOME so _profile_suffix resolves correctly
-    old_home = os.environ.get("HERMES_HOME")
+    # Temporarily set PICHKOO_HOME so _profile_suffix resolves correctly
+    old_home = os.environ.get("PICHKOO_HOME")
     try:
-        os.environ["HERMES_HOME"] = str(profile_dir)
+        os.environ["PICHKOO_HOME"] = str(profile_dir)
         from pichkoo_cli.gateway import get_service_name, get_launchd_plist_path
 
         if _platform.system() == "Linux":
@@ -1199,9 +1199,9 @@ def _cleanup_gateway_service(name: str, profile_dir: Path) -> None:
         print(f"⚠ Service cleanup: {e}")
     finally:
         if old_home is not None:
-            os.environ["HERMES_HOME"] = old_home
-        elif "HERMES_HOME" in os.environ:
-            del os.environ["HERMES_HOME"]
+            os.environ["PICHKOO_HOME"] = old_home
+        elif "PICHKOO_HOME" in os.environ:
+            del os.environ["PICHKOO_HOME"]
 
 
 def _stop_gateway_process(profile_dir: Path) -> None:
@@ -1288,11 +1288,11 @@ def set_active_profile(name: str) -> None:
 
 
 def get_active_profile_name() -> str:
-    """Infer the current profile name from HERMES_HOME.
+    """Infer the current profile name from PICHKOO_HOME.
 
-    Returns ``"default"`` if HERMES_HOME is not set or points to ``~/.pichkoo``.
-    Returns the profile name if HERMES_HOME points into ``~/.pichkoo/profiles/<name>``.
-    Returns ``"custom"`` if HERMES_HOME is set to an unrecognized path.
+    Returns ``"default"`` if PICHKOO_HOME is not set or points to ``~/.pichkoo``.
+    Returns the profile name if PICHKOO_HOME points into ``~/.pichkoo/profiles/<name>``.
+    Returns ``"custom"`` if PICHKOO_HOME is set to an unrecognized path.
     """
     from pichkoo_constants import get_hermes_home
     hermes_home = get_hermes_home()
@@ -1650,10 +1650,10 @@ def rename_profile(old_name: str, new_name: str) -> Path:
 # ---------------------------------------------------------------------------
 
 def resolve_profile_env(profile_name: str) -> str:
-    """Resolve a profile name to a HERMES_HOME path string.
+    """Resolve a profile name to a PICHKOO_HOME path string.
 
     Called early in the CLI entry point, before any pichkoo modules
-    are imported, to set the HERMES_HOME environment variable.
+    are imported, to set the PICHKOO_HOME environment variable.
     """
     canon = normalize_profile_name(profile_name)
     validate_profile_name(canon)

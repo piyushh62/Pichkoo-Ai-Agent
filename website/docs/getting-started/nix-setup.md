@@ -135,7 +135,7 @@ services.pichkoo-agent.environmentFiles = [ "/var/lib/pichkoo/env" ];
 :::
 
 :::tip addToSystemPackages
-Setting `addToSystemPackages = true` does two things: puts the `pichkoo` CLI on your system PATH **and** sets `HERMES_HOME` system-wide so the interactive CLI shares state (sessions, skills, cron) with the gateway service. Without it, running `pichkoo` in your shell creates a separate `~/.pichkoo/` directory.
+Setting `addToSystemPackages = true` does two things: puts the `pichkoo` CLI on your system PATH **and** sets `PICHKOO_HOME` system-wide so the interactive CLI shares state (sessions, skills, cron) with the gateway service. Without it, running `pichkoo` in your shell creates a separate `~/.pichkoo/` directory.
 :::
 
 ### Container-aware CLI
@@ -146,7 +146,7 @@ When `container.enable = true` and `addToSystemPackages = true`, **every** `pich
 - The routing is transparent: `pichkoo chat`, `pichkoo sessions list`, `pichkoo version`, etc. all exec into the container under the hood
 - All CLI flags are forwarded as-is
 - If the container isn't running, the CLI retries briefly (5s with a spinner for interactive use, 10s silently for scripts) then fails with a clear error — no silent fallback
-- For developers working on the pichkoo codebase, set `HERMES_DEV=1` to bypass container routing and run the local checkout directly
+- For developers working on the pichkoo codebase, set `PICHKOO_DEV=1` to bypass container routing and run the local checkout directly
 
 Set `container.hostUsers` to create a `~/.pichkoo` symlink to the service state directory, so the host CLI and the container share sessions, config, and memories:
 
@@ -322,7 +322,7 @@ If you'd rather manage `config.yaml` entirely outside Nix, use `configFile`:
 services.pichkoo-agent.configFile = /etc/pichkoo/config.yaml;
 ```
 
-This bypasses `settings` entirely — no merge, no generation. The file is copied as-is to `$HERMES_HOME/config.yaml` on each activation.
+This bypasses `settings` entirely — no merge, no generation. The file is copied as-is to `$PICHKOO_HOME/config.yaml` on each activation.
 
 ### Customization Cheatsheet
 
@@ -354,7 +354,7 @@ Quick reference for the most common things Nix users want to customize:
 Values in Nix expressions end up in `/nix/store`, which is world-readable. Always use `environmentFiles` with a secrets manager.
 :::
 
-Both `environment` (non-secret vars) and `environmentFiles` (secret files) are merged into `$HERMES_HOME/.env` at activation time (`nixos-rebuild switch`). Pichkoo reads this file on every startup, so changes take effect with a `systemctl restart pichkoo-agent` — no container recreation needed.
+Both `environment` (non-secret vars) and `environmentFiles` (secret files) are merged into `$PICHKOO_HOME/.env` at activation time (`nixos-rebuild switch`). Pichkoo reads this file on every startup, so changes take effect with a `systemctl restart pichkoo-agent` — no container recreation needed.
 
 ### sops-nix
 
@@ -418,7 +418,7 @@ The `documents` option installs files into the agent's working directory (the `w
 - **`USER.md`** — context about the user the agent is interacting with.
 - Any other files you place here are visible to the agent as workspace files.
 
-The agent identity file is separate: Pichkoo loads its primary `SOUL.md` from `$HERMES_HOME/SOUL.md`, which in the NixOS module is `${services.pichkoo-agent.stateDir}/.pichkoo/SOUL.md`. Putting `SOUL.md` in `documents` only creates a workspace file and will not replace the main persona file.
+The agent identity file is separate: Pichkoo loads its primary `SOUL.md` from `$PICHKOO_HOME/SOUL.md`, which in the NixOS module is `${services.pichkoo-agent.stateDir}/.pichkoo/SOUL.md`. Putting `SOUL.md` in `documents` only creates a workspace file and will not replace the main persona file.
 
 ```nix
 {
@@ -455,7 +455,7 @@ The `mcpServers` option declaratively configures [MCP (Model Context Protocol)](
 ```
 
 :::tip
-Environment variables in `env` values are resolved from `$HERMES_HOME/.env` at runtime. Use `environmentFiles` to inject secrets — never put tokens directly in Nix config.
+Environment variables in `env` values are resolved from `$PICHKOO_HOME/.env` at runtime. Use `environmentFiles` to inject secrets — never put tokens directly in Nix config.
 :::
 
 ### HTTP Transport (Remote Servers)
@@ -483,7 +483,7 @@ Set `auth = "oauth"` for servers using OAuth 2.1. Pichkoo implements the full PK
 }
 ```
 
-Tokens are stored in `$HERMES_HOME/mcp-tokens/<server-name>.json` and persist across restarts and rebuilds.
+Tokens are stored in `$PICHKOO_HOME/mcp-tokens/<server-name>.json` and persist across restarts and rebuilds.
 
 <details>
 <summary><strong>Initial OAuth authorization on headless servers</strong></summary>
@@ -498,7 +498,7 @@ docker exec -it pichkoo-agent \
   pichkoo mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
 
 # Native mode
-sudo -u pichkoo HERMES_HOME=/var/lib/pichkoo/.pichkoo \
+sudo -u pichkoo PICHKOO_HOME=/var/lib/pichkoo/.pichkoo \
   pichkoo mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
 ```
 
@@ -551,8 +551,8 @@ When pichkoo runs via the NixOS module, the following CLI commands are **blocked
 
 This prevents drift between what Nix declares and what's on disk. Detection uses two signals:
 
-1. **`HERMES_MANAGED=true`** environment variable — set by the systemd service, visible to the gateway process
-2. **`.managed` marker file** in `HERMES_HOME` — set by the activation script, visible to interactive shells (e.g., `docker exec -it pichkoo-agent pichkoo config set ...` is also blocked)
+1. **`PICHKOO_MANAGED=true`** environment variable — set by the systemd service, visible to the gateway process
+2. **`.managed` marker file** in `PICHKOO_HOME` — set by the activation script, visible to interactive shells (e.g., `docker exec -it pichkoo-agent pichkoo config set ...` is also blocked)
 
 To change configuration, edit your Nix config and run `sudo nixos-rebuild switch`.
 
@@ -575,7 +575,7 @@ Host                                    Container
   ├── current-package -> /nix/store/...    (symlink, updated each rebuild)
   ├── .gc-root -> /nix/store/...           (prevents nix-collect-garbage)
   ├── .container-identity                  (sha256 hash, triggers recreation)
-  ├── .pichkoo/                             (HERMES_HOME)
+  ├── .pichkoo/                             (PICHKOO_HOME)
   │   ├── .env                             (merged from environment + environmentFiles)
   │   ├── config.yaml                      (Nix-generated, deep-merged by activation)
   │   ├── .managed                         (marker file)
@@ -637,11 +637,11 @@ services.pichkoo-agent.extraPlugins = [
 ];
 ```
 
-Plugins are symlinked into `$HERMES_HOME/plugins/` at activation time. Pichkoo discovers them via its normal directory scan. Removing a plugin from the list and running `nixos-rebuild switch` removes the symlink.
+Plugins are symlinked into `$PICHKOO_HOME/plugins/` at activation time. Pichkoo discovers them via its normal directory scan. Removing a plugin from the list and running `nixos-rebuild switch` removes the symlink.
 
 ### Entry-Point Plugins (`extraPythonPackages`)
 
-For pip-packaged plugins that register via `[project.entry-points."hermes_agent.plugins"]` (e.g., [rtk-pichkoo](https://github.com/ogallotti/rtk-pichkoo)):
+For pip-packaged plugins that register via `[project.entry-points."pichkoo_ai_agent.plugins"]` (e.g., [rtk-pichkoo](https://github.com/ogallotti/rtk-pichkoo)):
 
 ```nix
 services.pichkoo-agent.extraPythonPackages = [
@@ -798,7 +798,7 @@ nix flake check
 nix build .#checks.x86_64-linux.package-contents   # binaries exist + version
 nix build .#checks.x86_64-linux.entry-points-sync  # pyproject.toml ↔ Nix package sync
 nix build .#checks.x86_64-linux.cli-commands        # gateway/config subcommands
-nix build .#checks.x86_64-linux.managed-guard       # HERMES_MANAGED blocks mutation
+nix build .#checks.x86_64-linux.managed-guard       # PICHKOO_MANAGED blocks mutation
 nix build .#checks.x86_64-linux.bundled-skills      # skills present in package
 nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves user keys
 ```
@@ -811,8 +811,8 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 | `package-contents` | `pichkoo` and `pichkoo-agent` binaries exist and `pichkoo version` runs |
 | `entry-points-sync` | Every `[project.scripts]` entry in `pyproject.toml` has a wrapped binary in the Nix package |
 | `cli-commands` | `pichkoo --help` exposes `gateway` and `config` subcommands |
-| `managed-guard` | `HERMES_MANAGED=true pichkoo config set ...` prints the NixOS error |
-| `bundled-skills` | Skills directory exists, contains SKILL.md files, `HERMES_BUNDLED_SKILLS` is set in wrapper |
+| `managed-guard` | `PICHKOO_MANAGED=true pichkoo config set ...` prints the NixOS error |
+| `bundled-skills` | Skills directory exists, contains SKILL.md files, `PICHKOO_BUNDLED_SKILLS` is set in wrapper |
 | `config-roundtrip` | 7 merge scenarios: fresh install, Nix override, user key preservation, mixed merge, MCP additive merge, nested deep merge, idempotency |
 
 </details>
@@ -830,9 +830,9 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 | `user` | `str` | `"pichkoo"` | System user |
 | `group` | `str` | `"pichkoo"` | System group |
 | `createUser` | `bool` | `true` | Auto-create user/group |
-| `stateDir` | `str` | `"/var/lib/pichkoo"` | State directory (`HERMES_HOME` parent) |
+| `stateDir` | `str` | `"/var/lib/pichkoo"` | State directory (`PICHKOO_HOME` parent) |
 | `workingDirectory` | `str` | `"${stateDir}/workspace"` | Agent working directory |
-| `addToSystemPackages` | `bool` | `false` | Add `pichkoo` CLI to system PATH and set `HERMES_HOME` system-wide |
+| `addToSystemPackages` | `bool` | `false` | Add `pichkoo` CLI to system PATH and set `PICHKOO_HOME` system-wide |
 
 ### Configuration
 
@@ -845,7 +845,7 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `environmentFiles` | `listOf str` | `[]` | Paths to env files with secrets. Merged into `$HERMES_HOME/.env` at activation time |
+| `environmentFiles` | `listOf str` | `[]` | Paths to env files with secrets. Merged into `$PICHKOO_HOME/.env` at activation time |
 | `environment` | `attrsOf str` | `{}` | Non-secret env vars. **Visible in Nix store** — do not put secrets here |
 | `authFile` | `null` or `path` | `null` | OAuth credentials seed. Only copied on first deploy |
 | `authFileForceOverwrite` | `bool` | `false` | Always overwrite `auth.json` from `authFile` on activation |
@@ -879,7 +879,7 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 |---|---|---|---|
 | `extraArgs` | `listOf str` | `[]` | Extra args for `pichkoo gateway` |
 | `extraPackages` | `listOf package` | `[]` | Extra packages available to the agent. Added to the pichkoo user's per-user profile so terminal commands, skills, and cron jobs all see them |
-| `extraPlugins` | `listOf package` | `[]` | Directory plugin packages to symlink into `$HERMES_HOME/plugins/`. Each must contain `plugin.yaml` |
+| `extraPlugins` | `listOf package` | `[]` | Directory plugin packages to symlink into `$PICHKOO_HOME/plugins/`. Each must contain `plugin.yaml` |
 | `extraPythonPackages` | `listOf package` | `[]` | Python packages added to PYTHONPATH for entry-point plugin discovery. Build with `python312Packages` |
 | `extraDependencyGroups` | `listOf str` | `[]` | pyproject.toml optional extras to include in the sealed venv (e.g. `["hindsight"]`). Resolved by uv — no collisions |
 | `restart` | `str` | `"always"` | systemd `Restart=` policy |
@@ -904,7 +904,7 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 
 ```
 /var/lib/pichkoo/                     # stateDir (owned by pichkoo:pichkoo, 0750)
-├── .pichkoo/                         # HERMES_HOME
+├── .pichkoo/                         # PICHKOO_HOME
 │   ├── config.yaml                  # Nix-generated (deep-merged each rebuild)
 │   ├── .managed                     # Marker: CLI config mutation blocked
 │   ├── .env                         # Merged from environment + environmentFiles

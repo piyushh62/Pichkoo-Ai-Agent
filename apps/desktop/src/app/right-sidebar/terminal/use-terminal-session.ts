@@ -20,7 +20,7 @@ import {
 
 type TerminalStatus = 'closed' | 'open' | 'starting'
 
-const HERMES_PATHS_MIME = 'application/x-pichkoo-paths'
+const PICHKOO_PATHS_MIME = 'application/x-pichkoo-paths'
 
 function readEscapeSequence(data: string, index: number) {
   if (data.charCodeAt(index) !== 0x1b || index + 1 >= data.length) {
@@ -131,7 +131,7 @@ function withSurface(theme: ReturnType<typeof terminalTheme>) {
 }
 
 function transferHasDropCandidates(t: DataTransfer): boolean {
-  if (t.types?.includes(HERMES_PATHS_MIME)) {
+  if (t.types?.includes(PICHKOO_PATHS_MIME)) {
     return true
   }
 
@@ -164,7 +164,7 @@ function collectDroppedPaths(t: DataTransfer): string[] {
   }
 
   try {
-    const raw = t.getData(HERMES_PATHS_MIME)
+    const raw = t.getData(PICHKOO_PATHS_MIME)
 
     if (raw) {
       for (const entry of JSON.parse(raw) as { path?: unknown }[]) {

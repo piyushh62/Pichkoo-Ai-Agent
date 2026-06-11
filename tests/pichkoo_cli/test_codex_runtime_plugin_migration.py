@@ -488,7 +488,7 @@ class TestMigrate:
     def test_expose_hermes_tools_writes_callback_mcp_entry(self, tmp_path):
         """When expose_hermes_tools=True (production default), an
         [mcp_servers.pichkoo-tools] entry is written so codex calls back
-        into Hermes for browser/web/delegate_task/vision/memory tools.
+        into Pichkoo for browser/web/delegate_task/vision/memory tools.
 
         This is the fix for 'all other tools that codex doesn't provide
         should be useable by pichkoo' — quirk #7."""
@@ -574,7 +574,7 @@ class TestMigrate:
         assert MIGRATION_MARKER in new_text
 
     def test_managed_root_keys_stay_top_level_when_config_ends_in_table(self, tmp_path):
-        """TOML has no explicit 'leave current table' syntax. If Hermes appends
+        """TOML has no explicit 'leave current table' syntax. If Pichkoo appends
         root keys like default_permissions after a user table such as [features],
         Codex parses them as features.default_permissions and rejects the config.
         The managed block must therefore be inserted before the first table."""
@@ -596,7 +596,7 @@ class TestMigrate:
 
     def test_preserves_user_mcp_server_outside_managed_block(self, tmp_path):
         """Quirk #6: when a user adds their own MCP server entry directly
-        to ~/.codex/config.toml outside Hermes' managed block, re-running
+        to ~/.codex/config.toml outside Pichkoo' managed block, re-running
         migration must preserve it. Tested both above and below the
         managed block."""
         target = tmp_path / "config.toml"
@@ -792,13 +792,13 @@ class TestStripUnmanagedPluginTables:
         assert '[plugins."tasks@openai-curated"]' in new_text
 
 
-# ---- Bug C: HERMES_HOME tempdir leak into ~/.codex/config.toml ----
+# ---- Bug C: PICHKOO_HOME tempdir leak into ~/.codex/config.toml ----
 
 
-class TestHermesHomeLeakGuard:
+class TestPichkooHomeLeakGuard:
     """Regression tests for issue #26250 Bug C.
 
-    Previously ``_build_hermes_tools_mcp_entry()`` read ``HERMES_HOME``
+    Previously ``_build_hermes_tools_mcp_entry()`` read ``PICHKOO_HOME``
     directly from ``os.environ``, so a pytest ``monkeypatch.setenv`` would
     leak a transient tempdir path into the user's real ``~/.codex/config.toml``
     once codex spawned the pichkoo-tools MCP subprocess.
@@ -822,42 +822,42 @@ class TestHermesHomeLeakGuard:
         assert not _looks_like_test_tempdir("")
 
     def test_pytest_tempdir_not_burned_into_mcp_env(self, monkeypatch):
-        """The headline regression: even when HERMES_HOME points at a pytest
+        """The headline regression: even when PICHKOO_HOME points at a pytest
         tempdir, _build_hermes_tools_mcp_entry() must NOT propagate it."""
         monkeypatch.setenv(
-            "HERMES_HOME",
+            "PICHKOO_HOME",
             "/private/var/folders/xx/pytest-of-user/pytest-99/test_x/hermes_test",
         )
         entry = _build_hermes_tools_mcp_entry()
         env = entry.get("env", {})
-        assert "HERMES_HOME" not in env, (
-            f"pytest-tempdir HERMES_HOME leaked into codex MCP entry: "
-            f"{env.get('HERMES_HOME')!r}"
+        assert "PICHKOO_HOME" not in env, (
+            f"pytest-tempdir PICHKOO_HOME leaked into codex MCP entry: "
+            f"{env.get('PICHKOO_HOME')!r}"
         )
 
     def test_real_hermes_home_propagates(self, monkeypatch, tmp_path):
-        """A legitimate HERMES_HOME (not a tempdir path) DOES propagate so the
+        """A legitimate PICHKOO_HOME (not a tempdir path) DOES propagate so the
         MCP subprocess sees the same config as the parent CLI."""
         # Use a path that looks real — under /Users or /home, not /var/folders.
         # We can't easily create one in the test, so just use a stable path
         # outside any tempdir-detector needle. The detector checks for tempdir
         # markers, not for path existence.
         real_path = "/Users/alice/.pichkoo"
-        monkeypatch.setenv("HERMES_HOME", real_path)
+        monkeypatch.setenv("PICHKOO_HOME", real_path)
         entry = _build_hermes_tools_mcp_entry()
         env = entry.get("env", {})
-        assert env.get("HERMES_HOME") == real_path
+        assert env.get("PICHKOO_HOME") == real_path
 
     def test_unset_hermes_home_omits_env_key(self, monkeypatch):
-        """When HERMES_HOME is unset in the environment, the MCP entry MUST
+        """When PICHKOO_HOME is unset in the environment, the MCP entry MUST
         NOT bake in a resolved-default path. The codex subprocess should
-        inherit whatever HERMES_HOME its launcher (systemd, gateway, shell)
+        inherit whatever PICHKOO_HOME its launcher (systemd, gateway, shell)
         sets at runtime, rather than being pinned to migrate-time defaults.
         Regression guard for issue #26250 follow-up review."""
-        monkeypatch.delenv("HERMES_HOME", raising=False)
+        monkeypatch.delenv("PICHKOO_HOME", raising=False)
         entry = _build_hermes_tools_mcp_entry()
         env = entry.get("env", {})
-        assert "HERMES_HOME" not in env, (
-            f"HERMES_HOME should not be set when env var is unset, got: "
-            f"{env.get('HERMES_HOME')!r}"
+        assert "PICHKOO_HOME" not in env, (
+            f"PICHKOO_HOME should not be set when env var is unset, got: "
+            f"{env.get('PICHKOO_HOME')!r}"
         )

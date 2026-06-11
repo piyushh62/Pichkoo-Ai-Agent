@@ -68,7 +68,7 @@ pichkoo memory setup        # select "honcho" — runs the Honcho-specific post-
 
 The legacy `pichkoo honcho setup` command still works (it now redirects to `pichkoo memory setup`), but is only registered after Honcho is selected as the active memory provider.
 
-**Config:** `$HERMES_HOME/honcho.json` (profile-local) or `~/.honcho/config.json` (global). Resolution order: `$HERMES_HOME/honcho.json` > `~/.pichkoo/honcho.json` > `~/.honcho/config.json`. See the [config reference](https://github.com/NousResearch/pichkoo-agent/blob/main/plugins/memory/honcho/README.md) and the [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/pichkoo).
+**Config:** `$PICHKOO_HOME/honcho.json` (profile-local) or `~/.honcho/config.json` (global). Resolution order: `$PICHKOO_HOME/honcho.json` > `~/.pichkoo/honcho.json` > `~/.honcho/config.json`. See the [config reference](https://github.com/NousResearch/pichkoo-agent/blob/main/plugins/memory/honcho/README.md) and the [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/pichkoo).
 
 <details>
 <summary>Full config reference</summary>
@@ -314,7 +314,7 @@ pichkoo config set memory.provider mem0
 echo "MEM0_API_KEY=your-key" >> ~/.pichkoo/.env
 ```
 
-**Config:** `$HERMES_HOME/mem0.json`
+**Config:** `$PICHKOO_HOME/mem0.json`
 
 | Key | Default | Description |
 |-----|---------|-------------|
@@ -348,7 +348,7 @@ The setup wizard installs dependencies automatically and only installs what's ne
 
 **Local mode UI:** `hindsight-embed -p pichkoo ui start`
 
-**Config:** `$HERMES_HOME/hindsight/config.json`
+**Config:** `$PICHKOO_HOME/hindsight/config.json`
 
 | Key | Default | Description |
 |-----|---------|-------------|
@@ -394,7 +394,7 @@ pichkoo config set memory.provider holographic
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `db_path` | `$HERMES_HOME/memory_store.db` | SQLite database path |
+| `db_path` | `$PICHKOO_HOME/memory_store.db` | SQLite database path |
 | `auto_extract` | `false` | Auto-extract facts at session end |
 | `default_trust` | `0.5` | Default trust score (0.0–1.0) |
 
@@ -455,7 +455,7 @@ pichkoo config set memory.provider byterover
 
 **Key features:**
 - Automatic pre-compression extraction (saves insights before context compression discards them)
-- Knowledge tree stored at `$HERMES_HOME/byterover/` (profile-scoped)
+- Knowledge tree stored at `$PICHKOO_HOME/byterover/` (profile-scoped)
 - SOC2 Type II certified cloud sync (optional)
 
 ---
@@ -481,7 +481,7 @@ pichkoo config set memory.provider supermemory
 echo 'SUPERMEMORY_API_KEY=***' >> ~/.pichkoo/.env
 ```
 
-**Config:** `$HERMES_HOME/supermemory.json`
+**Config:** `$PICHKOO_HOME/supermemory.json`
 
 | Key | Default | Description |
 |-----|---------|-------------|
@@ -561,8 +561,8 @@ pichkoo memory setup
 
 Each provider's data is isolated per [profile](/user-guide/profiles):
 
-- **Local storage providers** (Holographic, ByteRover) use `$HERMES_HOME/` paths which differ per profile
-- **Config file providers** (Honcho, Mem0, Hindsight, Supermemory) store config in `$HERMES_HOME/` so each profile has its own credentials
+- **Local storage providers** (Holographic, ByteRover) use `$PICHKOO_HOME/` paths which differ per profile
+- **Config file providers** (Honcho, Mem0, Hindsight, Supermemory) store config in `$PICHKOO_HOME/` so each profile has its own credentials
 - **Cloud providers** (RetainDB) auto-derive profile-scoped project names
 - **Env var providers** (OpenViking) are configured via each profile's `.env` file
 

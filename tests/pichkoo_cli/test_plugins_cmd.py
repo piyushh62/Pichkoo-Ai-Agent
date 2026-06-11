@@ -724,7 +724,7 @@ class TestProviderDiscovery:
 
     def test_get_current_memory_provider_default(self, tmp_path, monkeypatch):
         """Empty config returns empty string."""
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
         config_file = tmp_path / "config.yaml"
         config_file.write_text("memory:\n  provider: ''\n")
         from pichkoo_cli.plugins_cmd import _get_current_memory_provider
@@ -733,7 +733,7 @@ class TestProviderDiscovery:
 
     def test_get_current_context_engine_default(self, tmp_path, monkeypatch):
         """Default config returns 'compressor'."""
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
         config_file = tmp_path / "config.yaml"
         config_file.write_text("context:\n  engine: compressor\n")
         from pichkoo_cli.plugins_cmd import _get_current_context_engine
@@ -742,7 +742,7 @@ class TestProviderDiscovery:
 
     def test_save_memory_provider(self, tmp_path, monkeypatch):
         """Saving a memory provider persists to config.yaml."""
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
         config_file = tmp_path / "config.yaml"
         config_file.write_text("memory:\n  provider: ''\n")
         from pichkoo_cli.plugins_cmd import _save_memory_provider
@@ -752,7 +752,7 @@ class TestProviderDiscovery:
 
     def test_save_context_engine(self, tmp_path, monkeypatch):
         """Saving a context engine persists to config.yaml."""
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
         config_file = tmp_path / "config.yaml"
         config_file.write_text("context:\n  engine: compressor\n")
         from pichkoo_cli.plugins_cmd import _save_context_engine

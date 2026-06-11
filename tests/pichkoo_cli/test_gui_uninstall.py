@@ -120,7 +120,7 @@ def test_uninstall_gui_removes_only_gui_artifacts(tmp_path, monkeypatch):
 def test_uninstall_gui_removes_userdata(tmp_path, monkeypatch):
     hermes_home = tmp_path / ".pichkoo"
     _make_agent(hermes_home)
-    userdata = tmp_path / "Hermes-userdata"
+    userdata = tmp_path / "Pichkoo-userdata"
     userdata.mkdir()
     (userdata / "connection.json").write_text("{}")
 
@@ -134,7 +134,7 @@ def test_uninstall_gui_removes_userdata(tmp_path, monkeypatch):
 def test_uninstall_gui_keeps_userdata_when_requested(tmp_path, monkeypatch):
     hermes_home = tmp_path / ".pichkoo"
     _make_agent(hermes_home)
-    userdata = tmp_path / "Hermes-userdata"
+    userdata = tmp_path / "Pichkoo-userdata"
     userdata.mkdir()
 
     monkeypatch.setattr(gu, "packaged_gui_app_paths", lambda: [])
@@ -147,7 +147,7 @@ def test_uninstall_gui_keeps_userdata_when_requested(tmp_path, monkeypatch):
 def test_uninstall_gui_removes_packaged_bundle(tmp_path, monkeypatch):
     hermes_home = tmp_path / ".pichkoo"
     _make_agent(hermes_home)
-    bundle = tmp_path / "Hermes.app"
+    bundle = tmp_path / "Pichkoo.app"
     (bundle / "Contents").mkdir(parents=True)
 
     monkeypatch.setattr(gu, "packaged_gui_app_paths", lambda: [bundle])
@@ -176,16 +176,16 @@ def test_gui_install_summary_shape(tmp_path, monkeypatch):
 
 
 def test_userdata_dir_per_platform(monkeypatch):
-    """userData path matches Electron's app.getPath('userData') for "Hermes"."""
+    """userData path matches Electron's app.getPath('userData') for "Pichkoo"."""
     home = Path("/home/tester")
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: home))
 
     monkeypatch.setattr(gu.sys, "platform", "darwin")
-    assert gu.desktop_userdata_dir() == home / "Library" / "Application Support" / "Hermes"
+    assert gu.desktop_userdata_dir() == home / "Library" / "Application Support" / "Pichkoo"
 
     monkeypatch.setattr(gu.sys, "platform", "linux")
     monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
-    assert gu.desktop_userdata_dir() == home / ".config" / "Hermes"
+    assert gu.desktop_userdata_dir() == home / ".config" / "Pichkoo"
 
 
 def test_userdata_dir_windows(monkeypatch):
@@ -193,7 +193,7 @@ def test_userdata_dir_windows(monkeypatch):
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: home))
     monkeypatch.setattr(gu.sys, "platform", "win32")
     monkeypatch.setenv("APPDATA", r"C:\Users\tester\AppData\Roaming")
-    assert gu.desktop_userdata_dir() == Path(r"C:\Users\tester\AppData\Roaming") / "Hermes"
+    assert gu.desktop_userdata_dir() == Path(r"C:\Users\tester\AppData\Roaming") / "Pichkoo"
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="POSIX symlink semantics")
@@ -223,7 +223,7 @@ def test_run_uninstall_yes_keep_data_is_non_interactive(tmp_path, monkeypatch):
 
     We DO NOT spawn the real CLI here (its project_root removal would delete the
     test checkout) — we call run_uninstall in-process against a throwaway
-    HERMES_HOME with all the destructive externals stubbed out.
+    PICHKOO_HOME with all the destructive externals stubbed out.
     """
     import pichkoo_cli.uninstall as uninstall
 
@@ -264,7 +264,7 @@ def test_run_uninstall_yes_keep_data_is_non_interactive(tmp_path, monkeypatch):
 
 
 def test_run_uninstall_yes_full_wipes_home(tmp_path, monkeypatch):
-    """``--yes --full`` removes the whole HERMES_HOME non-interactively."""
+    """``--yes --full`` removes the whole PICHKOO_HOME non-interactively."""
     import pichkoo_cli.uninstall as uninstall
 
     hermes_home = tmp_path / ".pichkoo"

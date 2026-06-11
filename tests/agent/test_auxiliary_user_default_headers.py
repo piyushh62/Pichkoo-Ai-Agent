@@ -16,10 +16,10 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def _isolate(tmp_path, monkeypatch):
-    """Redirect HERMES_HOME so load_config() reads our test config.yaml."""
+    """Redirect PICHKOO_HOME so load_config() reads our test config.yaml."""
     hermes_home = tmp_path / ".pichkoo"
     hermes_home.mkdir()
-    monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
     (hermes_home / "config.yaml").write_text("model:\n  default: test-model\n")
 
 

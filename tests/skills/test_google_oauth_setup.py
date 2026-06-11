@@ -258,7 +258,7 @@ class TestExchangeAuthCode:
         assert not setup_module.PENDING_AUTH_PATH.exists()
 
 
-class TestHermesConstantsFallback:
+class TestPichkooConstantsFallback:
     """Tests for _hermes_home.py fallback when pichkoo_constants is unavailable."""
 
     HELPER_PATH = (
@@ -276,38 +276,38 @@ class TestHermesConstantsFallback:
         return module
 
     def test_fallback_uses_hermes_home_env_var(self, monkeypatch, tmp_path):
-        """When pichkoo_constants is missing, HERMES_HOME comes from env var."""
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path / "custom-pichkoo"))
+        """When pichkoo_constants is missing, PICHKOO_HOME comes from env var."""
+        monkeypatch.setenv("PICHKOO_HOME", str(tmp_path / "custom-pichkoo"))
         module = self._load_helper(monkeypatch)
         assert module.get_hermes_home() == tmp_path / "custom-pichkoo"
 
     def test_fallback_defaults_to_dot_hermes(self, monkeypatch):
-        """When pichkoo_constants is missing and HERMES_HOME unset, default to ~/.pichkoo."""
-        monkeypatch.delenv("HERMES_HOME", raising=False)
+        """When pichkoo_constants is missing and PICHKOO_HOME unset, default to ~/.pichkoo."""
+        monkeypatch.delenv("PICHKOO_HOME", raising=False)
         module = self._load_helper(monkeypatch)
         assert module.get_hermes_home() == Path.home() / ".pichkoo"
 
     def test_fallback_ignores_empty_hermes_home(self, monkeypatch):
-        """Empty/whitespace HERMES_HOME is treated as unset."""
-        monkeypatch.setenv("HERMES_HOME", "  ")
+        """Empty/whitespace PICHKOO_HOME is treated as unset."""
+        monkeypatch.setenv("PICHKOO_HOME", "  ")
         module = self._load_helper(monkeypatch)
         assert module.get_hermes_home() == Path.home() / ".pichkoo"
 
     def test_fallback_display_hermes_home_shortens_path(self, monkeypatch):
         """Fallback display_hermes_home() uses ~/ shorthand like the real one."""
-        monkeypatch.delenv("HERMES_HOME", raising=False)
+        monkeypatch.delenv("PICHKOO_HOME", raising=False)
         module = self._load_helper(monkeypatch)
         assert module.display_hermes_home() == "~/.pichkoo"
 
     def test_fallback_display_hermes_home_profile_path(self, monkeypatch):
         """Fallback display_hermes_home() handles profile paths under ~/."""
-        monkeypatch.setenv("HERMES_HOME", str(Path.home() / ".pichkoo/profiles/coder"))
+        monkeypatch.setenv("PICHKOO_HOME", str(Path.home() / ".pichkoo/profiles/coder"))
         module = self._load_helper(monkeypatch)
         assert module.display_hermes_home() == "~/.pichkoo/profiles/coder"
 
     def test_fallback_display_hermes_home_custom_path(self, monkeypatch):
         """Fallback display_hermes_home() returns full path for non-home locations."""
-        monkeypatch.setenv("HERMES_HOME", "/opt/pichkoo-custom")
+        monkeypatch.setenv("PICHKOO_HOME", "/opt/pichkoo-custom")
         module = self._load_helper(monkeypatch)
         assert module.display_hermes_home() == "/opt/pichkoo-custom"
 
@@ -345,7 +345,7 @@ def _force_deps_missing(monkeypatch):
 class TestInstallDeps:
     """Tests for install_deps() interpreter/installer selection.
 
-    Regression coverage for the Hermes Docker image, whose venv is built with
+    Regression coverage for the Pichkoo Docker image, whose venv is built with
     `uv sync` and ships without pip — `sys.executable -m pip install` fails
     with `No module named pip`, so install_deps() must fall back to uv.
     """

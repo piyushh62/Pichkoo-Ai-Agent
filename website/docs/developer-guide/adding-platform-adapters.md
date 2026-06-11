@@ -571,7 +571,7 @@ Five touchpoints:
 
 ### 8. Toolsets
 
-1. **`toolsets.py`** — Add `"pichkoo-newplat"` toolset definition with `_HERMES_CORE_TOOLS`
+1. **`toolsets.py`** — Add `"pichkoo-newplat"` toolset definition with `_PICHKOO_CORE_TOOLS`
 2. **`toolsets.py`** — Add `"pichkoo-newplat"` to the `"pichkoo-gateway"` includes list
 
 ### 9. Optional: Platform Hints

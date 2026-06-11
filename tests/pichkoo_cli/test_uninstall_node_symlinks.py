@@ -1,9 +1,9 @@
 """Tests for pichkoo_cli.uninstall.remove_node_symlinks.
 
 Regression for #34536: the POSIX installer drops node/npm/npx symlinks in
-~/.local/bin pointing into $HERMES_HOME/node and prepends ~/.local/bin to
+~/.local/bin pointing into $PICHKOO_HOME/node and prepends ~/.local/bin to
 PATH, shadowing an existing nvm. Uninstall must remove those symlinks, but
-only when they still resolve into the Hermes-managed node dir.
+only when they still resolve into the Pichkoo-managed node dir.
 """
 
 import os
@@ -26,7 +26,7 @@ def fake_home(tmp_path, monkeypatch):
 
 
 def _make_hermes_node(hermes_home: Path) -> Path:
-    """Create a fake $HERMES_HOME/node/bin/{node,npm,npx} tree."""
+    """Create a fake $PICHKOO_HOME/node/bin/{node,npm,npx} tree."""
     node_bin = hermes_home / "node" / "bin"
     node_bin.mkdir(parents=True)
     for name in ("node", "npm", "npx"):
@@ -96,7 +96,7 @@ def test_handles_missing_local_bin(fake_home):
 
 
 def test_removes_dangling_symlink_into_hermes_node(fake_home):
-    """A link into the Hermes node dir is removed even if the target file is
+    """A link into the Pichkoo node dir is removed even if the target file is
     already gone (dangling) \u2014 the link still shadows PATH."""
     hermes_home = fake_home / ".pichkoo"
     node_bin = hermes_home / "node" / "bin"
@@ -114,12 +114,12 @@ def test_removes_dangling_symlink_into_hermes_node(fake_home):
 
 
 def test_only_some_links_present(fake_home):
-    """Removes the Hermes links that exist; ignores the ones that don't."""
+    """Removes the Pichkoo links that exist; ignores the ones that don't."""
     hermes_home = fake_home / ".pichkoo"
     node_bin = _make_hermes_node(hermes_home)
     local_bin = fake_home / ".local" / "bin"
 
-    # Only npm and npx are Hermes-managed; node is a real user binary.
+    # Only npm and npx are Pichkoo-managed; node is a real user binary.
     (local_bin / "npm").symlink_to(node_bin / "npm")
     (local_bin / "npx").symlink_to(node_bin / "npx")
     (local_bin / "node").write_text("#!/bin/sh\n")

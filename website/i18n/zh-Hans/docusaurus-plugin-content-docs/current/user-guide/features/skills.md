@@ -745,7 +745,7 @@ pichkoo skills reset google-workspace --restore --yes
 ```
 
 :::note Profiles
-每个 profile 在其自己的 `HERMES_HOME` 下有自己的 `.bundled_manifest`，因此 `pichkoo -p coder skills reset <name>` 只影响该 profile。
+每个 profile 在其自己的 `PICHKOO_HOME` 下有自己的 `.bundled_manifest`，因此 `pichkoo -p coder skills reset <name>` 只影响该 profile。
 :::
 
 ### 斜杠命令（在聊天中）

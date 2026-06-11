@@ -6,16 +6,16 @@ description: "Project context files — .pichkoo.md, AGENTS.md, CLAUDE.md, globa
 
 # Context Files
 
-Pichkoo AI Agent automatically discovers and loads context files that shape how it behaves. Some are project-local and discovered from your working directory. `SOUL.md` is now global to the Pichkoo instance and is loaded from `HERMES_HOME` only.
+Pichkoo AI Agent automatically discovers and loads context files that shape how it behaves. Some are project-local and discovered from your working directory. `SOUL.md` is now global to the Pichkoo instance and is loaded from `PICHKOO_HOME` only.
 
 ## Supported Context Files
 
 | File | Purpose | Discovery |
 |------|---------|-----------| 
-| **.pichkoo.md** / **HERMES.md** | Project instructions (highest priority) | Walks to git root |
+| **.pichkoo.md** / **PICHKOO.md** | Project instructions (highest priority) | Walks to git root |
 | **AGENTS.md** | Project instructions, conventions, architecture | CWD at startup + subdirectories progressively |
 | **CLAUDE.md** | Claude Code context files (also detected) | CWD at startup + subdirectories progressively |
-| **SOUL.md** | Global personality and tone customization for this Pichkoo instance | `HERMES_HOME/SOUL.md` only |
+| **SOUL.md** | Global personality and tone customization for this Pichkoo instance | `PICHKOO_HOME/SOUL.md` only |
 | **.cursorrules** | Cursor IDE coding conventions | CWD only |
 | **.cursor/rules/*.mdc** | Cursor IDE rule modules | CWD only |
 
@@ -84,12 +84,12 @@ This is a Next.js 14 web application with a Python FastAPI backend.
 **Location:**
 
 - `~/.pichkoo/SOUL.md`
-- or `$HERMES_HOME/SOUL.md` if you run Pichkoo with a custom home directory
+- or `$PICHKOO_HOME/SOUL.md` if you run Pichkoo with a custom home directory
 
 Important details:
 
 - Pichkoo seeds a default `SOUL.md` automatically if one does not exist yet
-- Pichkoo loads `SOUL.md` only from `HERMES_HOME`
+- Pichkoo loads `SOUL.md` only from `PICHKOO_HOME`
 - Pichkoo does not probe the working directory for `SOUL.md`
 - If the file is empty, nothing from `SOUL.md` is added to the prompt
 - If the file has content, the content is injected verbatim after scanning and truncation

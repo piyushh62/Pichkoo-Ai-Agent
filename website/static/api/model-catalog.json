@@ -2,8 +2,8 @@
   "version": 1,
   "updated_at": "2026-06-09T17:20:16Z",
   "metadata": {
-    "source": "hermes-agent repo",
-    "docs": "https://hermes-agent.nousresearch.com/docs/reference/model-catalog"
+    "source": "pichkoo-ai-agent repo",
+    "docs": "https://pichkoo-ai-agent.nousresearch.com/docs/reference/model-catalog"
   },
   "providers": {
     "openrouter": {

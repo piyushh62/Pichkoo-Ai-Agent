@@ -1,17 +1,17 @@
 # NeMo Relay Observability
 
-Optional Hermes observability plugin that maps Hermes observer hooks to
+Optional Pichkoo observability plugin that maps Pichkoo observer hooks to
 NeMo Relay scopes, LLM spans, tool spans, marks, ATOF, and ATIF.
 
 NeMo Relay is NVIDIA's runtime layer for agent execution boundaries. It does
-not replace Hermes Agent's planner, tools, memory, model provider routing, or
-CLI UX. Instead, this plugin lets Hermes emit NeMo Relay lifecycle events for
-the work Hermes already owns: sessions, turns, provider/API calls, tool calls,
+not replace Pichkoo AI Agent's planner, tools, memory, model provider routing, or
+CLI UX. Instead, this plugin lets Pichkoo emit NeMo Relay lifecycle events for
+the work Pichkoo already owns: sessions, turns, provider/API calls, tool calls,
 approval prompts, and delegated subagents.
 
-With this plugin enabled, Hermes Agent can:
+With this plugin enabled, Pichkoo AI Agent can:
 
-- Preserve Hermes execution as NeMo Relay scopes, LLM spans, tool spans, and
+- Preserve Pichkoo execution as NeMo Relay scopes, LLM spans, tool spans, and
   mark events.
 - Export raw lifecycle events as Agent Trajectory Observability Format (ATOF)
   JSONL for debugging and offline inspection.
@@ -41,29 +41,29 @@ Enable the plugin before setting export options:
 pichkoo plugins enable observability/nemo_relay
 ```
 
-The `HERMES_NEMO_RELAY_*` environment variables below only configure an
+The `PICHKOO_NEMO_RELAY_*` environment variables below only configure an
 already-enabled plugin. They do not enable plugin discovery by themselves.
 
-For isolated test homes, enable the plugin in the same `HERMES_HOME` that the
+For isolated test homes, enable the plugin in the same `PICHKOO_HOME` that the
 agent run will use:
 
 ```bash
-env HERMES_HOME=/tmp/pichkoo-nemo-relay-test \
+env PICHKOO_HOME=/tmp/pichkoo-nemo-relay-test \
   pichkoo plugins enable observability/nemo_relay
 ```
 
 Runs started with `--ignore_user_config` skip the enabled-plugin state from
-`HERMES_HOME`, so local E2E tests should omit that flag unless the test harness
+`PICHKOO_HOME`, so local E2E tests should omit that flag unless the test harness
 loads `observability/nemo_relay` explicitly another way.
 
-`HERMES_HOME` is the Hermes profile/config home used by both
+`PICHKOO_HOME` is the Pichkoo profile/config home used by both
 `pichkoo plugins enable ...` and the later `pichkoo chat ...` run. If unset,
-Hermes uses the user's default home, usually `~/.pichkoo`. For isolated smoke
+Pichkoo uses the user's default home, usually `~/.pichkoo`. For isolated smoke
 tests, choose any writable temporary directory and use the same value for every
 command in that test:
 
 ```bash
-export HERMES_HOME=/tmp/pichkoo-nemo-relay-test
+export PICHKOO_HOME=/tmp/pichkoo-nemo-relay-test
 pichkoo plugins enable observability/nemo_relay
 pichkoo chat --query 'Reply exactly ok' --provider custom --model qwen3.6:35b
 ```
@@ -83,7 +83,7 @@ wheel from this checkout, then install the official NeMo Relay runtime extra:
 
 ```bash
 uv build --wheel
-python -m pip install --force-reinstall dist/hermes_agent-*.whl
+python -m pip install --force-reinstall dist/pichkoo_ai_agent-*.whl
 python -m pip install "nemo-relay==0.3"
 pichkoo plugins enable observability/nemo_relay
 ```
@@ -96,7 +96,7 @@ pip install "nemo-relay==0.3"
 
 ## Export Configuration
 
-The plugin can configure exporters directly from `HERMES_NEMO_RELAY_*`
+The plugin can configure exporters directly from `PICHKOO_NEMO_RELAY_*`
 environment variables, or delegate exporter setup to a NeMo Relay
 `plugins.toml` component config.
 
@@ -110,29 +110,29 @@ OpenInference.
 Useful local export settings after the plugin is enabled:
 
 ```bash
-export HERMES_NEMO_RELAY_ATOF_ENABLED=1
-export HERMES_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY=.nemo-relay/atof
-export HERMES_NEMO_RELAY_ATIF_ENABLED=1
-export HERMES_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY=.nemo-relay/atif
+export PICHKOO_NEMO_RELAY_ATOF_ENABLED=1
+export PICHKOO_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY=.nemo-relay/atof
+export PICHKOO_NEMO_RELAY_ATIF_ENABLED=1
+export PICHKOO_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY=.nemo-relay/atif
 ```
 
 Optional overrides:
 
-- `HERMES_NEMO_RELAY_ATOF_FILENAME`
-- `HERMES_NEMO_RELAY_ATOF_MODE` (`append` or `overwrite`)
-- `HERMES_NEMO_RELAY_ATIF_FILENAME_TEMPLATE`
-- `HERMES_NEMO_RELAY_ATIF_AGENT_NAME`
-- `HERMES_NEMO_RELAY_ATIF_AGENT_VERSION`
-- `HERMES_NEMO_RELAY_ATIF_MODEL_NAME`
-- `HERMES_NEMO_RELAY_ATIF_SUBAGENT_EXPORT_MODE` (`embedded` by default; set `all` to also write standalone child files)
+- `PICHKOO_NEMO_RELAY_ATOF_FILENAME`
+- `PICHKOO_NEMO_RELAY_ATOF_MODE` (`append` or `overwrite`)
+- `PICHKOO_NEMO_RELAY_ATIF_FILENAME_TEMPLATE`
+- `PICHKOO_NEMO_RELAY_ATIF_AGENT_NAME`
+- `PICHKOO_NEMO_RELAY_ATIF_AGENT_VERSION`
+- `PICHKOO_NEMO_RELAY_ATIF_MODEL_NAME`
+- `PICHKOO_NEMO_RELAY_ATIF_SUBAGENT_EXPORT_MODE` (`embedded` by default; set `all` to also write standalone child files)
 
 ### NeMo Relay Component Config
 
 To initialize NeMo Relay from a component config, create a `plugins.toml` file
-and point Hermes at it:
+and point Pichkoo at it:
 
 ```bash
-export HERMES_NEMO_RELAY_PLUGINS_TOML=.nemo-relay/plugins.toml
+export PICHKOO_NEMO_RELAY_PLUGINS_TOML=.nemo-relay/plugins.toml
 ```
 
 Minimal ATOF and ATIF config:
@@ -157,17 +157,17 @@ mode = "overwrite"
 enabled = true
 output_directory = ".nemo-relay/atif"
 filename_template = "trajectory-{session_id}.json"
-agent_name = "Hermes Agent"
+agent_name = "Pichkoo AI Agent"
 agent_version = "local"
 ```
 
-When `HERMES_NEMO_RELAY_PLUGINS_TOML` is set and initializes successfully, NeMo
+When `PICHKOO_NEMO_RELAY_PLUGINS_TOML` is set and initializes successfully, NeMo
 Relay owns exporter lifecycle through that config. The direct
-`HERMES_NEMO_RELAY_ATOF_*` fallback setup is skipped. If the same
+`PICHKOO_NEMO_RELAY_ATOF_*` fallback setup is skipped. If the same
 `plugins.toml` observability config enables `atif`, the direct
-`HERMES_NEMO_RELAY_ATIF_*` fallback setup is also skipped so Hermes does not
+`PICHKOO_NEMO_RELAY_ATIF_*` fallback setup is also skipped so Pichkoo does not
 double-export trajectories on teardown. If `plugins.toml` initialization fails,
-Hermes keeps the direct env-var fallbacks active for that run.
+Pichkoo keeps the direct env-var fallbacks active for that run.
 
 To enable NeMo Relay managed execution intercepts for provider and tool calls,
 include an adaptive component in the same `plugins.toml`:
@@ -182,14 +182,14 @@ mode = "observe_only"
 ```
 
 When the adaptive component is enabled and the installed NeMo Relay runtime
-exposes `llm.execute(...)` / `tools.execute(...)`, Hermes routes LLM and tool
+exposes `llm.execute(...)` / `tools.execute(...)`, Pichkoo routes LLM and tool
 execution through those middleware boundaries. The observer hooks still emit
 session, turn, approval, and subagent marks; the plugin skips its manual
 `llm.call` and `tools.call` spans for executions that are already managed by
 NeMo Relay. `tool_parallelism.mode = "observe_only"` keeps tool scheduling
 observational while still wrapping the real execution boundary.
 
-For the full generic Hermes middleware contract, see
+For the full generic Pichkoo middleware contract, see
 [`docs/middleware/README.md`](../../../docs/middleware/README.md).
 
 ## Canonical Local Examples
@@ -200,10 +200,10 @@ distribution and a local Ollama model served through the OpenAI-compatible API.
 ```bash
 pip install "nemo-relay==0.3"
 
-export HERMES_HOME=/tmp/pichkoo-nemo-relay-docs/pichkoo-home
-mkdir -p "$HERMES_HOME"
+export PICHKOO_HOME=/tmp/pichkoo-nemo-relay-docs/pichkoo-home
+mkdir -p "$PICHKOO_HOME"
 
-cat > "$HERMES_HOME/config.yaml" <<'YAML'
+cat > "$PICHKOO_HOME/config.yaml" <<'YAML'
 model:
   provider: custom
   default: qwen3.6:35b
@@ -225,20 +225,20 @@ YAML
 
 ### Delegated Subagent Tool Call
 
-This run starts a parent Hermes session, delegates to a child subagent, has the
+This run starts a parent Pichkoo session, delegates to a child subagent, has the
 child call `terminal`, and writes both ATOF and ATIF.
 
 ```bash
-export HERMES_NEMO_RELAY_ATOF_ENABLED=1
-export HERMES_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/subagent/atof
-export HERMES_NEMO_RELAY_ATOF_FILENAME=nested-subagent-atof.jsonl
-export HERMES_NEMO_RELAY_ATOF_MODE=overwrite
-export HERMES_NEMO_RELAY_ATIF_ENABLED=1
-export HERMES_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/subagent/atif
-export HERMES_NEMO_RELAY_ATIF_FILENAME_TEMPLATE='nested-subagent-atif-{session_id}.json'
-export HERMES_NEMO_RELAY_ATIF_AGENT_NAME='Hermes Agent E2E'
-export HERMES_NEMO_RELAY_ATIF_AGENT_VERSION=docs-example
-export HERMES_NEMO_RELAY_ATIF_SUBAGENT_EXPORT_MODE=all
+export PICHKOO_NEMO_RELAY_ATOF_ENABLED=1
+export PICHKOO_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/subagent/atof
+export PICHKOO_NEMO_RELAY_ATOF_FILENAME=nested-subagent-atof.jsonl
+export PICHKOO_NEMO_RELAY_ATOF_MODE=overwrite
+export PICHKOO_NEMO_RELAY_ATIF_ENABLED=1
+export PICHKOO_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/subagent/atif
+export PICHKOO_NEMO_RELAY_ATIF_FILENAME_TEMPLATE='nested-subagent-atif-{session_id}.json'
+export PICHKOO_NEMO_RELAY_ATIF_AGENT_NAME='Pichkoo AI Agent E2E'
+export PICHKOO_NEMO_RELAY_ATIF_AGENT_VERSION=docs-example
+export PICHKOO_NEMO_RELAY_ATIF_SUBAGENT_EXPORT_MODE=all
 
 pichkoo chat \
   --query 'Use delegate_task exactly once. Ask the child subagent to use the terminal tool exactly once to run printf docs_nested_leaf_function. After the child returns, reply with exactly: parent received nested subagent result.' \
@@ -272,7 +272,7 @@ Sanitized ATIF excerpt:
 {
   "schema_version": "ATIF-v1.7",
   "session_id": "docs-parent-session",
-  "agent": {"name": "Hermes Agent E2E", "version": "docs-example", "model_name": "qwen3.6:35b"},
+  "agent": {"name": "Pichkoo AI Agent E2E", "version": "docs-example", "model_name": "qwen3.6:35b"},
   "steps": [
     {
       "source": "agent",
@@ -306,7 +306,7 @@ Sanitized ATIF excerpt:
 ### Parallel Tool Calls
 
 This run asks the model to emit two `read_file` tool calls in the same assistant
-message. Hermes dispatches the read-only tools as one batch, and NeMo Relay
+message. Pichkoo dispatches the read-only tools as one batch, and NeMo Relay
 records both tool invocations.
 
 ```bash
@@ -315,15 +315,15 @@ printf 'docs_parallel_alpha_function\n' > /tmp/pichkoo-nemo-relay-docs/workdir/a
 printf 'docs_parallel_beta_function\n' > /tmp/pichkoo-nemo-relay-docs/workdir/beta.txt
 cd /tmp/pichkoo-nemo-relay-docs/workdir
 
-export HERMES_NEMO_RELAY_ATOF_ENABLED=1
-export HERMES_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/parallel/atof
-export HERMES_NEMO_RELAY_ATOF_FILENAME=parallel-tools-atof.jsonl
-export HERMES_NEMO_RELAY_ATOF_MODE=overwrite
-export HERMES_NEMO_RELAY_ATIF_ENABLED=1
-export HERMES_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/parallel/atif
-export HERMES_NEMO_RELAY_ATIF_FILENAME_TEMPLATE='parallel-tools-atif-{session_id}.json'
-export HERMES_NEMO_RELAY_ATIF_AGENT_NAME='Hermes Agent E2E'
-export HERMES_NEMO_RELAY_ATIF_AGENT_VERSION=docs-example
+export PICHKOO_NEMO_RELAY_ATOF_ENABLED=1
+export PICHKOO_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/parallel/atof
+export PICHKOO_NEMO_RELAY_ATOF_FILENAME=parallel-tools-atof.jsonl
+export PICHKOO_NEMO_RELAY_ATOF_MODE=overwrite
+export PICHKOO_NEMO_RELAY_ATIF_ENABLED=1
+export PICHKOO_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY=/tmp/pichkoo-nemo-relay-docs/parallel/atif
+export PICHKOO_NEMO_RELAY_ATIF_FILENAME_TEMPLATE='parallel-tools-atif-{session_id}.json'
+export PICHKOO_NEMO_RELAY_ATIF_AGENT_NAME='Pichkoo AI Agent E2E'
+export PICHKOO_NEMO_RELAY_ATIF_AGENT_VERSION=docs-example
 
 pichkoo chat \
   --query 'Use exactly two read_file tool calls in the same assistant message. Read alpha.txt and beta.txt. Do not call terminal. After both tool results are available, reply with exactly: parallel tools complete.' \
@@ -358,7 +358,7 @@ Sanitized ATIF excerpt:
 {
   "schema_version": "ATIF-v1.7",
   "session_id": "docs-parallel-session",
-  "agent": {"name": "Hermes Agent E2E", "version": "docs-example", "model_name": "qwen3.6:35b"},
+  "agent": {"name": "Pichkoo AI Agent E2E", "version": "docs-example", "model_name": "qwen3.6:35b"},
   "steps": [
     {
       "source": "agent",
@@ -382,9 +382,9 @@ Sanitized ATIF excerpt:
 
 The plugin keeps NeMo Relay's native event model:
 
-- Hermes sessions map to `agent` scopes.
-- Hermes API request hooks map to `llm` scope start/end events.
-- Hermes tool hooks map to `tool` scope start/end events.
+- Pichkoo sessions map to `agent` scopes.
+- Pichkoo API request hooks map to `llm` scope start/end events.
+- Pichkoo tool hooks map to `tool` scope start/end events.
 - Turn, approval, subagent, and diagnostic fallback events map to `mark`
   events.
 
@@ -396,7 +396,7 @@ separate trajectories.
 
 ## Adaptive Middleware Example
 
-The `observability/nemo_relay` plugin uses Hermes execution middleware to hand
+The `observability/nemo_relay` plugin uses Pichkoo execution middleware to hand
 LLM and tool calls to NeMo Relay managed execution when an adaptive component is
 enabled.
 
@@ -413,26 +413,26 @@ enabled = true
 mode = "observe_only"
 ```
 
-Enable it for Hermes:
+Enable it for Pichkoo:
 
 ```bash
-export HERMES_NEMO_RELAY_PLUGINS_TOML=/tmp/pichkoo-middleware-test/plugins.toml
+export PICHKOO_NEMO_RELAY_PLUGINS_TOML=/tmp/pichkoo-middleware-test/plugins.toml
 ```
 
 When the adaptive component is enabled and the installed NeMo Relay runtime
-exposes `llm.execute(...)` and `tools.execute(...)`, Hermes routes execution
+exposes `llm.execute(...)` and `tools.execute(...)`, Pichkoo routes execution
 through these boundaries:
 
 ```text
-Hermes provider call
+Pichkoo provider call
   -> llm_execution middleware
     -> nemo_relay.llm.execute(...)
-      -> Hermes provider adapter next_call(...)
+      -> Pichkoo provider adapter next_call(...)
 
-Hermes tool call
+Pichkoo tool call
   -> tool_execution middleware
     -> nemo_relay.tools.execute(...)
-      -> Hermes tool dispatcher next_call(...)
+      -> Pichkoo tool dispatcher next_call(...)
 ```
 
 The plugin still emits observer marks for sessions, turns, approvals, and
@@ -443,16 +443,16 @@ for the same execution.
 ### Local Adaptive E2E
 
 This example enables both NeMo Relay observability export and adaptive execution
-middleware for a local Hermes run. This path requires a NeMo Relay runtime that
+middleware for a local Pichkoo run. This path requires a NeMo Relay runtime that
 supports `[components.config.tool_parallelism]`; the `nemo-relay==0.3`
 install used by the earlier observability-only examples does not support this
 adaptive config.
 
 ```bash
-export HERMES_HOME=/tmp/pichkoo-middleware-test/pichkoo-home
-mkdir -p "$HERMES_HOME" /tmp/pichkoo-middleware-test/nemo-relay
+export PICHKOO_HOME=/tmp/pichkoo-middleware-test/pichkoo-home
+mkdir -p "$PICHKOO_HOME" /tmp/pichkoo-middleware-test/nemo-relay
 
-cat > "$HERMES_HOME/config.yaml" <<'YAML'
+cat > "$PICHKOO_HOME/config.yaml" <<'YAML'
 model:
   provider: custom
   default: qwen3.6:35b
@@ -483,7 +483,7 @@ mode = "overwrite"
 enabled = true
 output_directory = "/tmp/pichkoo-middleware-test/atif"
 filename_template = "middleware-trajectory-{session_id}.json"
-agent_name = "Hermes Middleware E2E"
+agent_name = "Pichkoo Middleware E2E"
 agent_version = "local"
 
 [[components]]
@@ -494,7 +494,7 @@ enabled = true
 mode = "observe_only"
 TOML
 
-export HERMES_NEMO_RELAY_PLUGINS_TOML=/tmp/pichkoo-middleware-test/nemo-relay/plugins.toml
+export PICHKOO_NEMO_RELAY_PLUGINS_TOML=/tmp/pichkoo-middleware-test/nemo-relay/plugins.toml
 
 pichkoo chat \
   --query 'Use the terminal tool exactly once to run printf middleware_execution_ok. Then reply with exactly the command output.' \
@@ -528,7 +528,7 @@ Expected ATIF shape:
   "schema_version": "ATIF-v1.7",
   "session_id": "middleware-demo-session",
   "agent": {
-    "name": "Hermes Middleware E2E",
+    "name": "Pichkoo Middleware E2E",
     "version": "local",
     "model_name": "qwen3.6:35b"
   },

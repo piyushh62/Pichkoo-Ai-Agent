@@ -350,7 +350,7 @@ class TestTeamsInteractiveSetup:
         credentials to .env without crashing.
         """
         hermes_home = tmp_path / "pichkoo"
-        monkeypatch.setenv("HERMES_HOME", str(hermes_home))
+        monkeypatch.setenv("PICHKOO_HOME", str(hermes_home))
 
         import pichkoo_cli.cli_output as cli_output_mod
 
@@ -687,7 +687,7 @@ class TestTeamsMessageHandling:
         adapter.handle_message = AsyncMock()
 
         activity = self._make_activity(
-            text="<at>Hermes</at> what is the weather?",
+            text="<at>Pichkoo</at> what is the weather?",
             from_id="user-id",
         )
         await adapter._on_message(self._make_ctx(activity))

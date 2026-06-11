@@ -227,7 +227,7 @@ def test_current_custom_endpoint_passthrough_marks_current_row(monkeypatch):
     """Interactive picker should preserve current custom endpoint semantics."""
     monkeypatch.setattr("agent.models_dev.fetch_models_dev", lambda: {})
     monkeypatch.setattr("agent.models_dev.PROVIDER_TO_MODELS_DEV", {})
-    monkeypatch.setattr("pichkoo_cli.providers.HERMES_OVERLAYS", {})
+    monkeypatch.setattr("pichkoo_cli.providers.PICHKOO_OVERLAYS", {})
     monkeypatch.setattr("pichkoo_cli.models.fetch_openrouter_models",
                         lambda *a, **kw: [])
 

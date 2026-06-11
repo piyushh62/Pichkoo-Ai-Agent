@@ -50,7 +50,7 @@ interface MessageStreamOptions {
     runtimeSessionId?: string | null
   ) => Promise<void>
   queryClient: QueryClient
-  refreshHermesConfig: () => Promise<void>
+  refreshPichkooConfig: () => Promise<void>
   refreshSessions: () => Promise<void>
   updateSessionState: (
     sessionId: string,
@@ -190,7 +190,7 @@ export function useMessageStream({
   activeSessionIdRef,
   hydrateFromStoredSession,
   queryClient,
-  refreshHermesConfig,
+  refreshPichkooConfig,
   refreshSessions,
   updateSessionState
 }: MessageStreamOptions) {
@@ -558,7 +558,7 @@ export function useMessageStream({
 
       if (document.hidden && sessionId === activeSessionIdRef.current) {
         void window.hermesDesktop?.notify({
-          title: 'Hermes finished',
+          title: 'Pichkoo finished',
           body: text.slice(0, 140) || 'The response is ready.'
         })
       }
@@ -572,7 +572,7 @@ export function useMessageStream({
         const streamId = state.streamId ?? `assistant-error-${Date.now()}`
         const groupId = state.pendingBranchGroup ?? undefined
         const prev = state.messages
-        const error = errorMessage.trim() || 'Hermes reported an error'
+        const error = errorMessage.trim() || 'Pichkoo reported an error'
 
         const nextMessages = prev.some(m => m.id === streamId)
           ? prev.map(message =>
@@ -721,7 +721,7 @@ export function useMessageStream({
           requestDesktopOnboarding(payload.credential_warning)
         }
 
-        void refreshHermesConfig()
+        void refreshPichkooConfig()
 
         if (modelChanged || providerChanged) {
           void queryClient.invalidateQueries({
@@ -924,7 +924,7 @@ export function useMessageStream({
           })
         }
       } else if (event.type === 'error') {
-        const errorMessage = payload?.message || 'Hermes reported an error'
+        const errorMessage = payload?.message || 'Pichkoo reported an error'
         const looksLikeProviderSetup = isProviderSetupErrorMessage(errorMessage)
 
         // A turn that errors out has also ended — drop any open blocking prompt
@@ -939,7 +939,7 @@ export function useMessageStream({
         } else if (isActiveEvent) {
           notify({
             kind: 'error',
-            title: 'Hermes error',
+            title: 'Pichkoo error',
             message: errorMessage
           })
         }
@@ -962,7 +962,7 @@ export function useMessageStream({
       failAssistantMessage,
       flushQueuedDeltas,
       queryClient,
-      refreshHermesConfig,
+      refreshPichkooConfig,
       updateSessionState,
       upsertToolCall
     ]

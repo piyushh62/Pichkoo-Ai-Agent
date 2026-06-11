@@ -5,13 +5,13 @@ Hermetic-test invariants enforced here (see AGENTS.md for rationale):
 1. **No credential env vars.** All provider/credential-shaped env vars
    (ending in _API_KEY, _TOKEN, _SECRET, _PASSWORD, _CREDENTIALS, etc.)
    are unset before every test. Local developer keys cannot leak in.
-2. **Isolated HERMES_HOME.** HERMES_HOME points to a per-test tempdir so
+2. **Isolated PICHKOO_HOME.** PICHKOO_HOME points to a per-test tempdir so
    code reading ``~/.pichkoo/*`` via ``get_hermes_home()`` can't see the
    real one. (We do NOT also redirect HOME — that broke subprocesses in
    CI. Code using ``Path.home() / ".pichkoo"`` instead of the canonical
    ``get_hermes_home()`` is a bug to fix at the callsite.)
 3. **Deterministic runtime.** TZ=UTC, LANG=C.UTF-8, PYTHONHASHSEED=0.
-4. **No HERMES_SESSION_* inheritance** — the agent's current gateway
+4. **No PICHKOO_SESSION_* inheritance** — the agent's current gateway
    session must not leak into tests.
 
 These invariants make the local test run match CI closely. Gaps that
@@ -166,61 +166,61 @@ def _looks_like_credential(name: str) -> bool:
     return any(name.endswith(suf) for suf in _CREDENTIAL_SUFFIXES)
 
 
-# HERMES_* vars that change test behavior by being set. Unset all of these
+# PICHKOO_* vars that change test behavior by being set. Unset all of these
 # unconditionally — individual tests that need them set do so explicitly.
-_HERMES_BEHAVIORAL_VARS = frozenset({
-    "HERMES_YOLO_MODE",
-    "HERMES_INTERACTIVE",
-    "HERMES_QUIET",
-    "HERMES_TOOL_PROGRESS",
-    "HERMES_TOOL_PROGRESS_MODE",
-    "HERMES_MAX_ITERATIONS",
-    "HERMES_SESSION_PLATFORM",
-    "HERMES_SESSION_CHAT_ID",
-    "HERMES_SESSION_CHAT_NAME",
-    "HERMES_SESSION_THREAD_ID",
-    "HERMES_SESSION_SOURCE",
-    "HERMES_SESSION_KEY",
-    "HERMES_GATEWAY_SESSION",
-    "HERMES_CRON_SESSION",
-    "_HERMES_GATEWAY",
-    "HERMES_PLATFORM",
-    "HERMES_MODEL",
-    "HERMES_INFERENCE_MODEL",
-    "HERMES_INFERENCE_PROVIDER",
-    "HERMES_TUI_PROVIDER",
-    "HERMES_MANAGED",
-    "HERMES_DEV",
-    "HERMES_CONTAINER",
-    "HERMES_EPHEMERAL_SYSTEM_PROMPT",
-    "HERMES_TIMEZONE",
-    "HERMES_REDACT_SECRETS",
-    "HERMES_BACKGROUND_NOTIFICATIONS",
-    "HERMES_EXEC_ASK",
-    "HERMES_HOME_MODE",
-    "HERMES_AGENT_USE_LEGACY_SESSION_KEYS",
+_PICHKOO_BEHAVIORAL_VARS = frozenset({
+    "PICHKOO_YOLO_MODE",
+    "PICHKOO_INTERACTIVE",
+    "PICHKOO_QUIET",
+    "PICHKOO_TOOL_PROGRESS",
+    "PICHKOO_TOOL_PROGRESS_MODE",
+    "PICHKOO_MAX_ITERATIONS",
+    "PICHKOO_SESSION_PLATFORM",
+    "PICHKOO_SESSION_CHAT_ID",
+    "PICHKOO_SESSION_CHAT_NAME",
+    "PICHKOO_SESSION_THREAD_ID",
+    "PICHKOO_SESSION_SOURCE",
+    "PICHKOO_SESSION_KEY",
+    "PICHKOO_GATEWAY_SESSION",
+    "PICHKOO_CRON_SESSION",
+    "_PICHKOO_GATEWAY",
+    "PICHKOO_PLATFORM",
+    "PICHKOO_MODEL",
+    "PICHKOO_INFERENCE_MODEL",
+    "PICHKOO_INFERENCE_PROVIDER",
+    "PICHKOO_TUI_PROVIDER",
+    "PICHKOO_MANAGED",
+    "PICHKOO_DEV",
+    "PICHKOO_CONTAINER",
+    "PICHKOO_EPHEMERAL_SYSTEM_PROMPT",
+    "PICHKOO_TIMEZONE",
+    "PICHKOO_REDACT_SECRETS",
+    "PICHKOO_BACKGROUND_NOTIFICATIONS",
+    "PICHKOO_EXEC_ASK",
+    "PICHKOO_HOME_MODE",
+    "PICHKOO_AGENT_USE_LEGACY_SESSION_KEYS",
     # Kanban path/board pins must never leak from a developer shell or
     # dispatched worker into tests; otherwise tests can write fake tasks to
-    # the real ~/.pichkoo/kanban.db instead of the per-test HERMES_HOME.
-    "HERMES_KANBAN_DB",
-    "HERMES_KANBAN_BOARD",
-    "HERMES_KANBAN_HOME",
-    "HERMES_KANBAN_WORKSPACES_ROOT",
-    "HERMES_KANBAN_LOGS_ROOT",
-    "HERMES_KANBAN_TASK",
-    "HERMES_KANBAN_WORKSPACE",
-    "HERMES_KANBAN_RUN_ID",
-    "HERMES_KANBAN_CLAIM_LOCK",
-    "HERMES_KANBAN_DISPATCH_IN_GATEWAY",
-    "HERMES_TENANT",
+    # the real ~/.pichkoo/kanban.db instead of the per-test PICHKOO_HOME.
+    "PICHKOO_KANBAN_DB",
+    "PICHKOO_KANBAN_BOARD",
+    "PICHKOO_KANBAN_HOME",
+    "PICHKOO_KANBAN_WORKSPACES_ROOT",
+    "PICHKOO_KANBAN_LOGS_ROOT",
+    "PICHKOO_KANBAN_TASK",
+    "PICHKOO_KANBAN_WORKSPACE",
+    "PICHKOO_KANBAN_RUN_ID",
+    "PICHKOO_KANBAN_CLAIM_LOCK",
+    "PICHKOO_KANBAN_DISPATCH_IN_GATEWAY",
+    "PICHKOO_TENANT",
     # Dashboard OAuth auth gate (PR #30156). When set, the bundled
     # dashboard-auth `nous` plugin auto-registers itself on plugin discovery,
     # which is triggered by any `/api/status` call. That leaks a provider
     # into the dashboard_auth registry across tests in the same worker and
     # makes assertions like `auth_providers == []` flaky. CI never sets
     # these, so production tests must not see them either.
-    "HERMES_DASHBOARD_OAUTH_CLIENT_ID",
-    "HERMES_DASHBOARD_PORTAL_URL",
+    "PICHKOO_DASHBOARD_OAUTH_CLIENT_ID",
+    "PICHKOO_DASHBOARD_PORTAL_URL",
     "TERMINAL_CWD",
     "TERMINAL_ENV",
     "TERMINAL_CONTAINER_CPU",
@@ -328,7 +328,7 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
 def _hermetic_environment(tmp_path, monkeypatch):
     """Blank out all credential/behavioral env vars so local and CI match.
 
-    Also redirects HOME and HERMES_HOME to per-test tempdirs so code that
+    Also redirects HOME and PICHKOO_HOME to per-test tempdirs so code that
     reads ``~/.pichkoo/*`` can't touch the real one, and pins TZ/LANG so
     datetime/locale-sensitive tests are deterministic.
     """
@@ -337,11 +337,11 @@ def _hermetic_environment(tmp_path, monkeypatch):
         if _looks_like_credential(name):
             monkeypatch.delenv(name, raising=False)
 
-    # 2. Blank behavioral HERMES_* vars that could change test semantics.
-    for name in _HERMES_BEHAVIORAL_VARS:
+    # 2. Blank behavioral PICHKOO_* vars that could change test semantics.
+    for name in _PICHKOO_BEHAVIORAL_VARS:
         monkeypatch.delenv(name, raising=False)
 
-    # 3. Redirect HERMES_HOME to a per-test tempdir. Code that reads
+    # 3. Redirect PICHKOO_HOME to a per-test tempdir. Code that reads
     #    ``~/.pichkoo/*`` via ``get_hermes_home()`` now gets the tempdir.
     #
     #    NOTE: We do NOT also redirect HOME. Doing so broke CI because
@@ -357,7 +357,7 @@ def _hermetic_environment(tmp_path, monkeypatch):
     (fake_hermes_home / "cron").mkdir()
     (fake_hermes_home / "memories").mkdir()
     (fake_hermes_home / "skills").mkdir()
-    monkeypatch.setenv("HERMES_HOME", str(fake_hermes_home))
+    monkeypatch.setenv("PICHKOO_HOME", str(fake_hermes_home))
 
     # 4. Deterministic locale / timezone / hashseed. CI runs in UTC with
     #    C.UTF-8 locale; local dev often doesn't. Pin everything.
@@ -643,7 +643,7 @@ def _live_system_guard(request, monkeypatch):
         monkeypatch.setattr(_os, "killpg", _guarded_killpg)
 
     # ── Subprocess command-string inspection (whole-line) ──────────
-    _HERMES_TOKENS = (
+    _PICHKOO_TOKENS = (
         "pichkoo-gateway",
         "pichkoo.service",
         "pichkoo_cli.main gateway",
@@ -677,7 +677,7 @@ def _live_system_guard(request, monkeypatch):
 
     def _matches_hermes_gateway(cmd_str: str) -> bool:
         low = cmd_str.lower()
-        return any(tok in low for tok in _HERMES_TOKENS)
+        return any(tok in low for tok in _PICHKOO_TOKENS)
 
     def _is_blocked_systemctl(cmd) -> bool:
         cmd_str = _cmd_to_string(cmd)

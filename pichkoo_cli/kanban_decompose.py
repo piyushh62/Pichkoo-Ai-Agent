@@ -49,7 +49,7 @@ from pichkoo_cli import profiles as profiles_mod
 logger = logging.getLogger(__name__)
 
 
-_SYSTEM_PROMPT = """You are the Kanban decomposer for the Hermes Agent board.
+_SYSTEM_PROMPT = """You are the Kanban decomposer for the Pichkoo AI Agent board.
 
 A user dropped a rough idea into the Triage column. Your job is to break it
 into a small graph of concrete child tasks and route each one to the best-
@@ -163,7 +163,7 @@ def _extract_json_blob(raw: str) -> Optional[dict]:
 def _profile_author() -> str:
     """Mirror of ``pichkoo_cli.kanban._profile_author``."""
     return (
-        os.environ.get("HERMES_PROFILE")
+        os.environ.get("PICHKOO_PROFILE")
         or os.environ.get("USER")
         or "decomposer"
     )

@@ -18,7 +18,7 @@ Pichkoo scans for image-gen backends in three places:
 
 1. **Bundled** — `<repo>/plugins/image_gen/<name>/` (auto-loaded with `kind: backend`, always available)
 2. **User** — `~/.pichkoo/plugins/image_gen/<name>/` (opt-in via `plugins.enabled`)
-3. **Pip** — packages declaring a `hermes_agent.plugins` entry point
+3. **Pip** — packages declaring a `pichkoo_ai_agent.plugins` entry point
 
 Each plugin's `register(ctx)` function calls `ctx.register_image_gen_provider(...)` — that puts it into the registry in `agent/image_gen_registry.py`. The active provider is picked by `image_gen.provider` in `config.yaml`; `pichkoo tools` walks users through selection.
 
@@ -145,7 +145,7 @@ class MyBackendImageGenProvider(ImageGenProvider):
 
             # Two shapes supported:
             #   - URL string: return it as `image`
-            #   - base64 data: save under $HERMES_HOME/cache/images/ via save_b64_image()
+            #   - base64 data: save under $PICHKOO_HOME/cache/images/ via save_b64_image()
             if result.get("image_b64"):
                 path = save_b64_image(
                     result["image_b64"],
@@ -239,7 +239,7 @@ The tool wrapper JSON-serializes the dict and hands it to the LLM. Errors are su
 
 ## Handling base64 vs URL output
 
-Some backends return image URLs (fal, Replicate); others return base64 payloads (OpenAI gpt-image-2). For the base64 case, use `save_b64_image()` — it writes to `$HERMES_HOME/cache/images/<prefix>_<timestamp>_<uuid>.<ext>` and returns the absolute `Path`. Pass that path (as `str`) as `image=` in `success_response()`. Gateway delivery (Telegram photo bubble, Discord attachment) recognizes both URLs and absolute paths.
+Some backends return image URLs (fal, Replicate); others return base64 payloads (OpenAI gpt-image-2). For the base64 case, use `save_b64_image()` — it writes to `$PICHKOO_HOME/cache/images/<prefix>_<timestamp>_<uuid>.<ext>` and returns the absolute `Path`. Pass that path (as `str`) as `image=` in `success_response()`. Gateway delivery (Telegram photo bubble, Discord attachment) recognizes both URLs and absolute paths.
 
 ## User overrides
 
@@ -248,16 +248,16 @@ Drop a user plugin at `~/.pichkoo/plugins/image_gen/<name>/` with the same `name
 ## Testing
 
 ```bash
-export HERMES_HOME=/tmp/pichkoo-imggen-test
-mkdir -p $HERMES_HOME/plugins/image_gen/my-backend
+export PICHKOO_HOME=/tmp/pichkoo-imggen-test
+mkdir -p $PICHKOO_HOME/plugins/image_gen/my-backend
 # …copy __init__.py + plugin.yaml into that dir…
 
 export MY_BACKEND_API_KEY=your-test-key
 pichkoo plugins enable my-backend
 
 # Pick it as the active provider
-echo "image_gen:" >> $HERMES_HOME/config.yaml
-echo "  provider: my-backend" >> $HERMES_HOME/config.yaml
+echo "image_gen:" >> $PICHKOO_HOME/config.yaml
+echo "  provider: my-backend" >> $PICHKOO_HOME/config.yaml
 
 # Exercise it
 pichkoo -z "Generate an image of a corgi in a spacesuit"
@@ -275,7 +275,7 @@ Or interactively: `pichkoo tools` → "Image Generation" → select `my-backend`
 
 ```toml
 # pyproject.toml
-[project.entry-points."hermes_agent.plugins"]
+[project.entry-points."pichkoo_ai_agent.plugins"]
 my-backend-imggen = "my_backend_imggen_package"
 ```
 

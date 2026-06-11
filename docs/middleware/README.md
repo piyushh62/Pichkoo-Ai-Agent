@@ -118,12 +118,12 @@ Middleware only runs for enabled plugins. For a bundled plugin:
 pichkoo plugins enable <plugin-name>
 ```
 
-For isolated local testing, use one `HERMES_HOME` for plugin enablement and the
+For isolated local testing, use one `PICHKOO_HOME` for plugin enablement and the
 agent run:
 
 ```bash
-export HERMES_HOME=/tmp/pichkoo-middleware-test
-mkdir -p "$HERMES_HOME"
+export PICHKOO_HOME=/tmp/pichkoo-middleware-test
+mkdir -p "$PICHKOO_HOME"
 pichkoo plugins enable <plugin-name>
 pichkoo chat --query 'Reply exactly ok'
 ```

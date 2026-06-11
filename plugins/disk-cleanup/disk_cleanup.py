@@ -1,4 +1,4 @@
-"""disk_cleanup — ephemeral file cleanup for Hermes Agent.
+"""disk_cleanup — ephemeral file cleanup for Pichkoo AI Agent.
 
 Library module wrapping the deterministic cleanup rules written by
 @LVT382009 in PR #12212. The plugin ``__init__.py`` wires these
@@ -10,12 +10,12 @@ Rules:
   - test files    → delete immediately at task end (age >= 0)
   - temp files    → delete after 7 days
   - cron-output   → delete after 14 days
-  - empty dirs    → always delete (under HERMES_HOME)
+  - empty dirs    → always delete (under PICHKOO_HOME)
   - research      → keep 10 newest, prompt for older (deep only)
   - chrome-profile→ prompt after 14 days (deep only)
   - >500 MB files → prompt always (deep only)
 
-Scope: strictly HERMES_HOME and /tmp/pichkoo-*
+Scope: strictly PICHKOO_HOME and /tmp/pichkoo-*
 Never touches: ~/.pichkoo/logs/ or any system directory.
 """
 
@@ -34,7 +34,7 @@ except Exception:  # pragma: no cover — plugin may load before constants resol
     import os
 
     def get_hermes_home() -> Path:  # type: ignore[no-redef]
-        val = (os.environ.get("HERMES_HOME") or "").strip()
+        val = (os.environ.get("PICHKOO_HOME") or "").strip()
         return Path(val).resolve() if val else (Path.home() / ".pichkoo").resolve()
 
 
@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def get_state_dir() -> Path:
-    """State dir — separate from ``$HERMES_HOME/logs/``."""
+    """State dir — separate from ``$PICHKOO_HOME/logs/``."""
     return get_hermes_home() / "disk-cleanup"
 
 
@@ -55,7 +55,7 @@ def get_tracked_file() -> Path:
 
 
 def get_log_file() -> Path:
-    """Audit log — intentionally NOT under ``$HERMES_HOME/logs/``."""
+    """Audit log — intentionally NOT under ``$PICHKOO_HOME/logs/``."""
     return get_state_dir() / "cleanup.log"
 
 
@@ -64,7 +64,7 @@ def get_log_file() -> Path:
 # ---------------------------------------------------------------------------
 
 def is_safe_path(path: Path) -> bool:
-    """Accept only paths under HERMES_HOME or ``/tmp/pichkoo-*``.
+    """Accept only paths under PICHKOO_HOME or ``/tmp/pichkoo-*``.
 
     Rejects Windows mounts (``/mnt/c`` etc.) and any system directory.
     """
@@ -145,7 +145,7 @@ ALLOWED_CATEGORIES = {
 }
 
 
-# Paths under $HERMES_HOME that must NEVER be deleted by quick(),
+# Paths under $PICHKOO_HOME that must NEVER be deleted by quick(),
 # regardless of what the stored category says.  This is a defense-in-depth
 # guard against stale tracked.json entries from before #34840.
 _PROTECTED_CRON_PATHS: set[str] = set()
@@ -159,7 +159,7 @@ def _is_protected_cron_path(p: Path) -> bool:
     (``jobs.json``, ``.tick.lock``) — it does NOT blanket-protect
     everything under ``cron/`` because ``cron/output/`` is disposable.
     """
-    # Lazily build the set once per process so HERMES_HOME is resolved
+    # Lazily build the set once per process so PICHKOO_HOME is resolved
     # exactly once.
     if not _PROTECTED_CRON_PATHS:
         hermes_home = get_hermes_home()
@@ -197,7 +197,7 @@ def track(path_str: str, category: str, silent: bool = False) -> bool:
         return False
 
     if not is_safe_path(path):
-        _log(f"REJECT: {path} (outside HERMES_HOME)")
+        _log(f"REJECT: {path} (outside PICHKOO_HOME)")
         return False
 
     size = path.stat().st_size if path.is_file() else 0
@@ -348,7 +348,7 @@ def quick() -> Dict[str, Any]:
         else:
             new_tracked.append(item)
 
-    # Remove empty dirs under HERMES_HOME (but leave HERMES_HOME itself and
+    # Remove empty dirs under PICHKOO_HOME (but leave PICHKOO_HOME itself and
     # a short list of well-known top-level state dirs alone — a fresh install
     # has these empty, and deleting them would surprise the user).
     hermes_home = get_hermes_home()
@@ -549,7 +549,7 @@ def guess_category(path: Path) -> Optional[str]:
         if top == "cache":
             return "temp"
     except ValueError:
-        # Path isn't under HERMES_HOME (e.g. /tmp/pichkoo-*) — fall through.
+        # Path isn't under PICHKOO_HOME (e.g. /tmp/pichkoo-*) — fall through.
         pass
 
     name = path.name

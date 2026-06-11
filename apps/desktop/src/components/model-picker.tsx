@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useI18n } from '@/i18n'
 import type { ModelOptionProvider, ModelOptionsResponse, ModelPricing } from '@/types/pichkoo'
 
-import type { HermesGateway } from '../pichkoo'
+import type { PichkooGateway } from '../pichkoo'
 import { getGlobalModelOptions } from '../pichkoo'
 import { cn } from '../lib/utils'
 import { startManualOnboarding } from '../store/onboarding'
@@ -19,7 +19,7 @@ import { Skeleton } from './ui/skeleton'
 interface ModelPickerDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  gw?: HermesGateway
+  gw?: PichkooGateway
   sessionId?: string | null
   currentModel: string
   currentProvider: string

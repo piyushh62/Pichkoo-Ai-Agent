@@ -138,7 +138,7 @@ class TestFirecrawlClientConfig:
                 )
 
     def test_nous_auth_token_respects_hermes_home_override(self, tmp_path):
-        """Auth lookup should read from HERMES_HOME/auth.json, not ~/.pichkoo/auth.json."""
+        """Auth lookup should read from PICHKOO_HOME/auth.json, not ~/.pichkoo/auth.json."""
         real_home = tmp_path / "real-home"
         (real_home / ".pichkoo").mkdir(parents=True)
 
@@ -154,7 +154,7 @@ class TestFirecrawlClientConfig:
 
         with patch.dict(os.environ, {
             "HOME": str(real_home),
-            "HERMES_HOME": str(hermes_home),
+            "PICHKOO_HOME": str(hermes_home),
         }, clear=False):
             import tools.web_tools
             importlib.reload(tools.web_tools)
@@ -655,7 +655,7 @@ class TestCheckWebApiKey:
         monkeypatch,
     ):
         monkeypatch.delenv("TOOL_GATEWAY_USER_TOKEN", raising=False)
-        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setenv("PICHKOO_HOME", str(tmp_path))
         expired_at = "2000-01-01T00:00:00+00:00"
         (tmp_path / "auth.json").write_text(json.dumps({
             "providers": {

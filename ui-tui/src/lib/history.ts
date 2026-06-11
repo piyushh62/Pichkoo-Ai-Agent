@@ -3,7 +3,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 const MAX = 1000
-const dir = process.env.HERMES_HOME ?? join(homedir(), '.pichkoo')
+const dir = process.env.PICHKOO_HOME ?? join(homedir(), '.pichkoo')
 const file = join(dir, '.hermes_history')
 
 let cache: string[] | null = null

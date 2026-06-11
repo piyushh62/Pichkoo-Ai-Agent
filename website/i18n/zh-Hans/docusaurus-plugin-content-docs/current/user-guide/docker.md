@@ -60,7 +60,7 @@ docker run -d \
 
 ## 运行 dashboard
 
-内置 Web dashboard 作为可选的子进程在与 gateway 相同的容器内运行。设置 `HERMES_DASHBOARD=1` 可在容器回环地址（`127.0.0.1`）上默认运行 dashboard：
+内置 Web dashboard 作为可选的子进程在与 gateway 相同的容器内运行。设置 `PICHKOO_DASHBOARD=1` 可在容器回环地址（`127.0.0.1`）上默认运行 dashboard：
 
 ```sh
 docker run -d \
@@ -68,7 +68,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/.pichkoo:/opt/data \
   -p 8642:8642 \
-  -e HERMES_DASHBOARD=1 \
+  -e PICHKOO_DASHBOARD=1 \
   nousresearch/pichkoo-agent gateway run
 ```
 
@@ -76,21 +76,21 @@ docker run -d \
 
 | 环境变量 | 描述 | 默认值 |
 |---------------------|-------------|---------|
-| `HERMES_DASHBOARD` | 设为 `1`（或 `true` / `yes`）以在主命令旁启动 dashboard | *（未设置——不启动 dashboard）* |
-| `HERMES_DASHBOARD_HOST` | dashboard HTTP 服务器的绑定地址 | `127.0.0.1` |
-| `HERMES_DASHBOARD_PORT` | dashboard HTTP 服务器的端口 | `9119` |
-| `HERMES_DASHBOARD_INSECURE` | 设为 `1`（或 `true` / `yes`）以在不启用 OAuth 鉴权门控的情况下绑定。仅在可信网络（且通过没有 OAuth 契约的反向代理时）使用——dashboard 会暴露 API 密钥与会话数据 | *（未设置——当注册了 `DashboardAuthProvider` 时启用门控）* |
+| `PICHKOO_DASHBOARD` | 设为 `1`（或 `true` / `yes`）以在主命令旁启动 dashboard | *（未设置——不启动 dashboard）* |
+| `PICHKOO_DASHBOARD_HOST` | dashboard HTTP 服务器的绑定地址 | `127.0.0.1` |
+| `PICHKOO_DASHBOARD_PORT` | dashboard HTTP 服务器的端口 | `9119` |
+| `PICHKOO_DASHBOARD_INSECURE` | 设为 `1`（或 `true` / `yes`）以在不启用 OAuth 鉴权门控的情况下绑定。仅在可信网络（且通过没有 OAuth 契约的反向代理时）使用——dashboard 会暴露 API 密钥与会话数据 | *（未设置——当注册了 `DashboardAuthProvider` 时启用门控）* |
 
 默认情况下，dashboard 保持在回环地址（`127.0.0.1`），以避免将
 Web 界面暴露到网络。若要有意发布，请设置
-`HERMES_DASHBOARD_HOST=0.0.0.0`。当以下两项同时满足时，
+`PICHKOO_DASHBOARD_HOST=0.0.0.0`。当以下两项同时满足时，
 dashboard 的 OAuth 鉴权门控会自动启用：
 
 1. 绑定地址为非回环地址，**且**
 2. 注册了一个 `DashboardAuthProvider` 插件。
 
 捆绑的 `dashboard_auth/nous` 提供者会在设置
-`HERMES_DASHBOARD_OAUTH_CLIENT_ID` 时自动激活（参见
+`PICHKOO_DASHBOARD_OAUTH_CLIENT_ID` 时自动激活（参见
 [Web Dashboard → 鉴权](features/web-dashboard.md)）。门控启用后，
 浏览器调用方会先被重定向到所配置门户的 OAuth 流，然后才能
 访问任何受保护路由。
@@ -98,7 +98,7 @@ dashboard 的 OAuth 鉴权门控会自动启用：
 如果未注册提供者且绑定为非回环地址，dashboard **会在启动时
 失败关闭**，并给出指向缺失环境变量的具体错误信息。要显式
 退出门控——用于不使用 OAuth 契约、通过你自己的反向代理部署
-在可信局域网中的场景——请设置 `HERMES_DASHBOARD_INSECURE=1`。
+在可信局域网中的场景——请设置 `PICHKOO_DASHBOARD_INSECURE=1`。
 这会恢复旧的“无鉴权，但发出告警”模式，也是唯一可以禁用门控的
 路径；绑定地址不再隐式决定 `--insecure`。
 
@@ -236,11 +236,11 @@ services:
     command: gateway run
     ports:
       - "8642:8642"   # gateway API
-      - "9119:9119"   # dashboard（仅在 HERMES_DASHBOARD=1 时生效）
+      - "9119:9119"   # dashboard（仅在 PICHKOO_DASHBOARD=1 时生效）
     volumes:
       - ~/.pichkoo:/opt/data
     environment:
-      - HERMES_DASHBOARD=1
+      - PICHKOO_DASHBOARD=1
       # 取消注释以直接转发特定环境变量而非使用 .env 文件：
       # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -292,7 +292,7 @@ docker run -d \
 
 容器的 `ENTRYPOINT` 是 s6-overlay 的 `/init`。启动时：
 1. 以 root 身份运行 `/etc/cont-init.d/01-pichkoo-setup`（即 `docker/stage2-hook.sh`）：可选的 UID/GID 重映射、修复卷所有权、首次启动时初始化 `.env` / `config.yaml` / `SOUL.md`、同步内置技能。
-2. 运行 `/etc/cont-init.d/02-reconcile-profiles`（即 `pichkoo_cli.container_boot`）：遍历 `$HERMES_HOME/profiles/<name>/`，在 `/run/service/gateway-<profile>/` 下重建各 profile 的 gateway s6 服务槽，并仅自动启动上次记录状态为 `running` 的 profile（参见 [Per-profile gateway 监管](#per-profile-gateway-supervision)）。
+2. 运行 `/etc/cont-init.d/02-reconcile-profiles`（即 `pichkoo_cli.container_boot`）：遍历 `$PICHKOO_HOME/profiles/<name>/`，在 `/run/service/gateway-<profile>/` 下重建各 profile 的 gateway s6 服务槽，并仅自动启动上次记录状态为 `running` 的 profile（参见 [Per-profile gateway 监管](#per-profile-gateway-supervision)）。
 3. 启动静态的 `main-pichkoo` 和 `dashboard` s6-rc 服务。
 4. 将容器的 CMD 作为主程序 exec（`/opt/pichkoo/docker/main-wrapper.sh`），根据用户传给 `docker run` 的参数进行路由：
    - 无参数 → `pichkoo`（默认）
@@ -305,7 +305,7 @@ docker run -d \
 :::
 
 :::warning 权限模型
-除非你在命令链中保留 `/init`（或等效的旧版 `docker/entrypoint.sh` shim，它会转发到 stage2 hook），否则不要覆盖镜像入口点。s6-overlay 的 `/init` 以 root 运行，以便在首次启动时对卷执行 chown，然后通过 `s6-setuidgid` 为每个受监管的服务**以及**主程序降权至 `pichkoo` 用户。在官方镜像内以 root 启动 `pichkoo gateway run` 默认会被拒绝，因为这可能在 `/opt/data` 中留下 root 所有的文件，导致后续 dashboard 或 gateway 启动失败。仅在你有意接受该风险时才设置 `HERMES_ALLOW_ROOT_GATEWAY=1`。
+除非你在命令链中保留 `/init`（或等效的旧版 `docker/entrypoint.sh` shim，它会转发到 stage2 hook），否则不要覆盖镜像入口点。s6-overlay 的 `/init` 以 root 运行，以便在首次启动时对卷执行 chown，然后通过 `s6-setuidgid` 为每个受监管的服务**以及**主程序降权至 `pichkoo` 用户。在官方镜像内以 root 启动 `pichkoo gateway run` 默认会被拒绝，因为这可能在 `/opt/data` 中留下 root 所有的文件，导致后续 dashboard 或 gateway 启动失败。仅在你有意接受该风险时才设置 `PICHKOO_ALLOW_ROOT_GATEWAY=1`。
 :::
 
 ### Per-profile gateway 监管
@@ -323,9 +323,9 @@ pichkoo profile delete coder            # 拆除 s6 槽
 **相比 pre-s6 镜像的监管优势：**
 
 - Gateway 崩溃后由 `s6-supervise` 在约 1 秒退避后自动重启。
-- Dashboard 崩溃后自动重启（设置 `HERMES_DASHBOARD=1` 以启动）。
-- `docker restart` 保留运行中的 gateway：cont-init 协调器读取 `$HERMES_HOME/profiles/<name>/gateway_state.json`，若上次记录状态为 `running` 则恢复该槽。已停止的 gateway 保持停止状态。
-- 各 profile 的 gateway 日志持久化于 `$HERMES_HOME/logs/gateways/<profile>/current`（由 `s6-log` 轮转），协调器的操作记录在每次启动时追加到 `$HERMES_HOME/logs/container-boot.log`。
+- Dashboard 崩溃后自动重启（设置 `PICHKOO_DASHBOARD=1` 以启动）。
+- `docker restart` 保留运行中的 gateway：cont-init 协调器读取 `$PICHKOO_HOME/profiles/<name>/gateway_state.json`，若上次记录状态为 `running` 则恢复该槽。已停止的 gateway 保持停止状态。
+- 各 profile 的 gateway 日志持久化于 `$PICHKOO_HOME/logs/gateways/<profile>/current`（由 `s6-log` 轮转），协调器的操作记录在每次启动时追加到 `$PICHKOO_HOME/logs/container-boot.log`。
 
 在容器内执行 `pichkoo status` 会显示 `Manager: s6 (container supervisor)`。使用 `/command/s6-svstat /run/service/gateway-<name>` 查看原始 supervisor 状态（注意 `/command/` 仅在监管树进程的 PATH 中；从 `docker exec` 调用时请传入绝对路径）。
 
@@ -579,7 +579,7 @@ model:
 
 ### "Permission denied" 错误
 
-容器的 stage2 hook 通过 `s6-setuidgid` 在每个受监管的服务内将权限降至非 root 用户 `pichkoo`（UID 10000）。如果宿主机的 `~/.pichkoo/` 由不同 UID 拥有，请设置 `HERMES_UID`/`HERMES_GID` 以匹配宿主机用户，或确保数据目录可写：
+容器的 stage2 hook 通过 `s6-setuidgid` 在每个受监管的服务内将权限降至非 root 用户 `pichkoo`（UID 10000）。如果宿主机的 `~/.pichkoo/` 由不同 UID 拥有，请设置 `PICHKOO_UID`/`PICHKOO_GID` 以匹配宿主机用户，或确保数据目录可写：
 
 ```sh
 chmod -R 755 ~/.pichkoo

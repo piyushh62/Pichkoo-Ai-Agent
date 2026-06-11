@@ -39,7 +39,7 @@ def _write_manifest(root: Path, version: str) -> None:
         json.dumps(
             {
                 "id": "pichkoo-agent",
-                "name": "Hermes Agent",
+                "name": "Pichkoo AI Agent",
                 "version": version,
                 "description": "test",
                 "distribution": {

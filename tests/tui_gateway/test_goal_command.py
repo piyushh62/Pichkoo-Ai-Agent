@@ -23,9 +23,9 @@ def hermes_home(tmp_path, monkeypatch):
     home = tmp_path / ".pichkoo"
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setenv("HERMES_HOME", str(home))
+    monkeypatch.setenv("PICHKOO_HOME", str(home))
 
-    # Bust the goal-module DB cache so it re-resolves HERMES_HOME.
+    # Bust the goal-module DB cache so it re-resolves PICHKOO_HOME.
     from pichkoo_cli import goals
 
     goals._DB_CACHE.clear()
@@ -187,7 +187,7 @@ def test_goal_requires_session(server):
 
 def test_slash_exec_rejects_goal_routes_to_command_dispatch(server, session):
     """slash.exec must reject /goal with 4018 so the TUI client falls through
-    to command.dispatch. Without this, the HermesCLI slash-worker subprocess
+    to command.dispatch. Without this, the PichkooCLI slash-worker subprocess
     would set the goal but silently drop the kickoff — the queue is in-proc."""
     sid, _, _ = session
     r = _call(server, "slash.exec", command="goal status", session_id=sid)

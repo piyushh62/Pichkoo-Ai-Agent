@@ -26,8 +26,8 @@ def store(tmp_path, monkeypatch):
 
     Pin DEFAULT_DB_PATH to tmp_path so SessionDB() can't write to the real
     ~/.pichkoo/state.db. (DEFAULT_DB_PATH is a module-level constant computed
-    at pichkoo_state import time, before pytest's HERMES_HOME monkeypatch
-    fires — the autouse fixture's HERMES_HOME override doesn't help here.)
+    at pichkoo_state import time, before pytest's PICHKOO_HOME monkeypatch
+    fires — the autouse fixture's PICHKOO_HOME override doesn't help here.)
     """
     import pichkoo_state
     monkeypatch.setattr(pichkoo_state, "DEFAULT_DB_PATH", tmp_path / "state.db")

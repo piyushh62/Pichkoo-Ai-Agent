@@ -91,13 +91,13 @@ def test_detect_concurrent_matches_case_insensitively(_winp, tmp_path):
     shim.write_bytes(b"")
 
     # Simulate the desktop spawning pichkoo.EXE (uppercase ext) from same path
-    upper = str(shim).replace("pichkoo.exe", "HERMES.EXE")
-    procs = [_make_proc(9999, upper, "HERMES.EXE")]
+    upper = str(shim).replace("pichkoo.exe", "PICHKOO.EXE")
+    procs = [_make_proc(9999, upper, "PICHKOO.EXE")]
     fake_psutil = types.SimpleNamespace(process_iter=lambda attrs: iter(procs))
     with patch.dict(sys.modules, {"psutil": fake_psutil}):
         result = cli_main._detect_concurrent_hermes_instances(scripts_dir)
 
-    assert result == [(9999, "HERMES.EXE")]
+    assert result == [(9999, "PICHKOO.EXE")]
 
 
 @patch.object(cli_main, "_is_windows", return_value=True)
@@ -329,7 +329,7 @@ def test_format_message_mentions_pids_and_remediation(tmp_path):
     assert "1234" in msg
     assert "5678" in msg
     assert "pichkoo.exe" in msg
-    assert "Hermes Desktop" in msg
+    assert "Pichkoo Desktop" in msg
     assert "--force" in msg
     # Mentions the file that would have been overwritten
     assert str(tmp_path / "pichkoo.exe") in msg
@@ -443,7 +443,7 @@ def test_quarantine_actionable_warning_when_everything_fails(
     # New message format: no raw "[WinError 32]" dump; instead names the cause
     # and tells the user what to do.
     assert "another process" in captured.lower()
-    assert "Hermes Desktop" in captured or "gateway" in captured.lower()
+    assert "Pichkoo Desktop" in captured or "gateway" in captured.lower()
 
 
 # ---------------------------------------------------------------------------

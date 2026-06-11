@@ -41,7 +41,7 @@ and drives the loop via the upstream CLI or a small custom Python driver.
 
 **License:** the upstream tool is **AGPL-3.0**. The skill ONLY ever invokes it
 via the upstream CLI or a `subprocess`/`uv run` call (mere aggregation). Do NOT
-import upstream classes into Hermes itself.
+import upstream classes into Pichkoo itself.
 
 ## When to Use
 

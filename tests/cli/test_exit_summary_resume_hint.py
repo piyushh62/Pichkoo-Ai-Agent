@@ -3,11 +3,11 @@
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from cli import HermesCLI
+from cli import PichkooCLI
 
 
 def _make_cli(session_id="20260524_000001_abc123"):
-    cli_obj = HermesCLI.__new__(HermesCLI)
+    cli_obj = PichkooCLI.__new__(PichkooCLI)
     cli_obj.session_id = session_id
     # _print_exit_summary requires a populated conversation history (msg_count > 0)
     # to print the resume hint at all. One synthetic user turn is enough.
@@ -40,7 +40,7 @@ class TestExitSummaryResumeHint:
         with patch("pichkoo_cli.profiles.get_active_profile_name", return_value="custom"):
             cli_obj._print_exit_summary()
         out = capsys.readouterr().out
-        # "custom" is the standard HERMES_HOME indicator — no -p needed.
+        # "custom" is the standard PICHKOO_HOME indicator — no -p needed.
         assert "pichkoo --resume 20260524_000001_abc123" in out
         assert " -p " not in out
 

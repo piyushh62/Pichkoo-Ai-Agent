@@ -5,7 +5,7 @@ Backup and import commands for pichkoo CLI.
 (excluding the pichkoo-agent repo and transient files).
 
 `pichkoo import` restores from a backup zip, overlaying onto the current
-HERMES_HOME root.
+PICHKOO_HOME root.
 """
 
 import json
@@ -91,7 +91,7 @@ def _should_skip_backup_file(abs_path: Path, rel_path: Path, out_path: Path) -> 
         return True
 
     # zipfile.write() follows file symlinks, so skip links before any archive
-    # write can copy data from outside HERMES_HOME.
+    # write can copy data from outside PICHKOO_HOME.
     if abs_path.is_symlink():
         return True
 
@@ -142,11 +142,11 @@ def _format_size(nbytes: int) -> str:
 
 
 def run_backup(args) -> None:
-    """Create a zip backup of the Hermes home directory."""
+    """Create a zip backup of the Pichkoo home directory."""
     hermes_root = get_default_hermes_root()
 
     if not hermes_root.is_dir():
-        print(f"Error: Hermes home directory not found at {hermes_root}")
+        print(f"Error: Pichkoo home directory not found at {hermes_root}")
         sys.exit(1)
 
     # Determine output path
@@ -263,7 +263,7 @@ def run_backup(args) -> None:
 # ---------------------------------------------------------------------------
 
 def _validate_backup_zip(zf: zipfile.ZipFile) -> tuple[bool, str]:
-    """Check that a zip looks like a Hermes backup.
+    """Check that a zip looks like a Pichkoo backup.
 
     Returns (ok, reason).
     """
@@ -282,7 +282,7 @@ def _validate_backup_zip(zf: zipfile.ZipFile) -> tuple[bool, str]:
 
     if not found:
         return False, (
-            "zip does not appear to be a Hermes backup "
+            "zip does not appear to be a Pichkoo backup "
             "(no config.yaml, .env, or state databases found)"
         )
 
@@ -314,7 +314,7 @@ def _detect_prefix(zf: zipfile.ZipFile) -> str:
 
 
 def run_import(args) -> None:
-    """Restore a Hermes backup from a zip file."""
+    """Restore a Pichkoo backup from a zip file."""
     zip_path = Path(args.zipfile).expanduser().resolve()
 
     if not zip_path.is_file():
@@ -350,7 +350,7 @@ def run_import(args) -> None:
 
         if (has_config or has_env) and not args.force:
             print()
-            print("Warning: Target directory already has Hermes configuration.")
+            print("Warning: Target directory already has Pichkoo configuration.")
             print("Importing will overwrite existing files with backup contents.")
             print()
             try:
@@ -469,14 +469,14 @@ def run_import(args) -> None:
             for pname in gw_profiles:
                 print(f"  pichkoo -p {pname} gateway install")
 
-        print("Done. Your Hermes configuration has been restored.")
+        print("Done. Your Pichkoo configuration has been restored.")
 
 
 # ---------------------------------------------------------------------------
 # Quick state snapshots (used by /snapshot slash command and pichkoo backup --quick)
 # ---------------------------------------------------------------------------
 
-# Critical state files to include in quick snapshots (relative to HERMES_HOME).
+# Critical state files to include in quick snapshots (relative to PICHKOO_HOME).
 # Everything else is either regeneratable (logs, cache) or managed separately
 # (skills, repo, sessions/).
 #
@@ -670,7 +670,7 @@ def restore_quick_snapshot(
     return restored > 0
 
 
-# Relative path of the cron job database inside HERMES_HOME. Kept in sync with
+# Relative path of the cron job database inside PICHKOO_HOME. Kept in sync with
 # the entry in ``_QUICK_STATE_FILES`` and with ``cron/jobs.py``'s ``JOBS_FILE``.
 _CRON_JOBS_REL = "cron/jobs.json"
 
@@ -726,7 +726,7 @@ def restore_cron_jobs_if_emptied(
     Args:
         snapshot_id: The pre-update quick-snapshot id (from
             :func:`create_quick_snapshot`).
-        hermes_home: Override for the Hermes home directory (tests).
+        hermes_home: Override for the Pichkoo home directory (tests).
 
     Returns:
         ``None`` when no action was taken (the common, healthy path). On a
@@ -932,10 +932,10 @@ def create_pre_update_backup(
     hermes_home: Optional[Path] = None,
     keep: int = _PRE_UPDATE_DEFAULT_KEEP,
 ) -> Optional[Path]:
-    """Create a full zip backup of HERMES_HOME under ``backups/``.
+    """Create a full zip backup of PICHKOO_HOME under ``backups/``.
 
     Mirrors :func:`run_backup` (same exclusion rules, same SQLite safe-copy)
-    but writes to ``<HERMES_HOME>/backups/pre-update-<timestamp>.zip`` and
+    but writes to ``<PICHKOO_HOME>/backups/pre-update-<timestamp>.zip`` and
     auto-prunes old pre-update backups.
 
     Returns the path to the created zip, or ``None`` if no files were
@@ -1004,13 +1004,13 @@ def create_pre_migration_backup(
     hermes_home: Optional[Path] = None,
     keep: int = _PRE_MIGRATION_DEFAULT_KEEP,
 ) -> Optional[Path]:
-    """Create a full zip backup of HERMES_HOME under ``backups/`` before a
+    """Create a full zip backup of PICHKOO_HOME under ``backups/`` before a
     ``pichkoo claw migrate`` apply.
 
     Shares implementation with :func:`create_pre_update_backup` via
     ``_write_full_zip_backup`` — same exclusions, same SQLite safe-copy,
     restorable with ``pichkoo import <archive>``.  Writes to
-    ``<HERMES_HOME>/backups/pre-migration-<timestamp>.zip`` and auto-prunes
+    ``<PICHKOO_HOME>/backups/pre-migration-<timestamp>.zip`` and auto-prunes
     old pre-migration backups.
 
     Returns the path to the created zip, or ``None`` if nothing was found
