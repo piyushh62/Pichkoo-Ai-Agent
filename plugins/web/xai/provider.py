@@ -25,8 +25,8 @@ Optional knobs (under ``web.xai`` in ``config.yaml``)::
         timeout: 90                   # seconds (default 90)
 
 Auth: reuses :func:`tools.xai_http.resolve_xai_http_credentials`, which
-prefers Hermes-managed xAI Grok OAuth (via ``hermes auth``) and falls back
-to ``XAI_API_KEY`` (resolved through ``~/.hermes/.env``, then
+prefers Hermes-managed xAI Grok OAuth (via ``pichkoo auth``) and falls back
+to ``XAI_API_KEY`` (resolved through ``~/.pichkoo/.env``, then
 ``os.environ``).
 """
 
@@ -64,7 +64,7 @@ _JSON_BLOCK_RE = re.compile(r"\{[\s\S]*\}", re.MULTILINE)
 def _load_xai_web_config() -> Dict[str, Any]:
     """Read ``web.xai`` from config.yaml (returns {} on miss)."""
     try:
-        from hermes_cli.config import load_config
+        from pichkoo_cli.config import load_config
 
         cfg = load_config()
         web_section = cfg.get("web") if isinstance(cfg, dict) else None
@@ -132,7 +132,7 @@ class XAIWebSearchProvider(WebSearchProvider):
         deliberately *not* the same as :func:`resolve_xai_http_credentials`:
         it never triggers OAuth token refresh or acquires the auth-store
         lock. The ABC contract requires this method to be safe to call on
-        every ``hermes tools`` repaint and at tool-registration time.
+        every ``pichkoo tools`` repaint and at tool-registration time.
         Token freshness / refresh is handled inside :meth:`search`.
         """
         return has_xai_credentials()
@@ -166,7 +166,7 @@ class XAIWebSearchProvider(WebSearchProvider):
             return {
                 "success": False,
                 "error": (
-                    "No xAI credentials found. Run `hermes auth` to sign in with "
+                    "No xAI credentials found. Run `pichkoo auth` to sign in with "
                     "xAI Grok OAuth, or set XAI_API_KEY."
                 ),
             }

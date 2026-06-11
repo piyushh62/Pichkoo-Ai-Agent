@@ -25,7 +25,7 @@ function imageFilename(src?: string): string {
 function isMissingIpcHandler(error: unknown): boolean {
   const message = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
 
-  return message.includes("No handler registered for 'hermes:saveImageFromUrl'")
+  return message.includes("No handler registered for 'pichkoo:saveImageFromUrl'")
 }
 
 async function startBrowserDownload(src: string) {

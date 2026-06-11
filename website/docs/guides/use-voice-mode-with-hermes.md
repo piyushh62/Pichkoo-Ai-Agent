@@ -45,7 +45,7 @@ Before touching voice mode, verify that:
 - the agent can answer text prompts normally
 
 ```bash
-hermes
+pichkoo
 ```
 
 Ask something simple:
@@ -61,19 +61,19 @@ If that is not solid yet, fix text mode first.
 ### CLI microphone + playback
 
 ```bash
-pip install "hermes-agent[voice]"
+pip install "pichkoo-agent[voice]"
 ```
 
 ### Messaging platforms
 
 ```bash
-pip install "hermes-agent[messaging]"
+pip install "pichkoo-agent[messaging]"
 ```
 
 ### Premium ElevenLabs TTS
 
 ```bash
-pip install "hermes-agent[tts-premium]"
+pip install "pichkoo-agent[tts-premium]"
 ```
 
 ### Local NeuTTS (optional)
@@ -85,7 +85,7 @@ python -m pip install -U neutts[all]
 ### Everything
 
 ```bash
-pip install "hermes-agent[all]"
+pip install "pichkoo-agent[all]"
 ```
 
 ## Step 3: install system dependencies
@@ -124,7 +124,7 @@ This is usually the best place to start.
 
 ### Environment file example
 
-Add to `~/.hermes/.env`:
+Add to `~/.pichkoo/.env`:
 
 ```bash
 # Cloud STT options (local needs no key)
@@ -151,7 +151,7 @@ ELEVENLABS_API_KEY=***
 - `openai` → good middle ground
 - `mistral` → multilingual, native Opus
 
-### If you use `hermes setup`
+### If you use `pichkoo setup`
 
 If you choose NeuTTS in the setup wizard, Pichkoo checks whether `neutts` is already installed. If it is missing, the wizard tells you NeuTTS needs the Python package `neutts` and the system package `espeak-ng`, offers to install them for you, installs `espeak-ng` with your platform package manager, and then runs:
 
@@ -204,7 +204,7 @@ tts:
 Start Pichkoo:
 
 ```bash
-hermes
+pichkoo
 ```
 
 Inside the CLI:
@@ -302,7 +302,7 @@ Pichkoo stays a normal chat bot, but can speak replies.
 ### Start the gateway
 
 ```bash
-hermes gateway
+pichkoo gateway
 ```
 
 ### Turn on voice replies
@@ -444,7 +444,7 @@ By default, the bot needs an `@mention` in Discord server text channels unless c
 If you want the shortest path to success:
 
 1. get text Pichkoo working
-2. install `hermes-agent[voice]`
+2. install `pichkoo-agent[voice]`
 3. use CLI voice mode with local STT + Edge TTS
 4. then enable `/voice on` in Telegram or Discord
 5. only after that, try Discord VC mode

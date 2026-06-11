@@ -1,7 +1,7 @@
-"""Tests for `hermes photon setup`'s access auto-configuration.
+"""Tests for `pichkoo photon setup`'s access auto-configuration.
 
 `_autoconfigure_access` allowlists the operator and points the cron home
-channel at their DM, writing to the per-test ~/.hermes/.env (the hermetic
+channel at their DM, writing to the per-test ~/.pichkoo/.env (the hermetic
 HERMES_HOME fixture isolates this). It must fill only unset keys so a re-run
 never clobbers a hand-tuned allowlist.
 """
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from hermes_cli.config import get_env_value, save_env_value
+from pichkoo_cli.config import get_env_value, save_env_value
 from plugins.platforms.photon.adapter import _env_enablement
 from plugins.platforms.photon import cli
 

@@ -64,7 +64,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 ## `feishu_doc` 工具集
 
-仅限飞书文档评论智能回复处理器（`gateway/platforms/feishu_comment.py`）使用。不在 `hermes-cli` 或常规飞书聊天适配器中暴露。
+仅限飞书文档评论智能回复处理器（`gateway/platforms/feishu_comment.py`）使用。不在 `pichkoo-cli` 或常规飞书聊天适配器中暴露。
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
@@ -103,7 +103,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
-| `computer_use` | 通过 cua-driver 在后台控制 macOS 桌面——截图（SOM / vision / AX）、点击 / 拖拽 / 滚动 / 输入 / 按键 / 等待、`list_apps`、`focus_app`。**不会**抢占用户的光标或键盘焦点。适用于任何支持工具的模型。仅限 macOS。 | `cua-driver` 在 `$PATH` 中（通过 `hermes tools` 安装）。 |
+| `computer_use` | 通过 cua-driver 在后台控制 macOS 桌面——截图（SOM / vision / AX）、点击 / 拖拽 / 滚动 / 输入 / 按键 / 等待、`list_apps`、`focus_app`。**不会**抢占用户的光标或键盘焦点。适用于任何支持工具的模型。仅限 macOS。 | `cua-driver` 在 `$PATH` 中（通过 `pichkoo tools` 安装）。 |
 
 :::note
 **Honcho 工具**（`honcho_profile`、`honcho_search`、`honcho_context`、`honcho_reasoning`、`honcho_conclude`）不再是内置工具。它们通过 `plugins/memory/honcho/` 的 Honcho 记忆提供者插件提供。安装和使用方法见 [Memory Providers](../user-guide/features/memory-providers.md)。
@@ -159,7 +159,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
-| `skill_manage` | 管理 skill（创建、更新、删除）。Skill 是你的程序性记忆——针对重复任务类型的可复用方法。新 skill 保存到 `~/.hermes/skills/`；现有 skill 可在其所在位置修改。操作：create（完整 SKILL.m…） | — |
+| `skill_manage` | 管理 skill（创建、更新、删除）。Skill 是你的程序性记忆——针对重复任务类型的可复用方法。新 skill 保存到 `~/.pichkoo/skills/`；现有 skill 可在其所在位置修改。操作：create（完整 SKILL.m…） | — |
 | `skill_view` | Skill 允许加载特定任务和工作流的信息，以及脚本和模板。加载某个 skill 的完整内容或访问其链接文件（参考资料、模板、脚本）。首次调用返回 SKILL.md 内容及… | — |
 | `skills_list` | 列出可用 skill（名称 + 描述）。使用 `skill_view(name)` 加载完整内容。 | — |
 
@@ -184,7 +184,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 ## `video` 工具集
 
-可选工具集（默认 `hermes-cli` 集中不加载）。通过 `--toolsets video` 添加，或在 `toolsets:` 配置中包含 `video`。
+可选工具集（默认 `pichkoo-cli` 集中不加载）。通过 `--toolsets video` 添加，或在 `toolsets:` 配置中包含 `video`。
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
@@ -192,7 +192,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 ## `video_gen` 工具集
 
-可选工具集（默认 `hermes-cli` 集中不加载）。通过 `--toolsets video_gen` 添加，或在 `hermes tools` → Video Generation 中启用（同时引导你选择后端）。
+可选工具集（默认 `pichkoo-cli` 集中不加载）。通过 `--toolsets video_gen` 添加，或在 `pichkoo tools` → Video Generation 中启用（同时引导你选择后端）。
 
 后端以插件形式存放于 `plugins/video_gen/<name>/`：
 
@@ -216,7 +216,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
-| `x_search` | 使用 xAI 内置的 `x_search` Responses 工具搜索 X（Twitter）帖子、主页和话题串。用于获取 X 上的当前讨论、反应或观点，而非通用网页。默认关闭——通过 `hermes tools` → 🐦 X (Twitter) Search 选择启用。仅在配置了 xAI 凭据时注册 schema（check_fn 门控）。 | XAI_API_KEY **或** xAI Grok OAuth（SuperGrok / Premium+）登录 |
+| `x_search` | 使用 xAI 内置的 `x_search` Responses 工具搜索 X（Twitter）帖子、主页和话题串。用于获取 X 上的当前讨论、反应或观点，而非通用网页。默认关闭——通过 `pichkoo tools` → 🐦 X (Twitter) Search 选择启用。仅在配置了 xAI 凭据时注册 schema（check_fn 门控）。 | XAI_API_KEY **或** xAI Grok OAuth（SuperGrok / Premium+）登录 |
 
 ## `tts` 工具集
 
@@ -226,7 +226,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 ## `discord` 工具集
 
-在 `hermes-discord` 平台工具集（仅 gateway）上注册。使用与消息适配器相同的 bot token。
+在 `pichkoo-discord` 平台工具集（仅 gateway）上注册。使用与消息适配器相同的 bot token。
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
@@ -234,7 +234,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 ## `discord_admin` 工具集
 
-在 `hermes-discord` 平台工具集上注册。审核操作需要 bot 持有相应的 Discord 权限。
+在 `pichkoo-discord` 平台工具集上注册。审核操作需要 bot 持有相应的 Discord 权限。
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
@@ -242,7 +242,7 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 
 ## `spotify` 工具集
 
-由内置 `spotify` 插件注册。需要 OAuth token——运行一次 `hermes spotify setup` 进行授权。
+由内置 `spotify` 插件注册。需要 OAuth token——运行一次 `pichkoo spotify setup` 进行授权。
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|
@@ -254,9 +254,9 @@ description: "Pichkoo 内置工具权威参考，按工具集分组"
 | `spotify_albums` | 获取 Spotify 专辑元数据或专辑曲目。 | Spotify OAuth |
 | `spotify_library` | 列出、保存或移除用户已保存的 Spotify 曲目或专辑。 | Spotify OAuth |
 
-## `hermes-yuanbao` 工具集
+## `pichkoo-yuanbao` 工具集
 
-仅在 `hermes-yuanbao` 平台工具集上注册。元宝是腾讯的聊天应用；这些工具驱动其私信/群组/表情包 API。
+仅在 `pichkoo-yuanbao` 平台工具集上注册。元宝是腾讯的聊天应用；这些工具驱动其私信/群组/表情包 API。
 
 | 工具 | 描述 | 所需环境 |
 |------|------|----------|

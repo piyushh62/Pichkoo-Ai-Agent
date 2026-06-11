@@ -54,7 +54,7 @@ class TestPinPeerNameConfigParsing:
             "apiKey": "k",
             "peerName": "Igor",
             "hosts": {
-                "hermes": {"pinPeerName": True},
+                "pichkoo": {"pinPeerName": True},
             },
         }))
         monkeypatch.setenv("HERMES_HOME", str(tmp_path / "isolated"))
@@ -70,7 +70,7 @@ class TestPinPeerNameConfigParsing:
             "peerName": "Igor",
             "pinPeerName": True,
             "hosts": {
-                "hermes": {"pinPeerName": False},
+                "pichkoo": {"pinPeerName": False},
             },
         }))
         monkeypatch.setenv("HERMES_HOME", str(tmp_path / "isolated"))
@@ -124,7 +124,7 @@ class TestRuntimePeerMappingConfigParsing:
             "apiKey": "k",
             "userPeerAliases": {"root-user": "root-peer"},
             "hosts": {
-                "hermes": {
+                "pichkoo": {
                     "userPeerAliases": {"host-user": "host-peer"},
                 },
             },
@@ -140,7 +140,7 @@ class TestRuntimePeerMappingConfigParsing:
             "apiKey": "k",
             "userPeerAliases": {"root-user": "root-peer"},
             "hosts": {
-                "hermes": {
+                "pichkoo": {
                     "userPeerAliases": {},
                 },
             },
@@ -156,7 +156,7 @@ class TestRuntimePeerMappingConfigParsing:
             "apiKey": "k",
             "runtimePeerPrefix": "telegram_",
             "hosts": {
-                "hermes": {
+                "pichkoo": {
                     "runtimePeerPrefix": "",
                 },
             },
@@ -519,7 +519,7 @@ class TestPeerResolutionOrder:
             api_key="k",
             peer_name="Igor",
             pin_peer_name=True,
-            ai_peer="hermes-assistant",
+            ai_peer="pichkoo-assistant",
             enabled=False,
             write_frequency="turn",
         )
@@ -532,7 +532,7 @@ class TestPeerResolutionOrder:
 
         session = mgr.get_or_create("telegram:86701400")
         assert session.user_peer_id == "Igor"
-        assert session.assistant_peer_id == "hermes-assistant"
+        assert session.assistant_peer_id == "pichkoo-assistant"
 
 
 class TestCrossPlatformMemoryUnification:
@@ -635,7 +635,7 @@ class TestPinUserPeerAlias:
             "apiKey": "***",
             "peerName": "eri",
             "pinPeerName": False,
-            "hosts": {"hermes": {"pinUserPeer": True}},
+            "hosts": {"pichkoo": {"pinUserPeer": True}},
         }))
         config = HonchoClientConfig.from_global_config(config_path=config_file)
         assert config.pin_peer_name is True
@@ -648,7 +648,7 @@ class TestPinUserPeerAlias:
             "apiKey": "***",
             "peerName": "eri",
             "pinPeerName": True,
-            "hosts": {"hermes": {"pinUserPeer": False}},
+            "hosts": {"pichkoo": {"pinUserPeer": False}},
         }))
         config = HonchoClientConfig.from_global_config(config_path=config_file)
         assert config.pin_peer_name is False, (
@@ -663,7 +663,7 @@ class TestPinUserPeerAlias:
         config_file.write_text(json.dumps({
             "apiKey": "***",
             "peerName": "eri",
-            "hosts": {"hermes": {"pinPeerName": True}},
+            "hosts": {"pichkoo": {"pinPeerName": True}},
         }))
         config = HonchoClientConfig.from_global_config(config_path=config_file)
         assert config.pin_peer_name is True
@@ -803,7 +803,7 @@ class TestPinTransition:
         cfg_path.write_text(json.dumps({
             "apiKey": "k",
             "peerName": "Igor",
-            "aiPeer": "hermes",
+            "aiPeer": "pichkoo",
         }))
         sig_before = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
@@ -821,7 +821,7 @@ class TestProfilePeerUniqueness:
     """Each Hermes profile can pin to its own unique peerName.
 
     Profile cloning copies host blocks, but operators routinely diverge them
-    afterwards (e.g. `hermes -p partner` pinned to a different person's peer).
+    afterwards (e.g. `pichkoo -p partner` pinned to a different person's peer).
     The resolver must honor host-level ``peerName`` so two profiles in the
     same workspace stay scoped to different Honcho peers.
     """
@@ -868,7 +868,7 @@ class TestProfilePeerUniqueness:
             "apiKey": "k",
             "peerName": "default-user",
             "hosts": {
-                "hermes.partner": {
+                "pichkoo.partner": {
                     "peerName": "partner-user",
                     "pinPeerName": True,
                 },
@@ -877,7 +877,7 @@ class TestProfilePeerUniqueness:
         monkeypatch.setenv("HERMES_HOME", str(tmp_path / "isolated"))
 
         cfg = HonchoClientConfig.from_global_config(
-            host="hermes.partner", config_path=config_file,
+            host="pichkoo.partner", config_path=config_file,
         )
         assert cfg.peer_name == "partner-user"
         assert cfg.pin_peer_name is True

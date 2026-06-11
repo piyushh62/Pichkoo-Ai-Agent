@@ -19,7 +19,7 @@ ACP is a good fit when you want Pichkoo to behave like an editor-native coding a
 
 ## What Pichkoo exposes in ACP mode
 
-Pichkoo runs with a curated `hermes-acp` toolset designed for editor workflows. It includes:
+Pichkoo runs with a curated `pichkoo-acp` toolset designed for editor workflows. It includes:
 
 - file tools: `read_file`, `write_file`, `patch`, `search_files`
 - terminal tools: `terminal`, `process`
@@ -41,14 +41,14 @@ pip install -e '.[acp]'
 
 This installs the `agent-client-protocol` dependency and enables:
 
-- `hermes acp`
-- `hermes-acp`
+- `pichkoo acp`
+- `pichkoo-acp`
 - `python -m acp_adapter`
 
 For Zed registry installs, Zed launches Pichkoo through the official ACP Registry entry. That entry uses a `uvx` distribution that runs:
 
 ```bash
-uvx --from 'hermes-agent[acp]==<version>' hermes-acp
+uvx --from 'pichkoo-agent[acp]==<version>' pichkoo-acp
 ```
 
 Make sure `uv` is available on `PATH` before using the registry install path.
@@ -58,11 +58,11 @@ Make sure `uv` is available on `PATH` before using the registry install path.
 Any of the following starts Pichkoo in ACP mode:
 
 ```bash
-hermes acp
+pichkoo acp
 ```
 
 ```bash
-hermes-acp
+pichkoo-acp
 ```
 
 ```bash
@@ -74,8 +74,8 @@ Pichkoo logs to stderr so stdout remains reserved for ACP JSON-RPC traffic.
 For non-interactive checks:
 
 ```bash
-hermes acp --version
-hermes acp --check
+pichkoo acp --version
+pichkoo acp --check
 ```
 
 ### Browser tools (optional)
@@ -85,15 +85,15 @@ Browser tools (`browser_navigate`, `browser_click`, etc.) depend on the
 wheel. Install them with:
 
 ```bash
-hermes acp --setup-browser           # interactive (prompts before ~400 MB download)
-hermes acp --setup-browser --yes     # accept the download non-interactively
+pichkoo acp --setup-browser           # interactive (prompts before ~400 MB download)
+pichkoo acp --setup-browser --yes     # accept the download non-interactively
 ```
 
-This is the standalone command. The Zed registry's terminal-auth flow (`hermes acp --setup`) also offers the browser bootstrap as a follow-up question after model selection, so most users never need to run `--setup-browser` directly.
+This is the standalone command. The Zed registry's terminal-auth flow (`pichkoo acp --setup`) also offers the browser bootstrap as a follow-up question after model selection, so most users never need to run `--setup-browser` directly.
 
 What it does:
 
-- Installs Node.js 22 LTS into `~/.hermes/node/` if missing
+- Installs Node.js 22 LTS into `~/.pichkoo/node/` if missing
 - `npm install -g agent-browser @askjo/camofox-browser` into that prefix (no sudo needed — `npm`'s `--prefix` points at the user-writable Pichkoo-managed Node)
 - Installs Playwright Chromium, or uses a detected system Chrome/Chromium when available
 
@@ -117,7 +117,7 @@ If you want to define Pichkoo manually, add it through VS Code settings under `a
 {
   "acp.agents": {
     "Pichkoo AI Agent": {
-      "command": "hermes",
+      "command": "pichkoo",
       "args": ["acp"]
     }
   }
@@ -135,17 +135,17 @@ Zed v0.221.x and newer installs external agents through the official ACP Registr
 
 Prerequisites:
 
-- Configure Pichkoo provider credentials first with `hermes model`, or set them in `~/.hermes/.env` / `~/.hermes/config.yaml`.
-- Install `uv` so the registry launcher can run `uvx --from 'hermes-agent[acp]==<version>' hermes-acp`.
+- Configure Pichkoo provider credentials first with `pichkoo model`, or set them in `~/.pichkoo/.env` / `~/.pichkoo/config.yaml`.
+- Install `uv` so the registry launcher can run `uvx --from 'pichkoo-agent[acp]==<version>' pichkoo-acp`.
 
 For local development before the registry entry is available, use a custom agent server in Zed settings:
 
 ```json
 {
   "agent_servers": {
-    "hermes-agent": {
+    "pichkoo-agent": {
       "type": "custom",
-      "command": "hermes",
+      "command": "pichkoo",
       "args": ["acp"]
     }
   }
@@ -157,7 +157,7 @@ For local development before the registry entry is available, use a custom agent
 Use an ACP-compatible plugin and point it at:
 
 ```text
-/path/to/hermes-agent/acp_registry
+/path/to/pichkoo-agent/acp_registry
 ```
 
 ## Registry manifest
@@ -169,12 +169,12 @@ acp_registry/agent.json
 acp_registry/icon.svg
 ```
 
-The upstream registry PR copies those files into the top-level `hermes-agent/` directory in `agentclientprotocol/registry`.
+The upstream registry PR copies those files into the top-level `pichkoo-agent/` directory in `agentclientprotocol/registry`.
 
-The registry entry uses a `uvx` distribution that points directly at the `hermes-agent` PyPI release:
+The registry entry uses a `uvx` distribution that points directly at the `pichkoo-agent` PyPI release:
 
 ```text
-uvx --from 'hermes-agent[acp]==<version>' hermes-acp
+uvx --from 'pichkoo-agent[acp]==<version>' pichkoo-acp
 ```
 
 The registry CI verifies that the pinned version exists on PyPI, so the manifest's `version` and uvx `package` pin must always match `pyproject.toml`. `scripts/release.py` keeps them in lockstep automatically.
@@ -183,10 +183,10 @@ The registry CI verifies that the pinned version exists on PyPI, so the manifest
 
 ACP mode uses the same Pichkoo configuration as the CLI:
 
-- `~/.hermes/.env`
-- `~/.hermes/config.yaml`
-- `~/.hermes/skills/`
-- `~/.hermes/state.db`
+- `~/.pichkoo/.env`
+- `~/.pichkoo/config.yaml`
+- `~/.pichkoo/skills/`
+- `~/.pichkoo/state.db`
 
 Provider resolution uses Pichkoo' normal runtime resolver, so ACP inherits the currently configured provider and credentials. Pichkoo also advertises a terminal auth method (`--setup`) for first-run registry clients; this opens Pichkoo' interactive model/provider setup.
 
@@ -240,7 +240,7 @@ The ACP bridge maps these options onto Pichkoo' internal approval semantics — 
 Check:
 
 - In Zed, open the ACP Registry with `zed: acp registry` and search for **Pichkoo AI Agent**.
-- For manual/local development, verify the custom `agent_servers` command points to `hermes acp`.
+- For manual/local development, verify the custom `agent_servers` command points to `pichkoo acp`.
 - Pichkoo is installed and on your PATH.
 - The ACP extra is installed (`pip install -e '.[acp]'`).
 - `uv` is installed if launching from the official Zed registry entry.
@@ -250,10 +250,10 @@ Check:
 Try these checks:
 
 ```bash
-hermes acp --version
-hermes acp --check
-hermes doctor
-hermes status
+pichkoo acp --version
+pichkoo acp --check
+pichkoo doctor
+pichkoo status
 ```
 
 ### Missing credentials
@@ -261,10 +261,10 @@ hermes status
 ACP mode uses Pichkoo' existing provider setup. Configure credentials with:
 
 ```bash
-hermes model
+pichkoo model
 ```
 
-or by editing `~/.hermes/.env`. Registry clients can also trigger Pichkoo' terminal auth flow, which runs the same interactive provider/model setup.
+or by editing `~/.pichkoo/.env`. Registry clients can also trigger Pichkoo' terminal auth flow, which runs the same interactive provider/model setup.
 
 ### Zed registry launcher cannot find uv
 

@@ -72,7 +72,7 @@ def _resolve_home_dir() -> str:
     """Return a stable HOME for child ACP processes."""
 
     try:
-        from hermes_constants import get_subprocess_home
+        from pichkoo_constants import get_subprocess_home
 
         profile_home = get_subprocess_home()
         if profile_home:
@@ -540,7 +540,7 @@ class CopilotACPClient:
                         "point Hermes at it explicitly:\n"
                         "  export HERMES_COPILOT_ACP_COMMAND=/path/to/new/copilot\n\n"
                         "Alternative: use the `copilot` provider (no ACP, hits the Copilot API\n"
-                        "directly with a Copilot subscription token) via `hermes setup`.\n\n"
+                        "directly with a Copilot subscription token) via `pichkoo setup`.\n\n"
                         f"Original error:\n{stderr_text}"
                     )
                 raise RuntimeError(f"Copilot ACP process exited early: {stderr_text}")
@@ -558,7 +558,7 @@ class CopilotACPClient:
                         }
                     },
                     "clientInfo": {
-                        "name": "hermes-agent",
+                        "name": "pichkoo-agent",
                         "title": "Hermes Agent",
                         "version": "0.0.0",
                     },

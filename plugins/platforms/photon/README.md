@@ -42,13 +42,13 @@ talks to it over loopback.
 
 ```bash
 # One-shot setup: device login (opens browser) + project + user + sidecar deps
-hermes photon setup --phone +15551234567
+pichkoo photon setup --phone +15551234567
 
 # Start the gateway
-hermes gateway start --platform photon
+pichkoo gateway start --platform photon
 ```
 
-`hermes photon setup` does, in order:
+`pichkoo photon setup` does, in order:
 
 1. **Device login** (RFC 8628, `client_id=photon-cli`) — opens
    `https://app.photon.codes/` for approval and stores the bearer token.
@@ -64,11 +64,11 @@ hermes gateway start --platform photon
 There is no separate `login` command; like every other Hermes channel,
 onboarding goes through one setup surface. Re-running `setup` reuses an
 existing token/project, so it's safe to run again to finish a partial setup.
-Run `hermes photon status` to see what's configured.
+Run `pichkoo photon status` to see what's configured.
 
 ## Credentials
 
-Runtime SDK credentials live in `~/.hermes/.env` (the same place every other
+Runtime SDK credentials live in `~/.pichkoo/.env` (the same place every other
 channel keeps its token), and the adapter reads them from the environment:
 
 ```bash
@@ -76,7 +76,7 @@ PHOTON_PROJECT_ID=<spectrumProjectId>   # the SDK's projectId
 PHOTON_PROJECT_SECRET=<projectSecret>
 ```
 
-Management metadata lives in `~/.hermes/auth.json` under `credential_pool`:
+Management metadata lives in `~/.pichkoo/auth.json` under `credential_pool`:
 
 ```jsonc
 {

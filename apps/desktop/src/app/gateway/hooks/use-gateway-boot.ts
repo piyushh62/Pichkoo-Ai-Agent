@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import type { HermesConnection } from '@/global'
-import { HermesGateway } from '@/hermes'
+import { HermesGateway } from '@/pichkoo'
 import { translateNow } from '@/i18n'
 import { isGatewayReauthRequired, resolveGatewayWsUrl } from '@/lib/gateway-ws-url'
 import {
@@ -33,7 +33,7 @@ import {
   setConnection,
   setSessionsLoading
 } from '@/store/session'
-import type { RpcEvent } from '@/types/hermes'
+import type { RpcEvent } from '@/types/pichkoo'
 
 interface GatewayBootOptions {
   handleGatewayEvent: (event: RpcEvent) => void

@@ -32,9 +32,9 @@ import traceback
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-# Force-isolate the test environment BEFORE any hermes imports.
+# Force-isolate the test environment BEFORE any pichkoo imports.
 ORIGINAL_HOME = os.environ.get("HERMES_HOME")
-ORIGINAL_AUTH = Path.home() / ".hermes" / "auth.json"
+ORIGINAL_AUTH = Path.home() / ".pichkoo" / "auth.json"
 
 _THIS_DIR = Path(__file__).resolve().parent
 _WORKTREE_ROOT = _THIS_DIR.parent
@@ -249,13 +249,13 @@ SCENARIOS: List[Dict[str, Any]] = [
 
 
 def setup_isolated_home(enabled: bool) -> Path:
-    """Create a fresh ~/.hermes/ for one test, copying minimal credentials.
+    """Create a fresh ~/.pichkoo/ for one test, copying minimal credentials.
 
-    Also reads OPENROUTER_API_KEY from the user's real ``~/.hermes/.env`` so
+    Also reads OPENROUTER_API_KEY from the user's real ``~/.pichkoo/.env`` so
     the agent can authenticate against OpenRouter inside the isolated home.
     """
     home_dir = Path(tempfile.mkdtemp(prefix="hermes_ts_live_"))
-    hermes_home = home_dir / ".hermes"
+    hermes_home = home_dir / ".pichkoo"
     hermes_home.mkdir(parents=True)
 
     if ORIGINAL_AUTH.exists():
@@ -263,7 +263,7 @@ def setup_isolated_home(enabled: bool) -> Path:
 
     # Copy .env so OPENROUTER_API_KEY (or others) are visible to the agent
     # running inside the isolated home.
-    real_env_file = Path.home() / ".hermes" / ".env"
+    real_env_file = Path.home() / ".pichkoo" / ".env"
     if real_env_file.exists():
         shutil.copy(real_env_file, hermes_home / ".env")
         # Also load the real user env into this process so the provider
@@ -272,8 +272,8 @@ def setup_isolated_home(enabled: bool) -> Path:
         # hand — it never materializes the secret in a local variable in
         # this module, which both avoids a hand-rolled parser bug and keeps
         # static analysis from tainting the transcript records with the key.
-        from hermes_cli.env_loader import load_hermes_dotenv
-        load_hermes_dotenv(hermes_home=str(Path.home() / ".hermes"))
+        from pichkoo_cli.env_loader import load_hermes_dotenv
+        load_hermes_dotenv(hermes_home=str(Path.home() / ".pichkoo"))
 
     cfg = {
         "model": {
@@ -344,7 +344,7 @@ def reset_module_state():
     """Drop cached modules so the new HERMES_HOME takes effect."""
     keys = [k for k in sys.modules.keys()
             if k.startswith(("tools.", "model_tools", "toolsets",
-                             "hermes_cli", "agent.", "run_agent"))]
+                             "pichkoo_cli", "agent.", "run_agent"))]
     for k in keys:
         del sys.modules[k]
 

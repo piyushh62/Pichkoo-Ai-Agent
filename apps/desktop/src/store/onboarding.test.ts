@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { OAuthProvider } from '@/types/hermes'
+import type { OAuthProvider } from '@/types/pichkoo'
 
 import {
   $desktopOnboarding,
@@ -14,7 +14,7 @@ import {
 
 function provider(id: string, name = id): OAuthProvider {
   return {
-    cli_command: `hermes login ${id}`,
+    cli_command: `pichkoo login ${id}`,
     docs_url: `https://example.com/${id}`,
     flow: 'pkce',
     id,

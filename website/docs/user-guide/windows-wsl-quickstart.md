@@ -69,7 +69,7 @@ Ubuntu (LTS) is what we test against. Debian works. Arch and NixOS work for peop
 
 ### Enable systemd (recommended)
 
-The hermes gateway (and anything else you want to keep running) is easier to manage with systemd. On modern WSL, enable it once inside your distro:
+The pichkoo gateway (and anything else you want to keep running) is easier to manage with systemd. On modern WSL, enable it once inside your distro:
 
 ```bash
 sudo tee /etc/wsl.conf >/dev/null <<'EOF'
@@ -100,9 +100,9 @@ The `metadata` mount option above is important — without it, files on `/mnt/c/
 Once you have a WSL2 shell open:
 
 ```bash
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+curl -fsSL https://pichkoo-agent.nousresearch.com/install.sh | bash
 source ~/.bashrc
-hermes
+pichkoo
 ```
 
 The installer treats WSL2 as plain Linux — nothing WSL-specific is needed. See [Installation](/getting-started/installation) for the full layout.
@@ -124,7 +124,7 @@ Both are real, both work, but they are **not the same filesystem** — they're b
 
 **Rule of thumb: keep everything Linux-ish inside the Linux filesystem.**
 
-- Your Pichkoo install (`~/.hermes/`) — Linux side. The installer already does this.
+- Your Pichkoo install (`~/.pichkoo/`) — Linux side. The installer already does this.
 - Your git repos that you work on from WSL — Linux side (`~/code/...`, `~/projects/...`).
 - Your models, datasets, venvs — Linux side.
 
@@ -186,9 +186,9 @@ dos2unix path/to/script.sh
 
 ### "Clone inside WSL or on `/mnt/c`?"
 
-Clone inside WSL. Always, unless you have a specific reason not to. A typical Pichkoo workflow (`hermes chat`, tool calls that `rg`/`ripgrep` the repo, file watchers, background gateway) will be dramatically faster and more reliable against `~/code/myrepo` than `/mnt/c/Users/you/myrepo`.
+Clone inside WSL. Always, unless you have a specific reason not to. A typical Pichkoo workflow (`pichkoo chat`, tool calls that `rg`/`ripgrep` the repo, file watchers, background gateway) will be dramatically faster and more reliable against `~/code/myrepo` than `/mnt/c/Users/you/myrepo`.
 
-One exception: **MCP bridges that launch Windows binaries.** If you're using `chrome-devtools-mcp` through `cmd.exe` (see [MCP guide: WSL → Windows Chrome](/guides/use-mcp-with-hermes#wsl2-bridge-hermes-in-wsl-to-windows-chrome)), Windows may complain with a `UNC` warning if Pichkoo's current working directory is `~`. In that case, start Pichkoo from somewhere under `/mnt/c/` so the Windows process has a drive-letter cwd.
+One exception: **MCP bridges that launch Windows binaries.** If you're using `chrome-devtools-mcp` through `cmd.exe` (see [MCP guide: WSL → Windows Chrome](/guides/use-mcp-with-pichkoo#wsl2-bridge-pichkoo-in-wsl-to-windows-chrome)), Windows may complain with a `UNC` warning if Pichkoo's current working directory is `~`. In that case, start Pichkoo from somewhere under `/mnt/c/` so the Windows process has a drive-letter cwd.
 
 ## Networking: WSL ↔ Windows
 
@@ -214,7 +214,7 @@ For the full table (Ollama / LM Studio / vLLM / SGLang bind addresses, firewall 
 This is the reverse direction and is less documented elsewhere, but it's what you need for:
 
 - Using the Pichkoo **web dashboard** from a Windows browser.
-- Using the **OpenAI-compatible API server** (exposed by `hermes gateway` when `API_SERVER_ENABLED=true`) from a Windows-side tool. See the [API Server feature page](/user-guide/features/api-server).
+- Using the **OpenAI-compatible API server** (exposed by `pichkoo gateway` when `API_SERVER_ENABLED=true`) from a Windows-side tool. See the [API Server feature page](/user-guide/features/api-server).
 - Testing a **messaging gateway** (Telegram, Discord, etc.) where the platform pings a local webhook URL — usually you'd use `cloudflared`/`ngrok` rather than raw port forwarding.
 
 #### Subcase 2a: from the Windows host itself
@@ -269,15 +269,15 @@ it on the Windows side and have it jump into WSL for you:
 2. For the target, use your distro name (replace `Ubuntu` if needed):
 
    ```text
-   wt.exe -w 0 -p "Ubuntu" wsl.exe -d Ubuntu --cd ~ -- bash -ic "hermes"
+   wt.exe -w 0 -p "Ubuntu" wsl.exe -d Ubuntu --cd ~ -- bash -ic "pichkoo"
    ```
 
 3. Name it something obvious like `Pichkoo`.
 
 That opens Windows Terminal, starts your WSL distro, drops you in your Linux
-home directory, and launches Pichkoo. If `hermes` is not on PATH yet, open WSL
+home directory, and launches Pichkoo. If `pichkoo` is not on PATH yet, open WSL
 once manually and run `source ~/.bashrc`, or replace the command with
-`uv run hermes` inside your project checkout.
+`uv run pichkoo` inside your project checkout.
 
 Optional polish:
 
@@ -288,10 +288,10 @@ Optional polish:
 
 ### Inside WSL with systemd (recommended)
 
-If you enabled systemd per the setup section above, `hermes gateway` and the API server work the way they do on any Linux machine. Use the gateway setup wizard:
+If you enabled systemd per the setup section above, `pichkoo gateway` and the API server work the way they do on any Linux machine. Use the gateway setup wizard:
 
 ```bash
-hermes gateway setup
+pichkoo gateway setup
 ```
 
 It will offer to install a systemd user unit so the gateway comes up automatically when WSL starts.
@@ -320,7 +320,7 @@ If you're running a **Windows-native** local-model server (Ollama for Windows, L
 **"Connection refused" to my Windows-hosted Ollama / LM Studio.**
 See [WSL2 Networking](/integrations/providers#wsl2-networking-windows-users). Ninety percent of the time the server is bound to `127.0.0.1` and needs `0.0.0.0` (Ollama: `OLLAMA_HOST=0.0.0.0`), or you're missing a firewall rule.
 
-**Massive slowness on `git status` / `hermes chat` in a repo.**
+**Massive slowness on `git status` / `pichkoo chat` in a repo.**
 You're probably working under `/mnt/c/...`. Move the repo to `~/code/...` (Linux side). Order-of-magnitude faster.
 
 **`bad interpreter: /bin/bash^M` on scripts.**
@@ -341,7 +341,7 @@ Or install `ntpdate` and run it at login.
 **DNS stops working after enabling mirrored mode, or when a VPN is connected.**
 Mirrored mode proxies host network settings into WSL — if Windows DNS is funky (VPN split-tunnel, corporate resolver), WSL inherits that. Workaround: override `resolv.conf` manually (set `generateResolvConf=false` in `/etc/wsl.conf`, then write your own `/etc/resolv.conf` with `1.1.1.1` or your VPN's DNS).
 
-**`hermes` not found after running the installer.**
+**`pichkoo` not found after running the installer.**
 The installer adds `~/.local/bin` to your shell's PATH via `~/.bashrc`. You need to `source ~/.bashrc` (or open a new terminal) for it to take effect in the current session.
 
 **Windows Defender is slow on WSL files.**
@@ -354,5 +354,5 @@ WSL2 stores its VM disk as a sparse VHDX under `%LOCALAPPDATA%\Packages\...`. It
 
 - **[Installation](/getting-started/installation)** — actual install steps (Linux/WSL2/Termux all use the same installer).
 - **[Integrations → Providers → WSL2 Networking](/integrations/providers#wsl2-networking-windows-users)** — the canonical networking deep-dive for local model servers.
-- **[MCP guide → WSL → Windows Chrome](/guides/use-mcp-with-hermes#wsl2-bridge-hermes-in-wsl-to-windows-chrome)** — controlling your signed-in Windows Chrome from Pichkoo in WSL.
+- **[MCP guide → WSL → Windows Chrome](/guides/use-mcp-with-pichkoo#wsl2-bridge-pichkoo-in-wsl-to-windows-chrome)** — controlling your signed-in Windows Chrome from Pichkoo in WSL.
 - **[Tool Gateway](/user-guide/features/tool-gateway)** and **[Web Dashboard](/user-guide/features/web-dashboard)** — the long-lived services you'll most often want to expose from WSL to the rest of your network.

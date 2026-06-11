@@ -21,15 +21,15 @@ import pytest
 @pytest.fixture
 def fake_hermes(tmp_path, monkeypatch):
     """Build a two-profile Hermes layout and point HERMES_HOME at
-    the hermes-security profile (matching the original-incident shape).
+    the pichkoo-security profile (matching the original-incident shape).
     """
-    root = tmp_path / "fake-hermes"
+    root = tmp_path / "fake-pichkoo"
     (root / "skills" / "shared-skill").mkdir(parents=True)
     (root / "skills" / "shared-skill" / "SKILL.md").write_text(
         "---\nname: shared-skill\ndescription: default copy.\n---\n"
     )
 
-    sec_home = root / "profiles" / "hermes-security"
+    sec_home = root / "profiles" / "pichkoo-security"
     (sec_home / "skills").mkdir(parents=True)
 
     coder_home = root / "profiles" / "coder"
@@ -37,8 +37,8 @@ def fake_hermes(tmp_path, monkeypatch):
 
     monkeypatch.setenv("HERMES_HOME", str(sec_home))
 
-    import hermes_constants
-    monkeypatch.setattr(hermes_constants, "get_default_hermes_root", lambda: root)
+    import pichkoo_constants
+    monkeypatch.setattr(pichkoo_constants, "get_default_hermes_root", lambda: root)
 
     import agent.file_safety as fs
     monkeypatch.setattr(fs, "_hermes_home_path", lambda: sec_home)
@@ -78,7 +78,7 @@ class TestWriteFileCrossProfileGuard:
         assert result.get("error"), "Cross-profile write should be refused"
         assert "cross-profile" in result["error"].lower()
         assert "default" in result["error"]
-        assert "hermes-security" in result["error"]
+        assert "pichkoo-security" in result["error"]
         # File untouched.
         assert target.read_text() == original
 
@@ -187,7 +187,7 @@ class TestSkillManageCrossProfileErrorUX:
         from tools.skill_manager_tool import _skill_not_found_error
 
         err = _skill_not_found_error("default-only-skill")
-        assert "not found in active profile 'hermes-security'" in err
+        assert "not found in active profile 'pichkoo-security'" in err
         assert "default" in err
         assert "cross_profile=True" in err
 
@@ -205,7 +205,7 @@ class TestSkillManageCrossProfileErrorUX:
         assert "default" in err
         assert "coder" in err
         # Switch-profiles hint
-        assert "hermes -p" in err
+        assert "pichkoo -p" in err
 
     def test_genuinely_missing_skill_keeps_helpful_hint(
         self, fake_hermes, monkeypatch
@@ -217,7 +217,7 @@ class TestSkillManageCrossProfileErrorUX:
         from tools.skill_manager_tool import _skill_not_found_error
 
         err = _skill_not_found_error("totally-imaginary-skill")
-        assert "not found in active profile 'hermes-security'" in err
+        assert "not found in active profile 'pichkoo-security'" in err
         assert "skills_list" in err
 
 
@@ -229,7 +229,7 @@ class TestSkillManageCrossProfileErrorUX:
 class TestSystemPromptActiveProfile:
     def test_default_profile_line_in_prompt(self, tmp_path, monkeypatch):
         """When active profile is 'default', the prompt names it and warns
-        about ~/.hermes/profiles/<name>/."""
+        about ~/.pichkoo/profiles/<name>/."""
         # Don't set HERMES_HOME — falls back to default.
         import agent.file_safety as fs
         monkeypatch.setattr(fs, "_hermes_home_path", lambda: tmp_path / "fake")
@@ -242,7 +242,7 @@ class TestSystemPromptActiveProfile:
         # See agent/system_prompt.py for the exact wording.
 
     def test_named_profile_line_in_prompt_text(self, fake_hermes):
-        """When active profile is 'hermes-security', the prompt warns
+        """When active profile is 'pichkoo-security', the prompt warns
         explicitly about NOT modifying default's skills/plugins/cron/memories."""
         # Spot-check by reading the source — the contract is:
         # (1) names the active profile, (2) names the default-profile
@@ -252,7 +252,7 @@ class TestSystemPromptActiveProfile:
         src = Path("agent/system_prompt.py").read_text()
         assert "Active Hermes profile" in src
         assert "cross_profile=True" in src
-        assert "~/.hermes/profiles/" in src
+        assert "~/.pichkoo/profiles/" in src
         # Both branches present (default and named profile).
         assert "Active Hermes profile: default" in src
         assert "Active Hermes profile: {active_profile}" in src

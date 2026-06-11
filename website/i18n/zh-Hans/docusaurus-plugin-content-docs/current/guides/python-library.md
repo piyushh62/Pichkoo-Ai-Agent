@@ -15,19 +15,19 @@ Pichkoo 不仅仅是一个 CLI 工具。你可以直接导入 `AIAgent`，在自
 直接从仓库安装 Pichkoo：
 
 ```bash
-pip install git+https://github.com/NousResearch/hermes-agent.git
+pip install git+https://github.com/NousResearch/pichkoo-agent.git
 ```
 
 或使用 [uv](https://docs.astral.sh/uv/)：
 
 ```bash
-uv pip install git+https://github.com/NousResearch/hermes-agent.git
+uv pip install git+https://github.com/NousResearch/pichkoo-agent.git
 ```
 
 也可以在 `requirements.txt` 中固定版本：
 
 ```text
-hermes-agent @ git+https://github.com/NousResearch/hermes-agent.git
+pichkoo-agent @ git+https://github.com/NousResearch/pichkoo-agent.git
 ```
 
 :::tip
@@ -266,7 +266,7 @@ client = discord.Client(intents=discord.Intents.default())
 async def on_message(message):
     if message.author == client.user:
         return
-    if message.content.startswith("!hermes "):
+    if message.content.startswith("!pichkoo "):
         query = message.content[8:]
         agent = AIAgent(
             model="anthropic/claude-sonnet-4",

@@ -1,7 +1,7 @@
-import type { ConnectionState, GatewayEvent } from '@hermes/shared'
+import type { ConnectionState, GatewayEvent } from '@pichkoo/shared'
 import { atom } from 'nanostores'
 
-import { HermesGateway } from '@/hermes'
+import { HermesGateway } from '@/pichkoo'
 import { resolveGatewayWsUrl } from '@/lib/gateway-ws-url'
 import { setGatewayState } from '@/store/session'
 

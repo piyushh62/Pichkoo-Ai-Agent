@@ -6,9 +6,9 @@ author: Tony Simons (asimons81), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  pichkoo:
     tags: [Coding-Agent, Antigravity, CLI, Auth, Plugins, Sandbox]
-    related_skills: [grok, codex, claude-code, hermes-agent]
+    related_skills: [grok, codex, claude-code, pichkoo-agent]
 ---
 
 # Antigravity CLI (`agy`)

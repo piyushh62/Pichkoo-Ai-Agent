@@ -315,7 +315,7 @@ class HonchoMemoryProvider(MemoryProvider):
                 self._context_cadence = int(raw.get("contextCadence", 1))
                 # Backwards-compat: unset dialecticCadence falls back to 1
                 # (every turn) so existing honcho.json configs without the key
-                # behave as they did before. New setups via `hermes honcho setup`
+                # behave as they did before. New setups via `pichkoo honcho setup`
                 # get dialecticCadence=2 written explicitly by the wizard.
                 self._dialectic_cadence = int(raw.get("dialecticCadence", 1))
                 self._dialectic_depth = max(1, min(cfg.dialectic_depth, 3))
@@ -365,7 +365,7 @@ class HonchoMemoryProvider(MemoryProvider):
                 gateway_session_key=gateway_session_key,
             )
             or session_id
-            or "hermes-default"
+            or "pichkoo-default"
         )
 
     def _start_session_init_background(self, *, wait_timeout: float = 0.0) -> None:
@@ -392,7 +392,7 @@ class HonchoMemoryProvider(MemoryProvider):
 
             cfg = self._config
             init_kwargs = dict(self._lazy_init_kwargs)
-            init_session_id = self._lazy_init_session_id or "hermes-default"
+            init_session_id = self._lazy_init_session_id or "pichkoo-default"
 
             def _run() -> None:
                 try:
@@ -446,7 +446,7 @@ class HonchoMemoryProvider(MemoryProvider):
         # of performing a one-time migration.
         try:
             if not session.messages and cfg.session_strategy != "per-session":
-                from hermes_constants import get_hermes_home
+                from pichkoo_constants import get_hermes_home
                 mem_dir = str(get_hermes_home() / "memories")
                 self._manager.migrate_memory_files(self._session_key, mem_dir)
                 logger.debug("Honcho memory file migration attempted for new session: %s", self._session_key)
@@ -518,7 +518,7 @@ class HonchoMemoryProvider(MemoryProvider):
         try:
             self._do_session_init(
                 self._config,
-                self._lazy_init_session_id or "hermes-default",
+                self._lazy_init_session_id or "pichkoo-default",
                 **self._lazy_init_kwargs,
             )
             # Clear lazy refs

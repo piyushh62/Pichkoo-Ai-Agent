@@ -1,5 +1,5 @@
 """Tests for the memory/skill write-approval gate (tools/write_approval.py)
-and the shared slash-command handlers (hermes_cli/write_approval_commands.py).
+and the shared slash-command handlers (pichkoo_cli/write_approval_commands.py).
 
 Covers the boolean write_approval gate (off by default = write freely; on =
 require approval) for both subsystems, the foreground-vs-background staging
@@ -18,7 +18,7 @@ import pytest
 @pytest.fixture
 def hermes_home(monkeypatch):
     d = tempfile.mkdtemp(prefix="hermes_wa_test_")
-    home = os.path.join(d, ".hermes")
+    home = os.path.join(d, ".pichkoo")
     os.makedirs(home)
     monkeypatch.setenv("HERMES_HOME", home)
     yield home
@@ -26,7 +26,7 @@ def hermes_home(monkeypatch):
 
 
 def _set_approval(subsystem, enabled):
-    import hermes_cli.config as cfg
+    import pichkoo_cli.config as cfg
     c = cfg.load_config()
     c.setdefault(subsystem, {})["write_approval"] = enabled
     cfg.save_config(c)
@@ -185,14 +185,14 @@ def test_pending_store_roundtrip(hermes_home):
 # ---------------------------------------------------------------------------
 
 def test_handle_pending_list_empty(hermes_home):
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools import write_approval as wa
     out = handle_pending_subcommand(wa.MEMORY, ["pending"])
     assert "No pending memory" in out
 
 
 def test_handle_approve_all(hermes_home):
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools.memory_tool import MemoryStore
     from tools import write_approval as wa
     store = MemoryStore(); store.load_from_disk()
@@ -207,7 +207,7 @@ def test_handle_approve_all(hermes_home):
 
 
 def test_handle_reject(hermes_home):
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools import write_approval as wa
     rec = wa.stage_write("skills", {"action": "create", "name": "s"},
                          summary="create s", origin="background_review")
@@ -217,7 +217,7 @@ def test_handle_reject(hermes_home):
 
 
 def test_handle_approval_on(hermes_home):
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools import write_approval as wa
     captured = {}
     out = handle_pending_subcommand(
@@ -229,7 +229,7 @@ def test_handle_approval_on(hermes_home):
 
 
 def test_handle_approval_off(hermes_home):
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools import write_approval as wa
     captured = {}
     out = handle_pending_subcommand(
@@ -242,7 +242,7 @@ def test_handle_approval_off(hermes_home):
 
 def test_handle_mode_alias_still_works(hermes_home):
     # 'mode' is kept as a back-compat alias for 'approval'.
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools import write_approval as wa
     captured = {}
     out = handle_pending_subcommand(
@@ -254,7 +254,7 @@ def test_handle_mode_alias_still_works(hermes_home):
 
 
 def test_handle_approval_invalid(hermes_home):
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools import write_approval as wa
     out = handle_pending_subcommand(wa.MEMORY, ["approval", "bogus"],
                                     set_mode_fn=lambda enabled: None)
@@ -262,7 +262,7 @@ def test_handle_approval_invalid(hermes_home):
 
 
 def test_handle_unknown_subcommand_returns_none(hermes_home):
-    from hermes_cli.write_approval_commands import handle_pending_subcommand
+    from pichkoo_cli.write_approval_commands import handle_pending_subcommand
     from tools import write_approval as wa
     # An unrecognized /skills subcommand (e.g. 'search') must return None so
     # the CLI falls through to the skills hub.

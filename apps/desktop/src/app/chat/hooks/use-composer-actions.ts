@@ -52,7 +52,7 @@ export interface DroppedFile {
 
 /** MIME emitted by in-app drag sources (project tree, gutter line numbers).
  * Payload is JSON `{ path; isDirectory?; line?; lineEnd? }[]`. */
-export const HERMES_PATHS_MIME = 'application/x-hermes-paths'
+export const HERMES_PATHS_MIME = 'application/x-pichkoo-paths'
 
 /**
  * Eagerly resolve files from a drop event into [File?, path, isDirectory?]

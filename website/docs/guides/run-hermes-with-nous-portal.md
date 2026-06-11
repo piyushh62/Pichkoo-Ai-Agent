@@ -25,14 +25,14 @@ Already subscribed? Skip to step 2.
 ## 2. Run the one-shot setup
 
 ```bash
-hermes setup --portal
+pichkoo setup --portal
 ```
 
 This single command does five things:
 
 1. Opens your browser to portal.nousresearch.com for OAuth login
-2. Stores the refresh token at `~/.hermes/auth.json`
-3. Sets `model.provider: nous` in `~/.hermes/config.yaml`
+2. Stores the refresh token at `~/.pichkoo/auth.json`
+3. Sets `model.provider: nous` in `~/.pichkoo/config.yaml`
 4. Picks a default agentic model (`anthropic/claude-sonnet-4.6` or similar)
 5. Turns on the Tool Gateway for web search, image generation, TTS, and browser automation
 
@@ -45,11 +45,11 @@ OAuth needs a browser, but the loopback callback runs on the machine where Pichk
 ```bash
 # Option A: SSH port forwarding (preferred)
 ssh -N -L 8642:127.0.0.1:8642 user@remote-host    # in a local terminal
-hermes setup --portal                              # on the remote, open the printed URL in your local browser
+pichkoo setup --portal                              # on the remote, open the printed URL in your local browser
 
 # Option B: manual paste (for Cloud Shell, Codespaces, EC2 Instance Connect)
-hermes auth add nous --type oauth --manual-paste
-# Then re-run `hermes setup --portal` to wire the provider + gateway
+pichkoo auth add nous --type oauth --manual-paste
+# Then re-run `pichkoo setup --portal` to wire the provider + gateway
 ```
 
 See [OAuth over SSH / Remote Hosts](/guides/oauth-over-ssh) for the full walkthrough including ProxyJump chains, mosh/tmux, and ControlMaster gotchas.
@@ -57,7 +57,7 @@ See [OAuth over SSH / Remote Hosts](/guides/oauth-over-ssh) for the full walkthr
 ## 3. Verify it worked
 
 ```bash
-hermes portal info
+pichkoo portal info
 ```
 
 You should see:
@@ -82,7 +82,7 @@ If any line shows something other than "via Nous Portal" or the auth line says "
 ## 4. Run your first conversation
 
 ```bash
-hermes chat
+pichkoo chat
 ```
 
 Try something that exercises both the model and the Tool Gateway:
@@ -95,7 +95,7 @@ You should see Pichkoo call `web_search` (Firecrawl-backed, through the gateway)
 
 ## 5. Pick the model you actually want
 
-`hermes setup --portal` lets you pick a model during setup, but the whole point of the subscription is access to the full catalog — switch any time with `/model` mid-session:
+`pichkoo setup --portal` lets you pick a model during setup, but the whole point of the subscription is access to the full catalog — switch any time with `/model` mid-session:
 
 ```bash
 /model anthropic/claude-sonnet-4.6     # best general-purpose agentic
@@ -115,7 +115,7 @@ Pick a different default permanently:
 
 ```bash
 # in your terminal, outside any session
-hermes config set model.default anthropic/claude-sonnet-4.6
+pichkoo config set model.default anthropic/claude-sonnet-4.6
 ```
 
 ### Don't pick Pichkoo-4 for agent work
@@ -129,19 +129,19 @@ The Portal's own [info page](https://portal.nousresearch.com/info) carries this 
 The gateway is opt-in per tool, not all-or-nothing. If you already have a Browserbase account and want to keep using it while routing web search and image generation through Nous, that's supported:
 
 ```bash
-hermes tools
+pichkoo tools
 # → Web search       → "Nous Subscription"     (recommended)
 # → Image generation → "Nous Subscription"     (recommended)
 # → Browser          → "Browserbase"           (your existing key)
 # → TTS              → "Nous Subscription"     (recommended)
 ```
 
-These rows appear in `hermes tools` even before you've logged into Nous Portal — if you pick "Nous Subscription" without an active session, Pichkoo runs the Portal login inline (without changing your inference provider or your other tools).
+These rows appear in `pichkoo tools` even before you've logged into Nous Portal — if you pick "Nous Subscription" without an active session, Pichkoo runs the Portal login inline (without changing your inference provider or your other tools).
 
 Verify your mix with:
 
 ```bash
-hermes portal tools
+pichkoo portal tools
 ```
 
 You'll see per-tool routing — `via Nous Portal` for the ones routed through the subscription, and the partner name (`browserbase`, `firecrawl`, etc.) for the ones using your own keys.
@@ -151,7 +151,7 @@ You'll see per-tool routing — `via Nous Portal` for the ones routed through th
 Because the Tool Gateway includes OpenAI TTS, [voice mode](/user-guide/features/voice-mode) works without a separate OpenAI key:
 
 ```bash
-hermes setup voice
+pichkoo setup voice
 # → pick "Nous Subscription" for TTS
 # → pick a speech-to-text backend (local faster-whisper is free, no setup)
 ```
@@ -163,7 +163,7 @@ Then in any messaging-platform session (Telegram, Discord, Signal, etc.), send a
 The Portal subscription works for [cron jobs](/user-guide/features/cron) and [batch processing](/user-guide/features/batch-processing) the same way it works for interactive chat — the OAuth refresh token is reused automatically. No additional setup; just schedule cron jobs and they'll bill against your subscription.
 
 ```bash
-hermes cron create "every day at 9am" \
+pichkoo cron create "every day at 9am" \
   "Search the web for top AI news and summarize the 5 most important stories" \
   --name "Daily AI news"
 ```
@@ -174,16 +174,16 @@ The cron job runs unattended, calls the model + web search + summarization all t
 
 If you use [Pichkoo profiles](/user-guide/profiles) (e.g. a separate config per project), the Portal refresh token is automatically shared across all profiles via a shared token store. Sign in once on any profile, and the rest pick it up automatically.
 
-For team setups where multiple humans share a machine, each human has their own Portal account → each home directory holds its own `~/.hermes/auth.json` → no token sharing across users. This is the right boundary.
+For team setups where multiple humans share a machine, each human has their own Portal account → each home directory holds its own `~/.pichkoo/auth.json` → no token sharing across users. This is the right boundary.
 
 ## Troubleshooting
 
-### `hermes portal info` shows "not logged in" after `hermes setup --portal`
+### `pichkoo portal info` shows "not logged in" after `pichkoo setup --portal`
 
 The OAuth flow didn't complete. Re-run it:
 
 ```bash
-hermes portal
+pichkoo portal
 ```
 
 If your browser doesn't open or the callback fails, you're likely on a remote/headless host — see [OAuth over SSH](/guides/oauth-over-ssh) for the port-forwarding and manual-paste workarounds.
@@ -193,24 +193,24 @@ If your browser doesn't open or the callback fails, you're likely on a remote/he
 Your local config drifted. The OAuth worked but `model.provider` is still pointing at a different provider. Fix:
 
 ```bash
-hermes config set model.provider nous
+pichkoo config set model.provider nous
 ```
 
 Or interactively:
 
 ```bash
-hermes model
+pichkoo model
 # pick Nous Portal
 ```
 
-Re-verify with `hermes portal info`.
+Re-verify with `pichkoo portal info`.
 
 ### Tool Gateway tools showing partner names instead of "via Nous Portal"
 
 Per-tool config is overriding the gateway. Run:
 
 ```bash
-hermes tools
+pichkoo tools
 # pick "Nous Subscription" for any tool you want gateway-routed
 ```
 
@@ -221,7 +221,7 @@ Some users intentionally mix — e.g. routing web through Nous but using their o
 Your Portal refresh token was invalidated (password change, manual revoke, session expiry). The token is now quarantined locally so Pichkoo doesn't replay it endlessly. Just log in again:
 
 ```bash
-hermes auth add nous
+pichkoo auth add nous
 ```
 
 The quarantine clears automatically on successful re-login.
@@ -235,20 +235,20 @@ The Portal catalog mirrors OpenRouter's model list (300+). If a model is missing
 /model openai/o1-2025-12-17
 ```
 
-If a model is genuinely unavailable, [open an issue](https://github.com/NousResearch/hermes-agent/issues) — most gaps are routing config we can update.
+If a model is genuinely unavailable, [open an issue](https://github.com/NousResearch/pichkoo-agent/issues) — most gaps are routing config we can update.
 
 ### Billing not appearing on my Portal account
 
-`hermes portal info` will tell you whether you're actually routing through the Portal or some other provider. Common causes:
+`pichkoo portal info` will tell you whether you're actually routing through the Portal or some other provider. Common causes:
 
 - `model.provider` set to `openrouter`/`anthropic`/etc. instead of `nous`
 - An OAuth refresh failure that fell back to a different configured provider
-- Multiple Pichkoo profiles where you're using the wrong one (check `hermes profile current`)
+- Multiple Pichkoo profiles where you're using the wrong one (check `pichkoo profile current`)
 
 ### Want to revoke and start clean
 
 ```bash
-hermes auth remove nous       # wipes the local refresh token
+pichkoo auth remove nous       # wipes the local refresh token
 # Then re-run setup or remove the subscription from the Portal web UI
 ```
 

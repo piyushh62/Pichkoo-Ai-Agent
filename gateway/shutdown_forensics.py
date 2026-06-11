@@ -323,7 +323,7 @@ def check_systemd_timing_alignment(drain_timeout: float) -> Optional[Dict[str, A
     """At startup, sanity-check that systemd's TimeoutStopSec >= drain_timeout.
 
     When the gateway is run under a stale systemd unit file (e.g. the user
-    upgraded hermes-agent but never re-ran ``hermes setup`` to regenerate
+    upgraded pichkoo-agent but never re-ran ``pichkoo setup`` to regenerate
     the unit), ``TimeoutStopSec`` can be smaller than the configured
     ``restart_drain_timeout``.  Result: SIGTERM arrives, the drain starts,
     and systemd SIGKILLs the cgroup mid-drain — looks like a phantom kill
@@ -343,7 +343,7 @@ def check_systemd_timing_alignment(drain_timeout: float) -> Optional[Dict[str, A
     # Try to identify our unit name and ask systemctl for its config.
     unit_name: Optional[str] = None
     try:
-        # /proc/self/cgroup gives us "0::/user.slice/.../hermes-gateway.service"
+        # /proc/self/cgroup gives us "0::/user.slice/.../pichkoo-gateway.service"
         with open("/proc/self/cgroup", encoding="utf-8") as fh:
             for line in fh:
                 # systemd cgroup line ends with the unit name
@@ -362,7 +362,7 @@ def check_systemd_timing_alignment(drain_timeout: float) -> Optional[Dict[str, A
 
     # Query systemctl for TimeoutStopUSec.  Use --user OR system depending
     # on which manager actually owns the unit.  Try user first since
-    # that's the common case for hermes.
+    # that's the common case for pichkoo.
     timeout_us: Optional[int] = None
     for flag in (["--user"], []):
         try:
@@ -394,7 +394,7 @@ def check_systemd_timing_alignment(drain_timeout: float) -> Optional[Dict[str, A
     timeout_stop_sec = timeout_us / 1_000_000.0
     # systemd needs headroom for: post-interrupt kill, adapter disconnect,
     # SessionDB close, file unlinks, etc.  30s matches the unit-template
-    # constant in hermes_cli/gateway.py.
+    # constant in pichkoo_cli/gateway.py.
     headroom = 30.0
     expected = drain_timeout + headroom
     return {

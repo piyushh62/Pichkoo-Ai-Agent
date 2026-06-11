@@ -10,7 +10,7 @@ import {
   registerSessionPreview
 } from '@/store/preview'
 import { $currentCwd, $messages } from '@/store/session'
-import type { RpcEvent } from '@/types/hermes'
+import type { RpcEvent } from '@/types/pichkoo'
 
 import { usePreviewRouting } from './use-preview-routing'
 
@@ -141,7 +141,7 @@ describe('usePreviewRouting', () => {
       expect($previewTarget.get()?.source).toBe('./dist/index.html')
     })
 
-    expect(window.localStorage.getItem('hermes.desktop.sessionPreviews.v1')).toContain('./dist/index.html')
+    expect(window.localStorage.getItem('pichkoo.desktop.sessionPreviews.v1')).toContain('./dist/index.html')
   })
 
   it('registers html previews from edit inline diffs', async () => {

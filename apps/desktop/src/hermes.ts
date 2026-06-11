@@ -1,4 +1,4 @@
-import { JsonRpcGatewayClient } from '@hermes/shared'
+import { JsonRpcGatewayClient } from '@pichkoo/shared'
 
 import type {
   ActionResponse,
@@ -40,7 +40,7 @@ import type {
   StatusResponse,
   ToolsetConfig,
   ToolsetInfo
-} from '@/types/hermes'
+} from '@/types/pichkoo'
 
 const DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS = 30_000
 const SESSION_LIST_REQUEST_TIMEOUT_MS = 60_000
@@ -102,7 +102,7 @@ export type {
   StatusResponse,
   ToolsetConfig,
   ToolsetInfo
-} from '@/types/hermes'
+} from '@/types/pichkoo'
 
 export class HermesGateway extends JsonRpcGatewayClient {
   constructor() {
@@ -633,7 +633,7 @@ export interface RecommendedDefaultModel {
 }
 
 // Recommended default model for a freshly-authenticated provider. Mirrors the
-// curation `hermes model` does — for Nous it honors the free/paid tier so a
+// curation `pichkoo model` does — for Nous it honors the free/paid tier so a
 // free user gets a free model instead of a paid default.
 export function getRecommendedDefaultModel(provider: string): Promise<RecommendedDefaultModel> {
   return window.hermesDesktop.api<RecommendedDefaultModel>({
@@ -683,7 +683,7 @@ export function restartGateway(): Promise<ActionResponse> {
 
 export function updateHermes(): Promise<ActionResponse> {
   return window.hermesDesktop.api<ActionResponse>({
-    path: '/api/hermes/update',
+    path: '/api/pichkoo/update',
     method: 'POST'
   })
 }
@@ -693,7 +693,7 @@ export function updateHermes(): Promise<ActionResponse> {
  *  distinct from the Electron client clone's git state. */
 export function checkHermesUpdate(force = false): Promise<BackendUpdateCheckResponse> {
   return window.hermesDesktop.api<BackendUpdateCheckResponse>({
-    path: `/api/hermes/update/check${force ? '?force=true' : ''}`
+    path: `/api/pichkoo/update/check${force ? '?force=true' : ''}`
   })
 }
 

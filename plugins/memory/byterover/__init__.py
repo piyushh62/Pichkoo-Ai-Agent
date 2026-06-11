@@ -116,7 +116,7 @@ def _run_brv(args: List[str], timeout: int = _QUERY_TIMEOUT,
 
 def _get_brv_cwd() -> Path:
     """Profile-scoped working directory for the brv context tree."""
-    from hermes_constants import get_hermes_home
+    from pichkoo_constants import get_hermes_home
     return get_hermes_home() / "byterover"
 
 

@@ -44,7 +44,7 @@ A good rule:
 Pichkoo now uses only the global SOUL file for the current instance:
 
 ```text
-~/.hermes/SOUL.md
+~/.pichkoo/SOUL.md
 ```
 
 If you run Pichkoo with a custom home directory, it becomes:
@@ -212,13 +212,13 @@ This is the most common mistake.
 ## How to edit it
 
 ```bash
-nano ~/.hermes/SOUL.md
+nano ~/.pichkoo/SOUL.md
 ```
 
 or
 
 ```bash
-vim ~/.hermes/SOUL.md
+vim ~/.pichkoo/SOUL.md
 ```
 
 Then restart Pichkoo or start a new session.
@@ -238,7 +238,7 @@ That iterative approach works better than trying to design the perfect personali
 ### I edited SOUL.md but Pichkoo still sounds the same
 
 Check:
-- you edited `~/.hermes/SOUL.md` or `$HERMES_HOME/SOUL.md`
+- you edited `~/.pichkoo/SOUL.md` or `$HERMES_HOME/SOUL.md`
 - not some repo-local `SOUL.md`
 - the file is not empty
 - your session was restarted after the edit

@@ -49,7 +49,7 @@ _PHOTON_ENV = (
 
 @pytest.fixture
 def tmp_hermes_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    home = tmp_path / "hermes"
+    home = tmp_path / "pichkoo"
     home.mkdir()
     monkeypatch.setenv("HERMES_HOME", str(home))
     for key in _PHOTON_ENV:
@@ -127,7 +127,7 @@ def test_store_user_numbers_round_trip(tmp_hermes_home: Path) -> None:
 def test_load_user_numbers_falls_back_to_home_channel(
     tmp_hermes_home: Path,
 ) -> None:
-    from hermes_cli.config import save_env_value
+    from pichkoo_cli.config import save_env_value
 
     save_env_value("PHOTON_HOME_CHANNEL", "+15551234567")
 
@@ -276,7 +276,7 @@ def test_find_project_by_name_case_insensitive(monkeypatch: pytest.MonkeyPatch) 
     def fake_get(url: str, **kwargs: Any) -> _FakeResponse:
         return _FakeResponse(json_body={"data": [
             {"id": "p1", "name": "Other"},
-            {"id": "p2", "name": "hermes agent"},
+            {"id": "p2", "name": "pichkoo agent"},
         ]})
 
     monkeypatch.setattr(photon_auth.httpx, "get", fake_get)

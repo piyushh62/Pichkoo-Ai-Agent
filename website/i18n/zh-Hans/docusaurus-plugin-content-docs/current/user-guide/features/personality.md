@@ -18,7 +18,7 @@ Pichkoo AI Agent 的个性完全可自定义。`SOUL.md` 是**主要身份标识
 Pichkoo 现在会自动在以下位置生成默认的 `SOUL.md`：
 
 ```text
-~/.hermes/SOUL.md
+~/.pichkoo/SOUL.md
 ```
 
 更准确地说，它使用当前实例的 `HERMES_HOME`，因此如果你以自定义主目录运行 Pichkoo，它将使用：
@@ -47,14 +47,14 @@ $HERMES_HOME/SOUL.md
 如果 Pichkoo 从你启动它的任意目录加载 `SOUL.md`，你的个性可能会在不同项目之间意外改变。通过仅从 `HERMES_HOME` 加载，个性归属于 Pichkoo 实例本身。
 
 这也让用户更容易理解：
-- "编辑 `~/.hermes/SOUL.md` 来更改 Pichkoo 的默认个性。"
+- "编辑 `~/.pichkoo/SOUL.md` 来更改 Pichkoo 的默认个性。"
 
 ## 编辑位置
 
 对于大多数用户：
 
 ```bash
-~/.hermes/SOUL.md
+~/.pichkoo/SOUL.md
 ```
 
 如果你使用自定义主目录：
@@ -211,7 +211,7 @@ Pichkoo 内置了多种个性，可通过 `/personality` 切换。
 
 ## 在配置中定义自定义个性
 
-你也可以在 `~/.hermes/config.yaml` 的 `agent.personalities` 下定义命名的自定义个性。
+你也可以在 `~/.pichkoo/config.yaml` 的 `agent.personalities` 下定义命名的自定义个性。
 
 ```yaml
 agent:
@@ -231,7 +231,7 @@ agent:
 
 一个强健的默认配置：
 
-1. 在 `~/.hermes/SOUL.md` 中维护一个经过深思熟虑的全局 `SOUL.md`
+1. 在 `~/.pichkoo/SOUL.md` 中维护一个经过深思熟虑的全局 `SOUL.md`
 2. 将项目说明放在 `AGENTS.md` 中
 3. 仅在需要临时模式切换时使用 `/personality`
 
@@ -259,7 +259,7 @@ agent:
 - [上下文文件](/user-guide/features/context-files)
 - [配置](/user-guide/configuration)
 - [技巧与最佳实践](/guides/tips)
-- [SOUL.md 指南](/guides/use-soul-with-hermes)
+- [SOUL.md 指南](/guides/use-soul-with-pichkoo)
 
 ## CLI 外观与对话个性
 

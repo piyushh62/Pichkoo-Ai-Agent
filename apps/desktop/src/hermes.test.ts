@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { listAllProfileSessions, listSessions } from './hermes'
+import { listAllProfileSessions, listSessions } from './pichkoo'
 
 const emptySessionsResponse = {
   limit: 0,

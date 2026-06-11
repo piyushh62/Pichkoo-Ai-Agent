@@ -13,8 +13,8 @@ import {
   getUsageAnalytics,
   restartGateway,
   updateHermes
-} from '@/hermes'
-import type { ActionStatusResponse, AnalyticsResponse, StatusResponse } from '@/hermes'
+} from '@/pichkoo'
+import type { ActionStatusResponse, AnalyticsResponse, StatusResponse } from '@/pichkoo'
 import { useI18n } from '@/i18n'
 import { sessionTitle } from '@/lib/chat-runtime'
 import { Activity, AlertCircle, BarChart3, Pin } from '@/lib/icons'

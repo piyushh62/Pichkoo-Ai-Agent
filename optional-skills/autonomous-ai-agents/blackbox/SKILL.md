@@ -6,9 +6,9 @@ author: Hermes Agent (Nous Research)
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  pichkoo:
     tags: [Coding-Agent, Blackbox, Multi-Agent, Judge, Multi-Model]
-    related_skills: [claude-code, codex, hermes-agent]
+    related_skills: [claude-code, codex, pichkoo-agent]
 ---
 
 # Blackbox CLI

@@ -73,7 +73,7 @@ class TestIsWriteDenied:
     )
     def test_hermes_control_files_oauth_and_mcp_tokens_denied(self, path):
         """Hermes control files, PKCE creds, mcp-tokens, and pairing entries must be write-denied."""
-        from hermes_constants import get_hermes_home
+        from pichkoo_constants import get_hermes_home
         hermes_home = get_hermes_home()
         full_path = str(hermes_home / path)
         assert _is_write_denied(full_path) is True
@@ -89,7 +89,7 @@ class TestIsWriteDenied:
     )
     def test_hermes_control_files_and_oauth_traversal_denied(self, path):
         """Path traversal attempts to protected Hermes files must be blocked."""
-        from hermes_constants import get_hermes_home
+        from pichkoo_constants import get_hermes_home
         hermes_home = get_hermes_home()
         full_path = str(hermes_home / path)
         assert _is_write_denied(full_path) is True
@@ -114,14 +114,14 @@ class TestIsWriteDenied:
         """Under a profile, BOTH <profile>/X and <root>/X must be denied (#15981 shape).
 
         Without the root-level pass, a profile-mode session leaves the
-        global ~/.hermes/{auth.json,config.yaml,webhook_subscriptions.json,
+        global ~/.pichkoo/{auth.json,config.yaml,webhook_subscriptions.json,
         .anthropic_oauth.json} writable — the same gap PR #15981 fixed
         for .env.
         """
         # Simulate a profile-mode HERMES_HOME layout:
         #   <root>/profiles/coder/{auth.json,config.yaml,...}
         #   <root>/{auth.json,config.yaml,...}        ← must also be denied
-        root = tmp_path / "hermes"
+        root = tmp_path / "pichkoo"
         profile = root / "profiles" / "coder"
         profile.mkdir(parents=True)
         monkeypatch.setenv("HERMES_HOME", str(profile))
@@ -133,7 +133,7 @@ class TestIsWriteDenied:
 
     def test_mcp_tokens_dir_protected_in_profile_mode(self, tmp_path, monkeypatch):
         """mcp-tokens/ under profile AND under root must both be denied."""
-        root = tmp_path / "hermes"
+        root = tmp_path / "pichkoo"
         profile = root / "profiles" / "coder"
         profile.mkdir(parents=True)
         monkeypatch.setenv("HERMES_HOME", str(profile))
@@ -146,13 +146,13 @@ class TestIsWriteDenied:
     def test_pairing_dir_denied(self, tmp_path, monkeypatch):
         """Regression: pairing/ must be write-denied under both profile and root.
 
-        PR #30383 introduced ~/.hermes/pairing/{platform}-approved.json as the
+        PR #30383 introduced ~/.pichkoo/pairing/{platform}-approved.json as the
         gateway access-control list. Without this block, a prompt-injected agent
         can write arbitrary user IDs into an approved file, granting persistent
         gateway access without going through the pairing code flow — the same
         threat class that motivated protecting webhook_subscriptions.json.
         """
-        root = tmp_path / "hermes"
+        root = tmp_path / "pichkoo"
         profile = root / "profiles" / "coder"
         profile.mkdir(parents=True)
         monkeypatch.setenv("HERMES_HOME", str(profile))
@@ -518,7 +518,7 @@ class TestSearchFilesFallbackHiddenPaths:
 
     def test_hidden_root_with_hidden_ancestor_includes_files(self, tmp_path, monkeypatch):
         """Fallback find should include visible files when path is inside hidden root."""
-        root = tmp_path / ".hermes" / "logs"
+        root = tmp_path / ".pichkoo" / "logs"
         root.mkdir(parents=True)
         visible_file = root / "agent.log"
         hidden_dir_file = root / ".hidden" / "secret.log"

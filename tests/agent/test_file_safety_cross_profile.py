@@ -5,9 +5,9 @@ skills/plugins/cron/memories directory. It's a soft guard — defense in
 depth, NOT a security boundary — but it prevents the agent from silently
 corrupting a profile that belongs to a different session.
 
-Reference: May 2026 incident — a hermes-security profile session
-accidentally edited skills under both ~/.hermes/profiles/hermes-security/skills/
-AND ~/.hermes/skills/ (the default profile's skills), realizing only
+Reference: May 2026 incident — a pichkoo-security profile session
+accidentally edited skills under both ~/.pichkoo/profiles/pichkoo-security/skills/
+AND ~/.pichkoo/skills/ (the default profile's skills), realizing only
 afterwards that the second path belonged to a different profile.
 """
 from __future__ import annotations
@@ -33,20 +33,20 @@ def fake_hermes(tmp_path, monkeypatch):
           cron/<state>
           memories/MEMORY.md
           profiles/
-            hermes-security/
+            pichkoo-security/
               skills/foo/SKILL.md       # named profile
               plugins/...
             coder/
               skills/foo/SKILL.md       # another named profile
     """
-    root = tmp_path / "fake-hermes"
+    root = tmp_path / "fake-pichkoo"
     (root / "skills" / "foo").mkdir(parents=True)
     (root / "skills" / "foo" / "SKILL.md").write_text("# default skill\n")
     (root / "plugins" / "foo").mkdir(parents=True)
     (root / "memories").mkdir(parents=True)
     (root / "cron").mkdir(parents=True)
 
-    sec_home = root / "profiles" / "hermes-security"
+    sec_home = root / "profiles" / "pichkoo-security"
     (sec_home / "skills" / "foo").mkdir(parents=True)
     (sec_home / "skills" / "foo" / "SKILL.md").write_text("# sec skill\n")
     (sec_home / "plugins").mkdir(parents=True)
@@ -57,8 +57,8 @@ def fake_hermes(tmp_path, monkeypatch):
 
     # Monkeypatch the resolver functions used by file_safety so each test
     # can choose which profile is "active".
-    import hermes_constants
-    monkeypatch.setattr(hermes_constants, "get_default_hermes_root", lambda: root)
+    import pichkoo_constants
+    monkeypatch.setattr(pichkoo_constants, "get_default_hermes_root", lambda: root)
 
     # The reloads below ensure get_cross_profile_warning/classify see the patched root.
     import agent.file_safety as fs
@@ -92,7 +92,7 @@ class TestResolveActiveProfileName:
     def test_named_profile(self, fake_hermes, monkeypatch):
         _set_active_home(monkeypatch, fake_hermes["security_home"])
         from agent.file_safety import _resolve_active_profile_name
-        assert _resolve_active_profile_name() == "hermes-security"
+        assert _resolve_active_profile_name() == "pichkoo-security"
 
     def test_falls_back_to_default_on_resolution_failure(self, fake_hermes, monkeypatch):
         """If HERMES_HOME resolution raises, return 'default' rather than crashing the tool."""
@@ -128,7 +128,7 @@ class TestClassifyCrossProfileTarget:
             str(fake_hermes["default_home"] / "skills" / "foo" / "SKILL.md")
         )
         assert result is not None
-        assert result["active_profile"] == "hermes-security"
+        assert result["active_profile"] == "pichkoo-security"
         assert result["target_profile"] == "default"
         assert result["area"] == "skills"
 
@@ -141,7 +141,7 @@ class TestClassifyCrossProfileTarget:
         )
         assert result is not None
         assert result["active_profile"] == "default"
-        assert result["target_profile"] == "hermes-security"
+        assert result["target_profile"] == "pichkoo-security"
 
     def test_named_to_named_cross_profile(self, fake_hermes, monkeypatch):
         _set_active_home(monkeypatch, fake_hermes["security_home"])
@@ -201,7 +201,7 @@ class TestGetCrossProfileWarning:
         assert warn is not None
         # Must name BOTH profiles so the model knows which is which.
         assert "default" in warn
-        assert "hermes-security" in warn
+        assert "pichkoo-security" in warn
         # Must name the bypass kwarg.
         assert "cross_profile=True" in warn
         # Must reference the area.

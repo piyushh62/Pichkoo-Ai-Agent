@@ -42,7 +42,7 @@ If you installed Pichkoo with the standard install script, MCP support is alread
 If you installed without extras and need to add MCP separately:
 
 ```bash
-cd ~/.hermes/hermes-agent
+cd ~/.pichkoo/pichkoo-agent
 uv pip install -e ".[mcp]"
 ```
 
@@ -66,7 +66,7 @@ mcp_servers:
 Then start Pichkoo:
 
 ```bash
-hermes chat
+pichkoo chat
 ```
 
 Now ask something concrete:
@@ -143,13 +143,13 @@ Use `chrome-devtools-mcp`.
 If your Windows Chrome already has live remote debugging enabled from `chrome://inspect/#remote-debugging`, add it like this from WSL:
 
 ```bash
-hermes mcp add chrome-devtools-win --command cmd.exe --args /c npx -y chrome-devtools-mcp@latest --autoConnect --no-usage-statistics
+pichkoo mcp add chrome-devtools-win --command cmd.exe --args /c npx -y chrome-devtools-mcp@latest --autoConnect --no-usage-statistics
 ```
 
 After saving the server:
 
 ```bash
-hermes mcp test chrome-devtools-win
+pichkoo mcp test chrome-devtools-win
 ```
 
 Then start a fresh Pichkoo session or run:

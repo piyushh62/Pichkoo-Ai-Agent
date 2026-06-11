@@ -46,7 +46,7 @@ Pichkoo 刻意将以下内容分离：
 以下是所有层都存在时最终系统 prompt 的简化视图（注释说明每个部分的来源）：
 
 ```
-# Layer 1: Agent Identity (from ~/.hermes/SOUL.md)
+# Layer 1: Agent Identity (from ~/.pichkoo/SOUL.md)
 You are Pichkoo, an AI assistant created by Nous Research.
 You are an expert software engineer and researcher.
 You value correctness, clarity, and efficiency.
@@ -118,7 +118,7 @@ renderable inside a terminal.
 
 ## SOUL.md 在 prompt 中的位置
 
-`SOUL.md` 位于 `~/.hermes/SOUL.md`，作为 agent 的身份标识——系统 prompt 的第一个部分。`prompt_builder.py` 中的加载逻辑如下：
+`SOUL.md` 位于 `~/.pichkoo/SOUL.md`，作为 agent 的身份标识——系统 prompt 的第一个部分。`prompt_builder.py` 中的加载逻辑如下：
 
 ```python
 # From agent/prompt_builder.py (simplified)
@@ -157,7 +157,7 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 
     # Priority: first match wins — only ONE project context loaded
     project_context = (
-        _load_hermes_md(cwd_path)       # 1. .hermes.md / HERMES.md (walks to git root)
+        _load_hermes_md(cwd_path)       # 1. .pichkoo.md / HERMES.md (walks to git root)
         or _load_agents_md(cwd_path)    # 2. AGENTS.md (cwd only)
         or _load_claude_md(cwd_path)    # 3. CLAUDE.md (cwd only)
         or _load_cursorrules(cwd_path)  # 4. .cursorrules / .cursor/rules/*.mdc
@@ -188,7 +188,7 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 
 | 优先级 | 文件 | 搜索范围 | 说明 |
 |--------|------|----------|------|
-| 1 | `.hermes.md`、`HERMES.md` | 从 CWD 向上至 git 根目录 | Pichkoo 原生项目配置 |
+| 1 | `.pichkoo.md`、`HERMES.md` | 从 CWD 向上至 git 根目录 | Pichkoo 原生项目配置 |
 | 2 | `AGENTS.md` | 仅 CWD | 常见 agent 指令文件 |
 | 3 | `CLAUDE.md` | 仅 CWD | Claude Code 兼容性 |
 | 4 | `.cursorrules`、`.cursor/rules/*.mdc` | 仅 CWD | Cursor 兼容性 |
@@ -196,7 +196,7 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 所有上下文文件均会：
 - **安全扫描** — 检查 prompt 注入模式（不可见 unicode、"ignore previous instructions"、凭据窃取尝试）
 - **截断处理** — 使用 70/20 头尾比例上限为 20,000 字符，并附截断标记
-- **剥离 YAML frontmatter** — `.hermes.md` 的 frontmatter 会被移除（保留供未来配置覆盖使用）
+- **剥离 YAML frontmatter** — `.pichkoo.md` 的 frontmatter 会被移除（保留供未来配置覆盖使用）
 
 ## 仅在 API 调用时生效的层
 
@@ -217,7 +217,7 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 
 `agent/prompt_builder.py` 使用**优先级系统**扫描并清理项目上下文文件——只加载一种类型（先匹配先赢）：
 
-1. `.hermes.md` / `HERMES.md`（向上遍历至 git 根目录）
+1. `.pichkoo.md` / `HERMES.md`（向上遍历至 git 根目录）
 2. `AGENTS.md`（启动时的 CWD；子目录在会话期间通过 `agent/subdirectory_hints.py` 逐步发现）
 3. `CLAUDE.md`（仅 CWD）
 4. `.cursorrules` / `.cursor/rules/*.mdc`（仅 CWD）
@@ -236,9 +236,9 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 
 ### 优先使用这些入口
 
-- `~/.hermes/SOUL.md` — 用自定义 agent 角色和固定行为替换内置默认身份块。
-- `~/.hermes/MEMORY.md` 和 `~/.hermes/USER.md` — 提供应在新会话中快照的持久跨会话事实和用户配置文件数据。
-- 项目上下文文件，如 `.hermes.md`、`HERMES.md`、`AGENTS.md`、`CLAUDE.md` 或 `.cursorrules` — 注入仓库特定的工作规则。
+- `~/.pichkoo/SOUL.md` — 用自定义 agent 角色和固定行为替换内置默认身份块。
+- `~/.pichkoo/MEMORY.md` 和 `~/.pichkoo/USER.md` — 提供应在新会话中快照的持久跨会话事实和用户配置文件数据。
+- 项目上下文文件，如 `.pichkoo.md`、`HERMES.md`、`AGENTS.md`、`CLAUDE.md` 或 `.cursorrules` — 注入仓库特定的工作规则。
 - Skills — 打包可复用的工作流和参考资料，无需编辑核心 prompt 代码。
 - 可选系统 prompt 配置 / API 覆盖 — 添加部署特定的指令文本，无需 fork Pichkoo。
 - 临时覆盖层，如 `HERMES_EPHEMERAL_SYSTEM_PROMPT` 或 prefill 消息 — 添加不应成为已缓存 prompt 前缀一部分的轮次级指导。

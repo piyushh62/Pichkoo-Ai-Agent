@@ -1,4 +1,4 @@
-"""Tests for the hermes-tools-as-MCP server module surface.
+"""Tests for the pichkoo-tools-as-MCP server module surface.
 
 We don't run a live MCP session in unit tests — that requires the codex
 subprocess + client + an event loop. These tests pin the static
@@ -61,7 +61,7 @@ class TestModuleSurface:
             )
 
     def test_kanban_worker_tools_exposed(self):
-        """Kanban workers run as `hermes chat -q` subprocesses; if they
+        """Kanban workers run as `pichkoo chat -q` subprocesses; if they
         come up on the codex_app_server runtime, the worker can do the
         actual work via codex's shell but needs the kanban tools through
         the MCP callback to report back to the kernel. Without these

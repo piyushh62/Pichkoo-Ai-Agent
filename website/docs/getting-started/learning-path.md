@@ -13,7 +13,7 @@ If you haven't installed Pichkoo AI Agent yet, begin with the [Installation guid
 :::
 
 :::tip First-time provider setup
-First-time users almost always want `hermes setup --portal` — one OAuth covers a model plus the four Tool Gateway tools (search/image/TTS/browser). See [Nous Portal](/integrations/nous-portal).
+First-time users almost always want `pichkoo setup --portal` — one OAuth covers a model plus the four Tool Gateway tools (search/image/TTS/browser). See [Nous Portal](/integrations/nous-portal).
 :::
 
 ## How to Use This Page
@@ -59,7 +59,7 @@ Deploy Pichkoo AI Agent as a bot on your favorite messaging platform.
 4. [Telegram Setup](/user-guide/messaging/telegram)
 5. [Discord Setup](/user-guide/messaging/discord)
 6. [Voice Mode](/user-guide/features/voice-mode)
-7. [Use Voice Mode with Pichkoo](/guides/use-voice-mode-with-hermes)
+7. [Use Voice Mode with Pichkoo](/guides/use-voice-mode-with-pichkoo)
 8. [Security](/user-guide/security)
 
 For full project examples, see:
@@ -85,7 +85,7 @@ Cron jobs let Pichkoo AI Agent run tasks on a schedule — daily summaries, peri
 Extend Pichkoo AI Agent with your own tools and reusable skill packages.
 
 1. [Plugins](/user-guide/features/plugins)
-2. [Build a Pichkoo Plugin](/guides/build-a-hermes-plugin)
+2. [Build a Pichkoo Plugin](/guides/build-a-pichkoo-plugin)
 3. [Tools Overview](/user-guide/features/tools)
 4. [Skills Overview](/user-guide/features/skills)
 5. [MCP (Model Context Protocol)](/user-guide/features/mcp)

@@ -48,7 +48,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
-from hermes_constants import secure_parent_dir
+from pichkoo_constants import secure_parent_dir
 
 logger = logging.getLogger(__name__)
 
@@ -116,10 +116,10 @@ def _get_token_dir() -> Path:
     Layout: ``HERMES_HOME/mcp-tokens/``
     """
     try:
-        from hermes_constants import get_hermes_home
+        from pichkoo_constants import get_hermes_home
         base = Path(get_hermes_home())
     except ImportError:
-        base = Path(os.environ.get("HERMES_HOME", str(Path.home() / ".hermes")))
+        base = Path(os.environ.get("HERMES_HOME", str(Path.home() / ".pichkoo")))
     return base / "mcp-tokens"
 
 
@@ -431,7 +431,7 @@ async def _redirect_handler(authorization_url: str) -> None:
             f"         ssh -N -L {_oauth_port}:127.0.0.1:{_oauth_port} <user>@<this-host>\n"
             f"       then open the URL above and let it redirect normally.\n"
             f"\n"
-            f"  See: https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh\n",
+            f"  See: https://pichkoo-agent.nousresearch.com/docs/guides/oauth-over-ssh\n",
             file=sys.stderr,
         )
 
@@ -573,7 +573,7 @@ def _paste_callback_reader(result: dict) -> None:
             return
         result["error"] = _USER_SKIPPED_SENTINEL
         print(
-            "  OAuth skipped. Run `hermes mcp login <server>` later to "
+            "  OAuth skipped. Run `pichkoo mcp login <server>` later to "
             "authenticate, or set ``enabled: false`` on that server in "
             "config.yaml to disable persistently.",
             file=sys.stderr,

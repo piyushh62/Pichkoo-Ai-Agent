@@ -35,8 +35,8 @@ def _restore_tool_modules():
         for name, module in sys.modules.items()
         if name == "tools"
         or name.startswith("tools.")
-        or name == "hermes_cli"
-        or name.startswith("hermes_cli.")
+        or name == "pichkoo_cli"
+        or name.startswith("pichkoo_cli.")
         or name == "modal"
         or name.startswith("modal.")
     }
@@ -47,7 +47,7 @@ def _restore_tool_modules():
             os.environ.pop("HERMES_HOME", None)
         else:
             os.environ["HERMES_HOME"] = original_hermes_home
-        _reset_modules(("tools", "hermes_cli", "modal"))
+        _reset_modules(("tools", "pichkoo_cli", "modal"))
         sys.modules.update(original_modules)
 
 
@@ -57,14 +57,14 @@ def _install_modal_test_modules(
     fail_on_snapshot_ids: set[str] | None = None,
     snapshot_id: str = "im-fresh",
 ):
-    _reset_modules(("tools", "hermes_cli", "modal"))
+    _reset_modules(("tools", "pichkoo_cli", "modal"))
 
-    hermes_cli = types.ModuleType("hermes_cli")
-    hermes_cli.__path__ = []  # type: ignore[attr-defined]
-    sys.modules["hermes_cli"] = hermes_cli
-    hermes_home = tmp_path / "hermes-home"
+    pichkoo_cli = types.ModuleType("pichkoo_cli")
+    pichkoo_cli.__path__ = []  # type: ignore[attr-defined]
+    sys.modules["pichkoo_cli"] = pichkoo_cli
+    hermes_home = tmp_path / "pichkoo-home"
     os.environ["HERMES_HOME"] = str(hermes_home)
-    sys.modules["hermes_cli.config"] = types.SimpleNamespace(
+    sys.modules["pichkoo_cli.config"] = types.SimpleNamespace(
         get_hermes_home=lambda: hermes_home,
     )
 
@@ -144,7 +144,7 @@ def _install_modal_test_modules(
             return {"kind": "registry", "image": image}
 
     async def _lookup_aio(_name: str, create_if_missing: bool = False):
-        return types.SimpleNamespace(name="hermes-agent", create_if_missing=create_if_missing)
+        return types.SimpleNamespace(name="pichkoo-agent", create_if_missing=create_if_missing)
 
     class _FakeSandboxInstance:
         def __init__(self, image):

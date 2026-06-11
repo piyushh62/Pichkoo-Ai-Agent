@@ -204,7 +204,7 @@ def test_auto_mount_replaces_persistent_workspace_bind(monkeypatch, tmp_path):
 
 def test_non_persistent_cleanup_removes_container(monkeypatch):
     """When persist_across_processes=false, cleanup() must docker stop AND
-    docker rm so containers don't leak across hermes processes.
+    docker rm so containers don't leak across pichkoo processes.
 
     Updated for issue #20561: the previous implementation used fire-and-forget
     ``subprocess.Popen("... &", shell=True)`` which raced with parent exit;
@@ -266,8 +266,8 @@ def _make_execute_only_env(forward_env=None):
     env._docker_exe = "/usr/bin/docker"
     # Base class attributes needed by unified execute()
     env._session_id = "test123"
-    env._snapshot_path = "/tmp/hermes-snap-test123.sh"
-    env._cwd_file = "/tmp/hermes-cwd-test123.txt"
+    env._snapshot_path = "/tmp/pichkoo-snap-test123.sh"
+    env._cwd_file = "/tmp/pichkoo-cwd-test123.txt"
     env._cwd_marker = "__HERMES_CWD_test123__"
     env._snapshot_ready = True
     env._last_sync_time = None
@@ -309,7 +309,7 @@ def test_init_env_args_uses_hermes_dotenv_for_empty_shell_env(monkeypatch):
 
     Regression: the disk fallback used to fire only on `value is None`, so a
     present-but-empty `MY_SECRET=""` skipped it and was forwarded as `-e
-    MY_SECRET=`, clobbering the correct value sitting in ~/.hermes/.env.
+    MY_SECRET=`, clobbering the correct value sitting in ~/.pichkoo/.env.
     """
     env = _make_execute_only_env(["MY_SECRET"])
 
@@ -591,9 +591,9 @@ def _labels_in_run_args(run_args):
 
 
 def test_run_command_tags_hermes_agent_label(monkeypatch):
-    """Every container hermes-agent starts must carry the hermes-agent=1 label
+    """Every container pichkoo-agent starts must carry the pichkoo-agent=1 label
     so the orphan reaper (and external operators) can identify them with a
-    single ``docker ps --filter label=hermes-agent=1`` call. Regression test
+    single ``docker ps --filter label=pichkoo-agent=1`` call. Regression test
     for issue #20561 — without the label there is no global sweep target."""
     monkeypatch.setattr(docker_env, "find_docker", lambda: "/usr/bin/docker")
     calls = _mock_subprocess_run(monkeypatch)
@@ -601,8 +601,8 @@ def test_run_command_tags_hermes_agent_label(monkeypatch):
     _make_dummy_env(task_id="my-task")
 
     labels = _labels_in_run_args(_run_args_from_calls(calls))
-    assert "hermes-agent=1" in labels, (
-        f"hermes-agent=1 label missing; got labels: {sorted(labels)}"
+    assert "pichkoo-agent=1" in labels, (
+        f"pichkoo-agent=1 label missing; got labels: {sorted(labels)}"
     )
 
 
@@ -618,11 +618,11 @@ def test_run_command_tags_task_and_profile_labels(monkeypatch):
     _make_dummy_env(task_id="kanban-42")
 
     labels = _labels_in_run_args(_run_args_from_calls(calls))
-    assert "hermes-task-id=kanban-42" in labels, (
-        f"hermes-task-id=kanban-42 missing; got: {sorted(labels)}"
+    assert "pichkoo-task-id=kanban-42" in labels, (
+        f"pichkoo-task-id=kanban-42 missing; got: {sorted(labels)}"
     )
-    assert "hermes-profile=research-bot" in labels, (
-        f"hermes-profile=research-bot missing; got: {sorted(labels)}"
+    assert "pichkoo-profile=research-bot" in labels, (
+        f"pichkoo-profile=research-bot missing; got: {sorted(labels)}"
     )
 
 
@@ -654,7 +654,7 @@ def test_run_command_sanitizes_unsafe_task_id(monkeypatch):
 
     labels = _labels_in_run_args(_run_args_from_calls(calls))
     # Each non-OK character becomes an underscore; the safe chars survive.
-    assert "hermes-task-id=task_with_weird_chars" in labels, (
+    assert "pichkoo-task-id=task_with_weird_chars" in labels, (
         f"sanitized task-id label missing; got: {sorted(labels)}"
     )
 
@@ -670,9 +670,9 @@ def test_labels_attribute_populated_after_init(monkeypatch):
     env = _make_dummy_env(task_id="abc")
 
     assert env._labels == {
-        "hermes-agent": "1",
-        "hermes-task-id": "abc",
-        "hermes-profile": "default",
+        "pichkoo-agent": "1",
+        "pichkoo-task-id": "abc",
+        "pichkoo-profile": "default",
     }
 
 
@@ -828,7 +828,7 @@ def test_failed_docker_run_cleans_up_orphaned_container(monkeypatch):
     assert len(cleanup_calls) == 1, "docker rm should be called once for the orphaned container"
     rm_cmd = cleanup_calls[0]
     assert rm_cmd[1] == "rm" and rm_cmd[2] == "-f"
-    assert rm_cmd[3].startswith("hermes-"), "should remove the container by its generated name"
+    assert rm_cmd[3].startswith("pichkoo-"), "should remove the container by its generated name"
 
 
 def test_docker_run_timeout_cleans_up_orphaned_container(monkeypatch):
@@ -863,7 +863,7 @@ def test_docker_run_timeout_cleans_up_orphaned_container(monkeypatch):
     assert len(cleanup_calls) == 1, "docker rm should be called once for the orphaned container"
     rm_cmd = cleanup_calls[0]
     assert rm_cmd[1] == "rm" and rm_cmd[2] == "-f"
-    assert rm_cmd[3].startswith("hermes-"), "should remove the container by its generated name"
+    assert rm_cmd[3].startswith("pichkoo-"), "should remove the container by its generated name"
 
 
 def test_no_reuse_when_persist_across_processes_disabled(monkeypatch):
@@ -1334,7 +1334,7 @@ def test_reap_orphan_spares_recently_exited_container(monkeypatch):
 
 
 def test_reap_orphan_scopes_to_profile_filter_via_label(monkeypatch):
-    """The reaper must pass ``--filter label=hermes-profile=<profile>`` to
+    """The reaper must pass ``--filter label=pichkoo-profile=<profile>`` to
     docker ps so it never sweeps another profile's containers. A research
     profile must not tear down the default profile's stragglers."""
     calls = _reaper_run_mock(monkeypatch, ps_ids=[], inspect_responses={})
@@ -1346,11 +1346,11 @@ def test_reap_orphan_scopes_to_profile_filter_via_label(monkeypatch):
     ps_calls = [c for c in calls if isinstance(c[0], list) and c[0][1:2] == ["ps"]]
     assert ps_calls, "expected at least one docker ps call"
     flat = " ".join(ps_calls[0][0])
-    assert "label=hermes-profile=research-bot" in flat, (
+    assert "label=pichkoo-profile=research-bot" in flat, (
         f"profile filter not applied to docker ps; got args: {ps_calls[0][0]}"
     )
-    assert "label=hermes-agent=1" in flat, (
-        f"hermes-agent label filter must also be applied; got: {ps_calls[0][0]}"
+    assert "label=pichkoo-agent=1" in flat, (
+        f"pichkoo-agent label filter must also be applied; got: {ps_calls[0][0]}"
     )
     assert "status=exited" in flat, (
         "must filter to exited containers only — running containers may "
@@ -1498,7 +1498,7 @@ def test_credential_mount_skipped_when_source_is_directory(monkeypatch, tmp_path
 
     # Mock get_credential_file_mounts to return the corrupted entry
     fake_mounts = [
-        {"host_path": str(corrupted_dir), "container_path": "/root/.hermes/google_token.json"},
+        {"host_path": str(corrupted_dir), "container_path": "/root/.pichkoo/google_token.json"},
     ]
     monkeypatch.setattr(
         "tools.credential_files.get_credential_file_mounts",
@@ -1538,7 +1538,7 @@ def test_credential_mount_skipped_when_source_missing(monkeypatch, tmp_path, cap
     calls = _mock_subprocess_run(monkeypatch)
 
     fake_mounts = [
-        {"host_path": str(missing_path), "container_path": "/root/.hermes/deleted_token.json"},
+        {"host_path": str(missing_path), "container_path": "/root/.pichkoo/deleted_token.json"},
     ]
     monkeypatch.setattr(
         "tools.credential_files.get_credential_file_mounts",
@@ -1576,7 +1576,7 @@ def test_credential_mount_works_when_source_is_valid_file(monkeypatch, tmp_path)
     calls = _mock_subprocess_run(monkeypatch)
 
     fake_mounts = [
-        {"host_path": str(valid_file), "container_path": "/root/.hermes/token.json"},
+        {"host_path": str(valid_file), "container_path": "/root/.pichkoo/token.json"},
     ]
     monkeypatch.setattr(
         "tools.credential_files.get_credential_file_mounts",
@@ -1629,7 +1629,7 @@ def test_image_uses_init_entrypoint_detects_s6_init(monkeypatch):
         return subprocess.CompletedProcess(cmd, 0, stdout='["/init"]', stderr="")
 
     monkeypatch.setattr(docker_env.subprocess, "run", _run)
-    assert docker_env._image_uses_init_entrypoint("/usr/bin/docker", "hermes-agent:latest") is True
+    assert docker_env._image_uses_init_entrypoint("/usr/bin/docker", "pichkoo-agent:latest") is True
 
 
 def test_image_uses_init_entrypoint_false_for_plain_image(monkeypatch):
@@ -1674,7 +1674,7 @@ def test_s6_image_skips_docker_init_and_mounts_run_exec(monkeypatch):
     monkeypatch.setattr(docker_env, "find_docker", lambda: "/usr/bin/docker")
     calls = _mock_subprocess_run_with_entrypoint(monkeypatch, '["/init"]')
 
-    _make_dummy_env(image="hermes-agent:latest")
+    _make_dummy_env(image="pichkoo-agent:latest")
 
     run_calls = [c for c in calls if isinstance(c[0], list) and len(c[0]) >= 2 and c[0][1] == "run"]
     assert run_calls, "docker run should have been called"
@@ -1726,7 +1726,7 @@ def test_is_container_gone_matches_removal_errors(monkeypatch):
 
     # Positive: the daemon's "container gone" phrasings.
     assert env._is_container_gone(
-        "Error response from daemon: No such container: hermes-abc123"
+        "Error response from daemon: No such container: pichkoo-abc123"
     )
     assert env._is_container_gone("Error: No such container: deadbeef")
     assert env._is_container_gone(
@@ -1756,7 +1756,7 @@ def test_execute_recovers_from_out_of_band_removal(monkeypatch):
 
     # First execute() sees a dead container; second (post-recovery) succeeds.
     outputs = iter([
-        {"output": "Error response from daemon: No such container: hermes-x", "returncode": 1},
+        {"output": "Error response from daemon: No such container: pichkoo-x", "returncode": 1},
         {"output": "ok", "returncode": 0},
     ])
 

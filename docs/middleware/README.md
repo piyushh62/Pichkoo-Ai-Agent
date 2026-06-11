@@ -34,8 +34,8 @@ def register(ctx):
 
 Every middleware callback receives:
 
-- `telemetry_schema_version`: currently `hermes.observer.v1`
-- `middleware_schema_version`: currently `hermes.middleware.v1`
+- `telemetry_schema_version`: currently `pichkoo.observer.v1`
+- `middleware_schema_version`: currently `pichkoo.middleware.v1`
 - Runtime context such as `session_id`, `task_id`, `turn_id`,
   `api_request_id`, `provider`, `model`, `api_mode`, `tool_name`, and
   `tool_call_id` when applicable.
@@ -115,17 +115,17 @@ rewritten path, command, or URL is the value downstream policy will evaluate.
 Middleware only runs for enabled plugins. For a bundled plugin:
 
 ```bash
-hermes plugins enable <plugin-name>
+pichkoo plugins enable <plugin-name>
 ```
 
 For isolated local testing, use one `HERMES_HOME` for plugin enablement and the
 agent run:
 
 ```bash
-export HERMES_HOME=/tmp/hermes-middleware-test
+export HERMES_HOME=/tmp/pichkoo-middleware-test
 mkdir -p "$HERMES_HOME"
-hermes plugins enable <plugin-name>
-hermes chat --query 'Reply exactly ok'
+pichkoo plugins enable <plugin-name>
+pichkoo chat --query 'Reply exactly ok'
 ```
 
 For source checkouts, prefer the source command so the runtime sees plugins and
@@ -133,8 +133,8 @@ middleware from the working tree:
 
 ```bash
 uv sync
-uv run hermes plugins enable <plugin-name>
-uv run hermes chat --query 'Reply exactly ok'
+uv run pichkoo plugins enable <plugin-name>
+uv run pichkoo chat --query 'Reply exactly ok'
 ```
 
 ## Generic Plugin Examples
@@ -179,7 +179,7 @@ def normalize_terminal_workdir(**kwargs):
     if kwargs.get("tool_name") != "terminal":
         return None
     args = dict(kwargs["args"])
-    args.setdefault("workdir", "/tmp/hermes-middleware-demo")
+    args.setdefault("workdir", "/tmp/pichkoo-middleware-demo")
     return {
         "args": args,
         "source": "middleware-demo",

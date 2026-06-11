@@ -188,12 +188,12 @@ def test_merge_metadata_stamps_sm_source():
 
     client = _SupermemoryClient.__new__(_SupermemoryClient)
     merged = client._merge_metadata({"type": "explicit_memory"})
-    assert merged["sm_source"] == "hermes"
+    assert merged["sm_source"] == "pichkoo"
     assert merged["type"] == "explicit_memory"
 
     # Legacy "source" is migrated into "type" when type is absent.
     merged2 = client._merge_metadata({"source": "conversation_turn"})
-    assert merged2["sm_source"] == "hermes"
+    assert merged2["sm_source"] == "pichkoo"
     assert merged2["type"] == "conversation_turn"
     assert "source" not in merged2
 
@@ -308,7 +308,7 @@ def test_identity_template_resolved_in_container_tag(monkeypatch, tmp_path):
     """container_tag with {identity} resolves to profile-scoped tag."""
     monkeypatch.setenv("SUPERMEMORY_API_KEY", "test-key")
     monkeypatch.setattr("plugins.memory.supermemory._SupermemoryClient", FakeClient)
-    _save_supermemory_config({"container_tag": "hermes-{identity}"}, str(tmp_path))
+    _save_supermemory_config({"container_tag": "pichkoo-{identity}"}, str(tmp_path))
     p = SupermemoryMemoryProvider()
     p.initialize("s1", hermes_home=str(tmp_path), platform="cli", agent_identity="coder")
     assert p._container_tag == "hermes_coder"
@@ -318,7 +318,7 @@ def test_identity_template_default_profile(monkeypatch, tmp_path):
     """Without agent_identity kwarg, {identity} resolves to 'default'."""
     monkeypatch.setenv("SUPERMEMORY_API_KEY", "test-key")
     monkeypatch.setattr("plugins.memory.supermemory._SupermemoryClient", FakeClient)
-    _save_supermemory_config({"container_tag": "hermes-{identity}"}, str(tmp_path))
+    _save_supermemory_config({"container_tag": "pichkoo-{identity}"}, str(tmp_path))
     p = SupermemoryMemoryProvider()
     p.initialize("s1", hermes_home=str(tmp_path), platform="cli")
     assert p._container_tag == "hermes_default"
@@ -380,7 +380,7 @@ def test_multi_container_enabled_adds_schema_param(monkeypatch, tmp_path):
     p = SupermemoryMemoryProvider()
     p.initialize("s1", hermes_home=str(tmp_path), platform="cli")
     assert p._enable_custom_containers is True
-    assert p._allowed_containers == ["hermes", "project_alpha", "shared"]
+    assert p._allowed_containers == ["pichkoo", "project_alpha", "shared"]
     schemas = p.get_tool_schemas()
     for s in schemas:
         assert "container_tag" in s["parameters"]["properties"]

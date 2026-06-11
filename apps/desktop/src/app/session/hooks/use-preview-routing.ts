@@ -14,7 +14,7 @@ import {
   setSessionPreviewTarget
 } from '@/store/preview'
 import { $currentCwd } from '@/store/session'
-import type { RpcEvent } from '@/types/hermes'
+import type { RpcEvent } from '@/types/pichkoo'
 
 type EventHandler = (event: RpcEvent) => void
 

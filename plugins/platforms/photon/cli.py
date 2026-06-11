@@ -1,5 +1,5 @@
 """
-``hermes photon ...`` CLI subcommands — registered by the plugin via
+``pichkoo photon ...`` CLI subcommands — registered by the plugin via
 ``ctx.register_cli_command()``.
 
 Subcommands:
@@ -25,7 +25,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from hermes_cli.colors import Colors, color
+from pichkoo_cli.colors import Colors, color
 
 from . import auth as photon_auth
 
@@ -36,7 +36,7 @@ _SIDECAR_DIR = Path(__file__).parent / "sidecar"
 # argparse wiring
 
 def register_cli(parser: argparse.ArgumentParser) -> None:
-    """Wire up `hermes photon ...` subcommands."""
+    """Wire up `pichkoo photon ...` subcommands."""
     subs = parser.add_subparsers(dest="photon_command", required=False)
 
     p_setup = subs.add_parser(
@@ -86,7 +86,7 @@ def _run_device_login(args: argparse.Namespace) -> int:
     """Run the RFC 8628 device-code login flow and persist the token.
 
     Internal helper — invoked as the first step of ``setup``. There is
-    no standalone ``hermes photon login`` command; Photon onboards
+    no standalone ``pichkoo photon login`` command; Photon onboards
     through the single ``setup`` surface like every other channel.
     """
     def _print_code(code):
@@ -153,7 +153,7 @@ def _cmd_setup(args: argparse.Namespace) -> int:
         return 1
 
     # 3. Enable Spectrum, fetch the spectrum project id, rotate the secret,
-    #    and persist both (runtime creds -> ~/.hermes/.env, ids -> auth.json).
+    #    and persist both (runtime creds -> ~/.pichkoo/.env, ids -> auth.json).
     try:
         print("[3/5] Enabling Spectrum and provisioning credentials...")
         proj = photon_auth.ensure_spectrum_enabled(token, dashboard_id)
@@ -262,7 +262,7 @@ def _cmd_setup(args: argparse.Namespace) -> int:
 
     print()
     print("✓ Photon setup complete.")
-    print("  Start the gateway:  hermes gateway start --platform photon")
+    print("  Start the gateway:  pichkoo gateway start --platform photon")
     return 0
 
 
@@ -276,7 +276,7 @@ def _autoconfigure_access(phone: str) -> None:
     never clobbered on a re-run.
     """
     try:
-        from hermes_cli.config import get_env_value, save_env_value
+        from pichkoo_cli.config import get_env_value, save_env_value
     except ImportError:
         return
     for key, label in (
@@ -302,7 +302,7 @@ def _cmd_status(_args: argparse.Namespace) -> int:
     node_bin = os.getenv("PHOTON_NODE_BIN") or shutil.which("node")
     sidecar_installed = (_SIDECAR_DIR / "node_modules").exists()
     print(f"  node binary         : {node_bin or '✗ missing (install Node 18+)'}")
-    print(f"  sidecar deps        : {'✓ installed' if sidecar_installed else '✗ run `hermes photon install-sidecar`'}")
+    print(f"  sidecar deps        : {'✓ installed' if sidecar_installed else '✗ run `pichkoo photon install-sidecar`'}")
     return 0
 
 
@@ -350,15 +350,15 @@ def _install_sidecar() -> int:
 # ---------------------------------------------------------------------------
 # Gateway-setup entry point
 #
-# `hermes gateway setup` discovers platforms via the registry and calls each
+# `pichkoo gateway setup` discovers platforms via the registry and calls each
 # entry's zero-arg ``setup_fn``. Photon registers this function so it appears
 # in the unified setup wizard alongside every other channel — same onboarding
 # surface, no Photon-specific detour. It runs the identical device-login +
-# project + user + sidecar flow as ``hermes photon setup`` with interactive
+# project + user + sidecar flow as ``pichkoo photon setup`` with interactive
 # defaults (phone is prompted when stdin is a TTY).
 
 def gateway_setup() -> None:
-    """Run Photon first-time setup from the `hermes gateway setup` wizard."""
+    """Run Photon first-time setup from the `pichkoo gateway setup` wizard."""
     args = argparse.Namespace(
         photon_command="setup",
         project_name=None,

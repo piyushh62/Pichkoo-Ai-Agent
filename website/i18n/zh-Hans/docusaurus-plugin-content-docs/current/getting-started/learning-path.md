@@ -55,7 +55,7 @@ Pichkoo AI Agent 功能丰富——CLI 助手、Telegram/Discord 机器人、任
 4. [Telegram 配置](/user-guide/messaging/telegram)
 5. [Discord 配置](/user-guide/messaging/discord)
 6. [语音模式](/user-guide/features/voice-mode)
-7. [在 Pichkoo 中使用语音模式](/guides/use-voice-mode-with-hermes)
+7. [在 Pichkoo 中使用语音模式](/guides/use-voice-mode-with-pichkoo)
 8. [安全](/user-guide/security)
 
 完整项目示例请参阅：
@@ -81,7 +81,7 @@ Cron 任务让 Pichkoo AI Agent 按计划执行任务——每日摘要、定期
 通过自定义工具和可复用技能包扩展 Pichkoo AI Agent。
 
 1. [插件](/user-guide/features/plugins)
-2. [构建 Pichkoo 插件](/guides/build-a-hermes-plugin)
+2. [构建 Pichkoo 插件](/guides/build-a-pichkoo-plugin)
 3. [工具概览](/user-guide/features/tools)
 4. [技能概览](/user-guide/features/skills)
 5. [MCP（模型上下文协议）](/user-guide/features/mcp)

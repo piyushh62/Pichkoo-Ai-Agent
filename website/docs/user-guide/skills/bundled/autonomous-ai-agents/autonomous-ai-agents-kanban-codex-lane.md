@@ -20,7 +20,7 @@ Use when a Pichkoo Kanban worker wants to run Codex CLI as an isolated implement
 | Author | Pichkoo AI Agent |
 | License | MIT |
 | Tags | `kanban`, `codex`, `worktrees`, `autonomous-agents`, `prediction-market-bot` |
-| Related skills | [`kanban-worker`](/docs/user-guide/skills/bundled/devops/devops-kanban-worker), [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`hermes-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent) |
+| Related skills | [`kanban-worker`](/docs/user-guide/skills/bundled/devops/devops-kanban-worker), [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`pichkoo-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-pichkoo-agent) |
 
 ## Reference: full SKILL.md
 
@@ -247,7 +247,7 @@ Include this object under `metadata.codex_lane` for every task where the lane wa
     "accepted_commits": ["<sha1>", "<sha2>"],
     "rejected_reason": "empty when fully accepted; otherwise concrete reason",
     "tests_run": [
-      {"command": "scripts/run_tests.sh tests/tools/test_x.py", "exit_code": 0, "owner": "hermes"},
+      {"command": "scripts/run_tests.sh tests/tools/test_x.py", "exit_code": 0, "owner": "pichkoo"},
       {"command": "codex-reported: npm test", "exit_code": 0, "owner": "codex"}
     ],
     "artifacts": ["/absolute/path/to/log-or-patch"]

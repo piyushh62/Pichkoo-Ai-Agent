@@ -1,33 +1,33 @@
 const { contextBridge, ipcRenderer, webUtils } = require('electron')
 
 contextBridge.exposeInMainWorld('hermesDesktop', {
-  getConnection: profile => ipcRenderer.invoke('hermes:connection', profile),
-  revalidateConnection: () => ipcRenderer.invoke('hermes:connection:revalidate'),
-  touchBackend: profile => ipcRenderer.invoke('hermes:backend:touch', profile),
-  getGatewayWsUrl: profile => ipcRenderer.invoke('hermes:gateway:ws-url', profile),
-  openSessionWindow: sessionId => ipcRenderer.invoke('hermes:window:openSession', sessionId),
-  getBootProgress: () => ipcRenderer.invoke('hermes:boot-progress:get'),
-  getConnectionConfig: profile => ipcRenderer.invoke('hermes:connection-config:get', profile),
-  saveConnectionConfig: payload => ipcRenderer.invoke('hermes:connection-config:save', payload),
-  applyConnectionConfig: payload => ipcRenderer.invoke('hermes:connection-config:apply', payload),
-  testConnectionConfig: payload => ipcRenderer.invoke('hermes:connection-config:test', payload),
-  probeConnectionConfig: remoteUrl => ipcRenderer.invoke('hermes:connection-config:probe', remoteUrl),
-  oauthLoginConnectionConfig: remoteUrl => ipcRenderer.invoke('hermes:connection-config:oauth-login', remoteUrl),
-  oauthLogoutConnectionConfig: remoteUrl => ipcRenderer.invoke('hermes:connection-config:oauth-logout', remoteUrl),
+  getConnection: profile => ipcRenderer.invoke('pichkoo:connection', profile),
+  revalidateConnection: () => ipcRenderer.invoke('pichkoo:connection:revalidate'),
+  touchBackend: profile => ipcRenderer.invoke('pichkoo:backend:touch', profile),
+  getGatewayWsUrl: profile => ipcRenderer.invoke('pichkoo:gateway:ws-url', profile),
+  openSessionWindow: sessionId => ipcRenderer.invoke('pichkoo:window:openSession', sessionId),
+  getBootProgress: () => ipcRenderer.invoke('pichkoo:boot-progress:get'),
+  getConnectionConfig: profile => ipcRenderer.invoke('pichkoo:connection-config:get', profile),
+  saveConnectionConfig: payload => ipcRenderer.invoke('pichkoo:connection-config:save', payload),
+  applyConnectionConfig: payload => ipcRenderer.invoke('pichkoo:connection-config:apply', payload),
+  testConnectionConfig: payload => ipcRenderer.invoke('pichkoo:connection-config:test', payload),
+  probeConnectionConfig: remoteUrl => ipcRenderer.invoke('pichkoo:connection-config:probe', remoteUrl),
+  oauthLoginConnectionConfig: remoteUrl => ipcRenderer.invoke('pichkoo:connection-config:oauth-login', remoteUrl),
+  oauthLogoutConnectionConfig: remoteUrl => ipcRenderer.invoke('pichkoo:connection-config:oauth-logout', remoteUrl),
   profile: {
-    get: () => ipcRenderer.invoke('hermes:profile:get'),
-    set: name => ipcRenderer.invoke('hermes:profile:set', name)
+    get: () => ipcRenderer.invoke('pichkoo:profile:get'),
+    set: name => ipcRenderer.invoke('pichkoo:profile:set', name)
   },
-  api: request => ipcRenderer.invoke('hermes:api', request),
-  notify: payload => ipcRenderer.invoke('hermes:notify', payload),
-  requestMicrophoneAccess: () => ipcRenderer.invoke('hermes:requestMicrophoneAccess'),
-  readFileDataUrl: filePath => ipcRenderer.invoke('hermes:readFileDataUrl', filePath),
-  readFileText: filePath => ipcRenderer.invoke('hermes:readFileText', filePath),
-  selectPaths: options => ipcRenderer.invoke('hermes:selectPaths', options),
-  writeClipboard: text => ipcRenderer.invoke('hermes:writeClipboard', text),
-  saveImageFromUrl: url => ipcRenderer.invoke('hermes:saveImageFromUrl', url),
-  saveImageBuffer: (data, ext) => ipcRenderer.invoke('hermes:saveImageBuffer', { data, ext }),
-  saveClipboardImage: () => ipcRenderer.invoke('hermes:saveClipboardImage'),
+  api: request => ipcRenderer.invoke('pichkoo:api', request),
+  notify: payload => ipcRenderer.invoke('pichkoo:notify', payload),
+  requestMicrophoneAccess: () => ipcRenderer.invoke('pichkoo:requestMicrophoneAccess'),
+  readFileDataUrl: filePath => ipcRenderer.invoke('pichkoo:readFileDataUrl', filePath),
+  readFileText: filePath => ipcRenderer.invoke('pichkoo:readFileText', filePath),
+  selectPaths: options => ipcRenderer.invoke('pichkoo:selectPaths', options),
+  writeClipboard: text => ipcRenderer.invoke('pichkoo:writeClipboard', text),
+  saveImageFromUrl: url => ipcRenderer.invoke('pichkoo:saveImageFromUrl', url),
+  saveImageBuffer: (data, ext) => ipcRenderer.invoke('pichkoo:saveImageBuffer', { data, ext }),
+  saveClipboardImage: () => ipcRenderer.invoke('pichkoo:saveClipboardImage'),
   getPathForFile: file => {
     try {
       return webUtils.getPathForFile(file) || ''
@@ -35,36 +35,36 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
       return ''
     }
   },
-  normalizePreviewTarget: (target, baseDir) => ipcRenderer.invoke('hermes:normalizePreviewTarget', target, baseDir),
-  watchPreviewFile: url => ipcRenderer.invoke('hermes:watchPreviewFile', url),
-  stopPreviewFileWatch: id => ipcRenderer.invoke('hermes:stopPreviewFileWatch', id),
-  setTitleBarTheme: payload => ipcRenderer.send('hermes:titlebar-theme', payload),
-  setPreviewShortcutActive: active => ipcRenderer.send('hermes:previewShortcutActive', Boolean(active)),
-  openExternal: url => ipcRenderer.invoke('hermes:openExternal', url),
-  fetchLinkTitle: url => ipcRenderer.invoke('hermes:fetchLinkTitle', url),
-  sanitizeWorkspaceCwd: cwd => ipcRenderer.invoke('hermes:workspace:sanitize', cwd),
+  normalizePreviewTarget: (target, baseDir) => ipcRenderer.invoke('pichkoo:normalizePreviewTarget', target, baseDir),
+  watchPreviewFile: url => ipcRenderer.invoke('pichkoo:watchPreviewFile', url),
+  stopPreviewFileWatch: id => ipcRenderer.invoke('pichkoo:stopPreviewFileWatch', id),
+  setTitleBarTheme: payload => ipcRenderer.send('pichkoo:titlebar-theme', payload),
+  setPreviewShortcutActive: active => ipcRenderer.send('pichkoo:previewShortcutActive', Boolean(active)),
+  openExternal: url => ipcRenderer.invoke('pichkoo:openExternal', url),
+  fetchLinkTitle: url => ipcRenderer.invoke('pichkoo:fetchLinkTitle', url),
+  sanitizeWorkspaceCwd: cwd => ipcRenderer.invoke('pichkoo:workspace:sanitize', cwd),
   settings: {
-    getDefaultProjectDir: () => ipcRenderer.invoke('hermes:setting:defaultProjectDir:get'),
-    setDefaultProjectDir: dir => ipcRenderer.invoke('hermes:setting:defaultProjectDir:set', dir),
-    pickDefaultProjectDir: () => ipcRenderer.invoke('hermes:setting:defaultProjectDir:pick')
+    getDefaultProjectDir: () => ipcRenderer.invoke('pichkoo:setting:defaultProjectDir:get'),
+    setDefaultProjectDir: dir => ipcRenderer.invoke('pichkoo:setting:defaultProjectDir:set', dir),
+    pickDefaultProjectDir: () => ipcRenderer.invoke('pichkoo:setting:defaultProjectDir:pick')
   },
-  revealLogs: () => ipcRenderer.invoke('hermes:logs:reveal'),
-  getRecentLogs: () => ipcRenderer.invoke('hermes:logs:recent'),
-  readDir: dirPath => ipcRenderer.invoke('hermes:fs:readDir', dirPath),
-  gitRoot: startPath => ipcRenderer.invoke('hermes:fs:gitRoot', startPath),
+  revealLogs: () => ipcRenderer.invoke('pichkoo:logs:reveal'),
+  getRecentLogs: () => ipcRenderer.invoke('pichkoo:logs:recent'),
+  readDir: dirPath => ipcRenderer.invoke('pichkoo:fs:readDir', dirPath),
+  gitRoot: startPath => ipcRenderer.invoke('pichkoo:fs:gitRoot', startPath),
   terminal: {
-    dispose: id => ipcRenderer.invoke('hermes:terminal:dispose', id),
-    resize: (id, size) => ipcRenderer.invoke('hermes:terminal:resize', id, size),
-    start: options => ipcRenderer.invoke('hermes:terminal:start', options),
-    write: (id, data) => ipcRenderer.invoke('hermes:terminal:write', id, data),
+    dispose: id => ipcRenderer.invoke('pichkoo:terminal:dispose', id),
+    resize: (id, size) => ipcRenderer.invoke('pichkoo:terminal:resize', id, size),
+    start: options => ipcRenderer.invoke('pichkoo:terminal:start', options),
+    write: (id, data) => ipcRenderer.invoke('pichkoo:terminal:write', id, data),
     onData: (id, callback) => {
-      const channel = `hermes:terminal:${id}:data`
+      const channel = `pichkoo:terminal:${id}:data`
       const listener = (_event, payload) => callback(payload)
       ipcRenderer.on(channel, listener)
       return () => ipcRenderer.removeListener(channel, listener)
     },
     onExit: (id, callback) => {
-      const channel = `hermes:terminal:${id}:exit`
+      const channel = `pichkoo:terminal:${id}:exit`
       const listener = (_event, payload) => callback(payload)
       ipcRenderer.on(channel, listener)
       return () => ipcRenderer.removeListener(channel, listener)
@@ -72,71 +72,71 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   },
   onClosePreviewRequested: callback => {
     const listener = () => callback()
-    ipcRenderer.on('hermes:close-preview-requested', listener)
-    return () => ipcRenderer.removeListener('hermes:close-preview-requested', listener)
+    ipcRenderer.on('pichkoo:close-preview-requested', listener)
+    return () => ipcRenderer.removeListener('pichkoo:close-preview-requested', listener)
   },
   onOpenUpdatesRequested: callback => {
     const listener = () => callback()
-    ipcRenderer.on('hermes:open-updates', listener)
-    return () => ipcRenderer.removeListener('hermes:open-updates', listener)
+    ipcRenderer.on('pichkoo:open-updates', listener)
+    return () => ipcRenderer.removeListener('pichkoo:open-updates', listener)
   },
   onWindowStateChanged: callback => {
     const listener = (_event, payload) => callback(payload)
-    ipcRenderer.on('hermes:window-state-changed', listener)
-    return () => ipcRenderer.removeListener('hermes:window-state-changed', listener)
+    ipcRenderer.on('pichkoo:window-state-changed', listener)
+    return () => ipcRenderer.removeListener('pichkoo:window-state-changed', listener)
   },
   onPreviewFileChanged: callback => {
     const listener = (_event, payload) => callback(payload)
-    ipcRenderer.on('hermes:preview-file-changed', listener)
-    return () => ipcRenderer.removeListener('hermes:preview-file-changed', listener)
+    ipcRenderer.on('pichkoo:preview-file-changed', listener)
+    return () => ipcRenderer.removeListener('pichkoo:preview-file-changed', listener)
   },
   onBackendExit: callback => {
     const listener = (_event, payload) => callback(payload)
-    ipcRenderer.on('hermes:backend-exit', listener)
-    return () => ipcRenderer.removeListener('hermes:backend-exit', listener)
+    ipcRenderer.on('pichkoo:backend-exit', listener)
+    return () => ipcRenderer.removeListener('pichkoo:backend-exit', listener)
   },
   onPowerResume: callback => {
     const listener = () => callback()
-    ipcRenderer.on('hermes:power-resume', listener)
-    return () => ipcRenderer.removeListener('hermes:power-resume', listener)
+    ipcRenderer.on('pichkoo:power-resume', listener)
+    return () => ipcRenderer.removeListener('pichkoo:power-resume', listener)
   },
   onBootProgress: callback => {
     const listener = (_event, payload) => callback(payload)
-    ipcRenderer.on('hermes:boot-progress', listener)
-    return () => ipcRenderer.removeListener('hermes:boot-progress', listener)
+    ipcRenderer.on('pichkoo:boot-progress', listener)
+    return () => ipcRenderer.removeListener('pichkoo:boot-progress', listener)
   },
   // First-launch bootstrap progress -- emitted by the install.ps1 stage
   // runner in main.cjs (apps/desktop/electron/bootstrap-runner.cjs).
   // Renderer's install overlay subscribes to live events and queries the
   // current snapshot via getBootstrapState() to recover after a devtools
   // reload mid-bootstrap.
-  getBootstrapState: () => ipcRenderer.invoke('hermes:bootstrap:get'),
-  resetBootstrap: () => ipcRenderer.invoke('hermes:bootstrap:reset'),
-  repairBootstrap: () => ipcRenderer.invoke('hermes:bootstrap:repair'),
-  cancelBootstrap: () => ipcRenderer.invoke('hermes:bootstrap:cancel'),
+  getBootstrapState: () => ipcRenderer.invoke('pichkoo:bootstrap:get'),
+  resetBootstrap: () => ipcRenderer.invoke('pichkoo:bootstrap:reset'),
+  repairBootstrap: () => ipcRenderer.invoke('pichkoo:bootstrap:repair'),
+  cancelBootstrap: () => ipcRenderer.invoke('pichkoo:bootstrap:cancel'),
   onBootstrapEvent: callback => {
     const listener = (_event, payload) => callback(payload)
-    ipcRenderer.on('hermes:bootstrap:event', listener)
-    return () => ipcRenderer.removeListener('hermes:bootstrap:event', listener)
+    ipcRenderer.on('pichkoo:bootstrap:event', listener)
+    return () => ipcRenderer.removeListener('pichkoo:bootstrap:event', listener)
   },
-  getVersion: () => ipcRenderer.invoke('hermes:version'),
+  getVersion: () => ipcRenderer.invoke('pichkoo:version'),
   uninstall: {
-    summary: () => ipcRenderer.invoke('hermes:uninstall:summary'),
-    run: mode => ipcRenderer.invoke('hermes:uninstall:run', { mode })
+    summary: () => ipcRenderer.invoke('pichkoo:uninstall:summary'),
+    run: mode => ipcRenderer.invoke('pichkoo:uninstall:run', { mode })
   },
   updates: {
-    check: () => ipcRenderer.invoke('hermes:updates:check'),
-    apply: opts => ipcRenderer.invoke('hermes:updates:apply', opts),
-    getBranch: () => ipcRenderer.invoke('hermes:updates:branch:get'),
-    setBranch: name => ipcRenderer.invoke('hermes:updates:branch:set', name),
+    check: () => ipcRenderer.invoke('pichkoo:updates:check'),
+    apply: opts => ipcRenderer.invoke('pichkoo:updates:apply', opts),
+    getBranch: () => ipcRenderer.invoke('pichkoo:updates:branch:get'),
+    setBranch: name => ipcRenderer.invoke('pichkoo:updates:branch:set', name),
     onProgress: callback => {
       const listener = (_event, payload) => callback(payload)
-      ipcRenderer.on('hermes:updates:progress', listener)
-      return () => ipcRenderer.removeListener('hermes:updates:progress', listener)
+      ipcRenderer.on('pichkoo:updates:progress', listener)
+      return () => ipcRenderer.removeListener('pichkoo:updates:progress', listener)
     }
   },
   themes: {
-    fetchMarketplace: id => ipcRenderer.invoke('hermes:vscode-theme:fetch', id),
-    searchMarketplace: query => ipcRenderer.invoke('hermes:vscode-theme:search', query)
+    fetchMarketplace: id => ipcRenderer.invoke('pichkoo:vscode-theme:fetch', id),
+    searchMarketplace: query => ipcRenderer.invoke('pichkoo:vscode-theme:search', query)
   }
 })

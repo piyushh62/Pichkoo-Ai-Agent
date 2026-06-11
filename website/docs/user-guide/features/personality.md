@@ -18,7 +18,7 @@ If you want to change who Pichkoo is — or replace it with an entirely differen
 Pichkoo now seeds a default `SOUL.md` automatically in:
 
 ```text
-~/.hermes/SOUL.md
+~/.pichkoo/SOUL.md
 ```
 
 More precisely, it uses the current instance's `HERMES_HOME`, so if you run Pichkoo with a custom home directory, it will use:
@@ -47,14 +47,14 @@ This keeps personality predictable.
 If Pichkoo loaded `SOUL.md` from whatever directory you happened to launch it in, your personality could change unexpectedly between projects. By loading only from `HERMES_HOME`, the personality belongs to the Pichkoo instance itself.
 
 That also makes it easier to teach users:
-- "Edit `~/.hermes/SOUL.md` to change Pichkoo' default personality."
+- "Edit `~/.pichkoo/SOUL.md` to change Pichkoo' default personality."
 
 ## Where to edit it
 
 For most users:
 
 ```bash
-~/.hermes/SOUL.md
+~/.pichkoo/SOUL.md
 ```
 
 If you use a custom home:
@@ -211,7 +211,7 @@ These are convenient overlays, but your global `SOUL.md` still gives Pichkoo its
 
 ## Custom personalities in config
 
-You can also define named custom personalities in `~/.hermes/config.yaml` under `agent.personalities`.
+You can also define named custom personalities in `~/.pichkoo/config.yaml` under `agent.personalities`.
 
 ```yaml
 agent:
@@ -231,7 +231,7 @@ Then switch to it with:
 
 A strong default setup is:
 
-1. Keep a thoughtful global `SOUL.md` in `~/.hermes/SOUL.md`
+1. Keep a thoughtful global `SOUL.md` in `~/.pichkoo/SOUL.md`
 2. Put project instructions in `AGENTS.md`
 3. Use `/personality` only when you want a temporary mode shift
 
@@ -259,7 +259,7 @@ At a high level, the prompt stack includes:
 - [Context Files](/user-guide/features/context-files)
 - [Configuration](/user-guide/configuration)
 - [Tips & Best Practices](/guides/tips)
-- [SOUL.md Guide](/guides/use-soul-with-hermes)
+- [SOUL.md Guide](/guides/use-soul-with-pichkoo)
 
 ## CLI appearance vs conversational personality
 

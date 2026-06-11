@@ -352,13 +352,13 @@ class TestPlatformsMerge:
     """Test get_all_platforms() merges with registry."""
 
     def test_get_all_platforms_includes_builtins(self):
-        from hermes_cli.platforms import get_all_platforms, PLATFORMS
+        from pichkoo_cli.platforms import get_all_platforms, PLATFORMS
         merged = get_all_platforms()
         for key in PLATFORMS:
             assert key in merged
 
     def test_get_all_platforms_includes_plugin(self):
-        from hermes_cli.platforms import get_all_platforms
+        from pichkoo_cli.platforms import get_all_platforms
         from gateway.platform_registry import platform_registry as _reg
 
         _reg.register(PlatformEntry(
@@ -377,7 +377,7 @@ class TestPlatformsMerge:
             _reg.unregister("testmerge")
 
     def test_platform_label_plugin_fallback(self):
-        from hermes_cli.platforms import platform_label
+        from pichkoo_cli.platforms import platform_label
         from gateway.platform_registry import platform_registry as _reg
 
         _reg.register(PlatformEntry(
@@ -435,7 +435,7 @@ class TestApplyYamlConfigFnDispatch:
     """
 
     def _write_config(self, tmp_path, content: str):
-        hermes_home = tmp_path / ".hermes"
+        hermes_home = tmp_path / ".pichkoo"
         hermes_home.mkdir()
         (hermes_home / "config.yaml").write_text(content, encoding="utf-8")
         return hermes_home
@@ -667,7 +667,7 @@ class TestPluginPlatformSharedKeyBridge:
     """
 
     def _write_config(self, tmp_path, content: str):
-        hermes_home = tmp_path / ".hermes"
+        hermes_home = tmp_path / ".pichkoo"
         hermes_home.mkdir()
         (hermes_home / "config.yaml").write_text(content, encoding="utf-8")
         return hermes_home
@@ -722,7 +722,7 @@ class TestPluginEnablementGate:
     """
 
     def _write_config(self, tmp_path, content: str = ""):
-        hermes_home = tmp_path / ".hermes"
+        hermes_home = tmp_path / ".pichkoo"
         hermes_home.mkdir()
         (hermes_home / "config.yaml").write_text(content, encoding="utf-8")
         return hermes_home

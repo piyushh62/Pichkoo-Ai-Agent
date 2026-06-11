@@ -20,7 +20,7 @@ cd plugins/platforms/photon/sidecar
 npm install
 ```
 
-The Hermes plugin's `hermes photon setup` command runs `npm install`
+The Hermes plugin's `pichkoo photon setup` command runs `npm install`
 here automatically.
 
 ## Run standalone

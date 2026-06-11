@@ -5,11 +5,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { $composerAttachments, type ComposerAttachment } from '@/store/composer'
 import { $connection, $sessions, setSessions } from '@/store/session'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/pichkoo'
 
 import { uploadComposerAttachment, usePromptActions } from './use-prompt-actions'
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/pichkoo', () => ({
   getProfiles: vi.fn(async () => ({ profiles: [] })),
   setApiRequestProfile: vi.fn(),
   transcribeAudio: vi.fn()
@@ -357,8 +357,8 @@ describe('usePromptActions file attachment sync', () => {
       if (method === 'file.attach') {
         return {
           attached: true,
-          path: '/remote/work/.hermes/desktop-attachments/report.txt',
-          ref_text: '@file:.hermes/desktop-attachments/report.txt',
+          path: '/remote/work/.pichkoo/desktop-attachments/report.txt',
+          ref_text: '@file:.pichkoo/desktop-attachments/report.txt',
           uploaded: true
         } as never
       }
@@ -380,7 +380,7 @@ describe('usePromptActions file attachment sync', () => {
     })
     expect(calls[1]?.params).toEqual({
       session_id: RUNTIME_SESSION_ID,
-      text: '@file:.hermes/desktop-attachments/report.txt\n\nconvert this to epub'
+      text: '@file:.pichkoo/desktop-attachments/report.txt\n\nconvert this to epub'
     })
   })
 
@@ -471,7 +471,7 @@ describe('usePromptActions eager-upload races', () => {
   it('joins an in-flight eager upload at submit instead of staging the file twice', async () => {
     // Drop-then-immediately-Enter: the drop kicks off an eager file.attach; if
     // submit doesn't join it, both calls stage the file and leave a duplicate
-    // under .hermes/desktop-attachments/. Submit must await the in-flight upload
+    // under .pichkoo/desktop-attachments/. Submit must await the in-flight upload
     // and reuse its gateway-side ref.
     $connection.set({ mode: 'remote' } as never)
     Object.defineProperty(window, 'hermesDesktop', {
@@ -488,7 +488,7 @@ describe('usePromptActions eager-upload races', () => {
         await new Promise<void>(resolve => {
           releaseAttach = resolve
         })
-        return { attached: true, ref_text: '@file:.hermes/desktop-attachments/doc.pdf', uploaded: true } as never
+        return { attached: true, ref_text: '@file:.pichkoo/desktop-attachments/doc.pdf', uploaded: true } as never
       }
       return {} as never
     })
@@ -638,7 +638,7 @@ describe('usePromptActions eager attachment upload (drop-time)', () => {
     const requestGateway = vi.fn(async (method: string) => {
       calls.push(method)
       if (method === 'file.attach') {
-        return { attached: true, ref_text: '@file:.hermes/desktop-attachments/DEVIS_signed.pdf', uploaded: true } as never
+        return { attached: true, ref_text: '@file:.pichkoo/desktop-attachments/DEVIS_signed.pdf', uploaded: true } as never
       }
       return {} as never
     })
@@ -653,7 +653,7 @@ describe('usePromptActions eager attachment upload (drop-time)', () => {
     await waitFor(() => expect($composerAttachments.get()[0]?.attachedSessionId).toBe(RUNTIME_SESSION_ID))
 
     const chip = $composerAttachments.get()[0]!
-    expect(chip.refText).toBe('@file:.hermes/desktop-attachments/DEVIS_signed.pdf')
+    expect(chip.refText).toBe('@file:.pichkoo/desktop-attachments/DEVIS_signed.pdf')
     expect(chip.uploadState).toBeUndefined()
     expect(readFileDataUrl).toHaveBeenCalledWith('/Users/mahmoud/Downloads/DEVIS_signed.pdf')
   })
