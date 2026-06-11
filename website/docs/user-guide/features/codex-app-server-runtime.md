@@ -436,7 +436,7 @@ If you find a bug, [open an issue](https://github.com/NousResearch/pichkoo-agent
                                                         │
                                                         ▼
         ┌──────────────────────────────────────────────────────────┐
-        │  hermes_tools_mcp_server.py (subprocess on demand)        │
+        │  pichkoo_tools_mcp_server.py (subprocess on demand)        │
         │   web_search, web_extract, browser_*, vision_analyze,    │
         │   image_generate, skill_view, skills_list, text_to_speech│
         └──────────────────────────────────────────────────────────┘
