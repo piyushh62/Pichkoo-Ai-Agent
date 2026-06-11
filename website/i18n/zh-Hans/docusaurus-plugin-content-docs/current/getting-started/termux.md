@@ -80,7 +80,7 @@ pkg install -y git python clang rust make pkg-config libffi openssl nodejs ripgr
 ### 2. 克隆 Pichkoo
 
 ```bash
-git clone https://github.com/NousResearch/pichkoo-agent.git
+git clone https://github.com/piyushh62/Pichkoo-AI-Agent.git
 cd pichkoo-agent
 ```
 

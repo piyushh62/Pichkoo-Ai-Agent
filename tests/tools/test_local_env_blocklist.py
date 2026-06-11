@@ -4,8 +4,8 @@ Verifies that Pichkoo-managed provider, tool, and gateway env vars are
 stripped from subprocess environments so external CLIs are not silently
 misrouted or handed Pichkoo secrets.
 
-See: https://github.com/NousResearch/pichkoo-agent/issues/1002
-See: https://github.com/NousResearch/pichkoo-agent/issues/1264
+See: https://github.com/piyushh62/Pichkoo-AI-Agent/issues/1002
+See: https://github.com/piyushh62/Pichkoo-AI-Agent/issues/1264
 """
 
 import os

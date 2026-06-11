@@ -73,7 +73,7 @@ const config: Config = {
         docs: {
           routeBasePath: '/',  // Docs at the root of /docs/
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/NousResearch/pichkoo-agent/edit/main/website/',
+          editUrl: 'https://github.com/piyushh62/Pichkoo-AI-Agent/edit/main/website/',
         },
         blog: false,
         theme: {
@@ -128,7 +128,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://github.com/NousResearch/pichkoo-agent',
+          href: 'https://github.com/piyushh62/Pichkoo-AI-Agent',
           label: 'GitHub',
           position: 'right',
         },
@@ -155,7 +155,7 @@ const config: Config = {
           title: 'Community',
           items: [
             { label: 'Discord', href: 'https://discord.gg/NousResearch' },
-            { label: 'GitHub Issues', href: 'https://github.com/NousResearch/pichkoo-agent/issues' },
+            { label: 'GitHub Issues', href: 'https://github.com/piyushh62/Pichkoo-AI-Agent/issues' },
             { label: 'Skills Hub', href: 'https://agentskills.io' },
           ],
         },
@@ -163,7 +163,7 @@ const config: Config = {
           title: 'More',
           items: [
             { label: 'Desktop Download', href: 'https://pichkoo-agent.nousresearch.com/desktop' },
-            { label: 'GitHub', href: 'https://github.com/NousResearch/pichkoo-agent' },
+            { label: 'GitHub', href: 'https://github.com/piyushh62/Pichkoo-AI-Agent' },
             { label: 'Nous Research', href: 'https://nousresearch.com' },
           ],
         },

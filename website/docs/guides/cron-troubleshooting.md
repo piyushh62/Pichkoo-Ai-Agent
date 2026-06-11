@@ -214,7 +214,7 @@ If you've worked through this guide and the issue persists:
 
 1. Run the job with `pichkoo cron run <job_id>` (fires on next gateway tick) and watch for errors in the chat output
 2. Check `~/.pichkoo/logs/agent.log` for scheduler messages and `~/.pichkoo/logs/errors.log` for warnings
-3. Open an issue at [github.com/NousResearch/pichkoo-agent](https://github.com/NousResearch/pichkoo-agent) with:
+3. Open an issue at [github.com/piyushh62/Pichkoo-AI-Agent](https://github.com/piyushh62/Pichkoo-AI-Agent) with:
    - The job ID and schedule
    - The delivery target
    - What you expected vs. what happened

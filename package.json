@@ -24,13 +24,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NousResearch/pichkoo-agent.git"
+    "url": "git+https://github.com/piyushh62/Pichkoo-AI-Agent.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/NousResearch/pichkoo-agent/issues"
+    "url": "https://github.com/piyushh62/Pichkoo-AI-Agent/issues"
   },
-  "homepage": "https://github.com/NousResearch/pichkoo-agent#readme",
+  "homepage": "https://github.com/piyushh62/Pichkoo-AI-Agent#readme",
   "dependencies": {
     "@streamdown/math": "^1.0.2",
     "agent-browser": "^0.26.0"

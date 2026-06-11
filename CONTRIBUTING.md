@@ -81,7 +81,7 @@ This isn't a quality bar — it's a coupling-and-maintenance decision. Memory pr
 ### Clone and install
 
 ```bash
-git clone https://github.com/NousResearch/pichkoo-agent.git
+git clone https://github.com/piyushh62/Pichkoo-AI-Agent.git
 cd pichkoo-agent
 
 # Create venv with Python 3.11
@@ -901,7 +901,7 @@ test(tools): add unit tests for file_operations
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/NousResearch/pichkoo-agent/issues)
+- Use [GitHub Issues](https://github.com/piyushh62/Pichkoo-AI-Agent/issues)
 - Include: OS, Python version, Pichkoo version (`pichkoo version`), full error traceback
 - Include steps to reproduce
 - Check existing issues before creating duplicates

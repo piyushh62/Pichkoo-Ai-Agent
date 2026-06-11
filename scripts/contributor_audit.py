@@ -100,7 +100,7 @@ def gh_pr_list():
         result = subprocess.run(
             [
                 "gh", "pr", "list",
-                "--repo", "NousResearch/pichkoo-agent",
+                "--repo", "piyushh62/Pichkoo-AI-Agent",
                 "--state", "merged",
                 "--json", "number,title,body,author,mergedAt",
                 "--limit", "300",

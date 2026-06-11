@@ -81,7 +81,7 @@ python $PICHKOO_HOME/skills/devops/watchers/scripts/watch_rss.py \
 
 ```bash
 python $PICHKOO_HOME/skills/devops/watchers/scripts/watch_github.py \
-  --name pichkoo-issues --repo NousResearch/pichkoo-agent --scope issues
+  --name pichkoo-issues --repo piyushh62/Pichkoo-AI-Agent --scope issues
 ```
 
 轮询任意 JSON API：

@@ -182,7 +182,7 @@ class TestFallbackChain:
 
     PRIMARY = "https://pichkoo-agent.nousresearch.com/docs/api/model-catalog.json"
     FALLBACK = (
-        "https://raw.githubusercontent.com/NousResearch/pichkoo-agent"
+        "https://raw.githubusercontent.com/piyushh62/Pichkoo-AI-Agent"
         "/main/website/static/api/model-catalog.json"
     )
 

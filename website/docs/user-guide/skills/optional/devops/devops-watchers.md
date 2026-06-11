@@ -81,7 +81,7 @@ Watch a GitHub repo (set `GITHUB_TOKEN` in `~/.pichkoo/.env` to avoid the 60 req
 
 ```bash
 python $PICHKOO_HOME/skills/devops/watchers/scripts/watch_github.py \
-  --name pichkoo-issues --repo NousResearch/pichkoo-agent --scope issues
+  --name pichkoo-issues --repo piyushh62/Pichkoo-AI-Agent --scope issues
 ```
 
 Poll an arbitrary JSON API:

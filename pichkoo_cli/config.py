@@ -360,7 +360,7 @@ def detect_install_method(project_root: Optional[Path] = None) -> str:
     container detection here:
       - the curl installer (scripts/install.sh, the README/website install
         command) git-clones the repo and stamps ``git``;
-      - the published ``nousresearch/pichkoo-agent`` image stamps ``docker``
+      - the published ``piyushh62/Pichkoo-AI-Agent`` image stamps ``docker``
         at boot via ``docker/stage2-hook.sh``.
     An unsupported manual install dropped into a container (no stamp) was
     wrongly classified as the published image by bare container detection,
@@ -430,7 +430,7 @@ def recommended_update_command_for_method(method: str) -> str:
     if method == "homebrew":
         return "brew upgrade pichkoo-agent"
     if method == "docker":
-        return "docker pull nousresearch/pichkoo-agent:latest"
+        return "docker pull piyushh62/Pichkoo-AI-Agent:latest"
     if method == "pip":
         if is_uv_tool_install():
             return "uv tool upgrade pichkoo-agent"
@@ -468,23 +468,23 @@ def recommended_update_command() -> str:
 _DOCKER_UPDATE_MESSAGE = """\
 ✗ ``pichkoo update`` doesn't apply inside the Docker container.
 
-Pichkoo AI Agent runs as a published image (nousresearch/pichkoo-agent), not a
+Pichkoo AI Agent runs as a published image (piyushh62/Pichkoo-AI-Agent), not a
 git checkout — the container has no working tree to pull into.  Update by
 pulling a fresh image and restarting your container instead:
 
-  docker pull nousresearch/pichkoo-agent:latest
+  docker pull piyushh62/Pichkoo-AI-Agent:latest
   # then restart whatever started the container, e.g.:
   docker compose up -d --force-recreate pichkoo-agent
   # or, for ad-hoc runs, exit the current container and `docker run` again
 
 Verify the new version after restart:
-  docker run --rm nousresearch/pichkoo-agent:latest --version
+  docker run --rm piyushh62/Pichkoo-AI-Agent:latest --version
 
 Notes:
   • If you pinned a specific tag (e.g. ``:v0.14.0``) the ``:latest`` tag
     won't move your container — pull the newer tag you actually want, or
     switch to ``:latest`` / ``:main`` for rolling updates.  See available
-    tags at https://hub.docker.com/r/nousresearch/pichkoo-agent/tags
+    tags at https://hub.docker.com/r/piyushh62/Pichkoo-AI-Agent/tags
   • Your config and session history live under ``$PICHKOO_HOME`` (``/opt/data``
     in the container, typically bind-mounted from the host) and persist
     across image upgrades — re-pulling doesn't lose any state.

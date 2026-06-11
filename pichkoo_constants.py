@@ -64,7 +64,7 @@ def get_hermes_home() -> Path:
     callers that import this at load time.  Subprocess spawners are
     expected to propagate ``PICHKOO_HOME`` explicitly (see the systemd
     template in ``pichkoo_cli/gateway.py`` and the kanban dispatcher in
-    ``pichkoo_cli/kanban_db.py``).  See https://github.com/NousResearch/pichkoo-agent/issues/18594.
+    ``pichkoo_cli/kanban_db.py``).  See https://github.com/piyushh62/Pichkoo-AI-Agent/issues/18594.
     """
     override = get_hermes_home_override()
     if override:
@@ -270,7 +270,7 @@ def secure_parent_dir(path: Path) -> None:
     prevent catastrophic host bricking when ``PICHKOO_HOME`` or other path
     env vars resolve to an unexpected location.
 
-    See https://github.com/NousResearch/pichkoo-agent/issues/25821.
+    See https://github.com/piyushh62/Pichkoo-AI-Agent/issues/25821.
     """
     parent = path.parent.resolve()
     # Refuse root and its direct children (/usr, /home, /var, /tmp, …).

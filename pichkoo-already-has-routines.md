@@ -153,7 +153,7 @@ Full automation templates gallery: [pichkoo-agent.nousresearch.com/docs/guides/a
 
 Documentation: [pichkoo-agent.nousresearch.com](https://pichkoo-agent.nousresearch.com)
 
-GitHub: [github.com/NousResearch/pichkoo-agent](https://github.com/NousResearch/pichkoo-agent)
+GitHub: [github.com/piyushh62/Pichkoo-AI-Agent](https://github.com/piyushh62/Pichkoo-AI-Agent)
 
 ---
 

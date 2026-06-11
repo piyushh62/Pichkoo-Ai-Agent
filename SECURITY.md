@@ -6,7 +6,7 @@ scope for vulnerability reports.
 
 ## 1. Reporting a Vulnerability
 
-Report privately via [GitHub Security Advisories](https://github.com/NousResearch/pichkoo-agent/security/advisories/new)
+Report privately via [GitHub Security Advisories](https://github.com/piyushh62/Pichkoo-AI-Agent/security/advisories/new)
 or **security@nousresearch.com**. Do not open public issues for
 security vulnerabilities. **Pichkoo AI Agent does not operate a bug
 bounty program.**

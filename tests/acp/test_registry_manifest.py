@@ -32,7 +32,7 @@ def test_agent_json_matches_official_registry_required_fields():
     assert re.fullmatch(r"[a-z][a-z0-9-]*", data["id"])
     assert data["name"] == "Pichkoo AI Agent"
     assert data["description"]
-    assert data["repository"] == "https://github.com/NousResearch/pichkoo-agent"
+    assert data["repository"] == "https://github.com/piyushh62/Pichkoo-AI-Agent"
     assert data["website"].startswith("https://pichkoo-agent.nousresearch.com/")
     assert data["authors"] == ["Nous Research"]
     assert data["license"] == "MIT"

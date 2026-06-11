@@ -13,7 +13,7 @@ import urllib.request
 
 DEFAULT_UA = (
     "pichkoo-osint-investigation/0.2 "
-    "(+https://github.com/NousResearch/pichkoo-agent; "
+    "(+https://github.com/piyushh62/Pichkoo-AI-Agent; "
     "set PICHKOO_OSINT_UA env var to identify yourself per "
     "Wikimedia / SEC fair-use guidance)"
 )

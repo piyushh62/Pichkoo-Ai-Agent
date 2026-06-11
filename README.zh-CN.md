@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://pichkoo-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-pichkoo--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
   <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://github.com/NousResearch/pichkoo-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://github.com/piyushh62/Pichkoo-AI-Agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
   <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20by-Nous%20Research-blueviolet?style=for-the-badge" alt="Built by Nous Research"></a>
   <a href="README.md"><img src="https://img.shields.io/badge/Lang-English-lightgrey?style=for-the-badge" alt="English"></a>
   <a href="README.ur-pk.md"><img src="https://img.shields.io/badge/Lang-اردو-green?style=for-the-badge" alt="اردو"></a>
@@ -167,7 +167,7 @@ pichkoo claw migrate --overwrite  # 覆盖已有冲突
 贡献者快速开始——克隆并使用 `setup-pichkoo.sh`：
 
 ```bash
-git clone https://github.com/NousResearch/pichkoo-agent.git
+git clone https://github.com/piyushh62/Pichkoo-AI-Agent.git
 cd pichkoo-agent
 ./setup-pichkoo.sh     # 安装 uv、创建 venv、安装 .[all]、创建符号链接 ~/.local/bin/pichkoo
 ./pichkoo              # 自动检测 venv，无需先 source
@@ -189,8 +189,8 @@ python -m pytest tests/ -q
 
 - 💬 [Discord](https://discord.gg/NousResearch)
 - 📚 [技能中心](https://agentskills.io)
-- 🐛 [问题反馈](https://github.com/NousResearch/pichkoo-agent/issues)
-- 💡 [讨论区](https://github.com/NousResearch/pichkoo-agent/discussions)
+- 🐛 [问题反馈](https://github.com/piyushh62/Pichkoo-AI-Agent/issues)
+- 💡 [讨论区](https://github.com/piyushh62/Pichkoo-AI-Agent/discussions)
 - 🔌 [PichkooClaw](https://github.com/AaronWong1999/hermesclaw) — 社区微信桥接：在同一微信账号上运行 Pichkoo AI Agent 和 OpenClaw。
 
 ---

@@ -35,11 +35,11 @@ Pichkoo AI Agent 提供了一个 Nix flake，支持三个层级的集成：
 
 ```bash
 # 直接运行（首次使用时构建，之后使用缓存）
-nix run github:NousResearch/pichkoo-agent -- setup
-nix run github:NousResearch/pichkoo-agent -- chat
+nix run github:piyushh62/Pichkoo-AI-Agent -- setup
+nix run github:piyushh62/Pichkoo-AI-Agent -- chat
 
 # 或持久化安装
-nix profile install github:NousResearch/pichkoo-agent
+nix profile install github:piyushh62/Pichkoo-AI-Agent
 pichkoo setup
 pichkoo chat
 ```
@@ -50,7 +50,7 @@ pichkoo chat
 <summary><strong>从本地克隆构建</strong></summary>
 
 ```bash
-git clone https://github.com/NousResearch/pichkoo-agent.git
+git clone https://github.com/piyushh62/Pichkoo-AI-Agent.git
 cd pichkoo-agent
 nix build
 ./result/bin/pichkoo setup
@@ -75,7 +75,7 @@ nix build
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    pichkoo-agent.url = "github:NousResearch/pichkoo-agent";
+    pichkoo-agent.url = "github:piyushh62/Pichkoo-AI-Agent";
   };
 
   outputs = { nixpkgs, pichkoo-agent, ... }: {
@@ -685,7 +685,7 @@ services.pichkoo-agent = {
 
 ```nix
 {
-  inputs.pichkoo-agent.url = "github:NousResearch/pichkoo-agent";
+  inputs.pichkoo-agent.url = "github:piyushh62/Pichkoo-AI-Agent";
   outputs = { pichkoo-agent, nixpkgs, ... }: {
     nixpkgs.overlays = [ pichkoo-agent.overlays.default ];
     # 然后：

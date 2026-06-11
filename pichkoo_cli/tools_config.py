@@ -897,7 +897,7 @@ def _run_post_setup(post_setup_key: str):
                 "    Pull the latest image to get the bundled Chromium:"
             )
             _print_info(
-                "      docker pull ghcr.io/nousresearch/pichkoo-agent:latest"
+                "      docker pull ghcr.io/piyushh62/Pichkoo-AI-Agent:latest"
             )
             return
 

@@ -295,7 +295,7 @@ export default function UserStoriesCollage(): JSX.Element {
       <div className={styles.footer}>
         Built something with Pichkoo?{' '}
         <a
-          href="https://github.com/NousResearch/pichkoo-agent/edit/main/website/src/data/userStories.json"
+          href="https://github.com/piyushh62/Pichkoo-AI-Agent/edit/main/website/src/data/userStories.json"
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -15,19 +15,19 @@ Pichkoo 不仅仅是一个 CLI 工具。你可以直接导入 `AIAgent`，在自
 直接从仓库安装 Pichkoo：
 
 ```bash
-pip install git+https://github.com/NousResearch/pichkoo-agent.git
+pip install git+https://github.com/piyushh62/Pichkoo-AI-Agent.git
 ```
 
 或使用 [uv](https://docs.astral.sh/uv/)：
 
 ```bash
-uv pip install git+https://github.com/NousResearch/pichkoo-agent.git
+uv pip install git+https://github.com/piyushh62/Pichkoo-AI-Agent.git
 ```
 
 也可以在 `requirements.txt` 中固定版本：
 
 ```text
-pichkoo-agent @ git+https://github.com/NousResearch/pichkoo-agent.git
+pichkoo-agent @ git+https://github.com/piyushh62/Pichkoo-AI-Agent.git
 ```
 
 :::tip

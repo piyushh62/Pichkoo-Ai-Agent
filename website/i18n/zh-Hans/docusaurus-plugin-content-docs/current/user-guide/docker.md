@@ -21,7 +21,7 @@ Docker 与 Pichkoo AI Agent 的交集有两种截然不同的方式：
 mkdir -p ~/.pichkoo
 docker run -it --rm \
   -v ~/.pichkoo:/opt/data \
-  nousresearch/pichkoo-agent setup
+  piyushh62/Pichkoo-AI-Agent setup
 ```
 
 这将进入设置向导，向导会提示你输入 API 密钥并将其写入 `~/.pichkoo/.env`。你只需执行一次。强烈建议此时为 gateway 配置一个聊天系统。
@@ -36,7 +36,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/.pichkoo:/opt/data \
   -p 8642:8642 \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 端口 8642 暴露 gateway 的 [OpenAI 兼容 API 服务器](./features/api-server.md)和健康检查端点。如果你只使用聊天平台（Telegram、Discord 等），该端口是可选的；但如果你希望 dashboard 或外部工具访问 gateway，则必须开放。
@@ -53,7 +53,7 @@ docker run -d \
   -e API_SERVER_HOST=0.0.0.0 \
   -e API_SERVER_KEY="$(openssl rand -hex 32)" \
   -e API_SERVER_CORS_ORIGINS='*' \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 在面向互联网的机器上开放任何端口都存在安全风险。除非你了解相关风险，否则不应这样做。
@@ -69,7 +69,7 @@ docker run -d \
   -v ~/.pichkoo:/opt/data \
   -p 8642:8642 \
   -e PICHKOO_DASHBOARD=1 \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 入口点在 `exec` 主命令之前，以非 root 用户 `pichkoo` 在后台启动 `pichkoo dashboard`。Dashboard 输出在 `docker logs` 中以 `[dashboard]` 为前缀，便于与 gateway 日志区分。
@@ -118,7 +118,7 @@ dashboard 进程崩溃，s6-overlay 会在短暂退避后自动
 ```sh
 docker run -it --rm \
   -v ~/.pichkoo:/opt/data \
-  nousresearch/pichkoo-agent
+  piyushh62/Pichkoo-AI-Agent
 ```
 
 或者，如果你已通过 Docker Desktop 等方式在运行中的容器内打开了终端，直接运行：
@@ -161,7 +161,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/.pichkoo-work:/opt/data \
   -p 8642:8642 \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 
 # 个人 profile
 docker run -d \
@@ -169,7 +169,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/.pichkoo-personal:/opt/data \
   -p 8643:8642 \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 在 Docker 中使用独立容器而非 profile 的原因：
@@ -185,7 +185,7 @@ docker run -d \
 ```yaml
 services:
   pichkoo-work:
-    image: nousresearch/pichkoo-agent:latest
+    image: piyushh62/Pichkoo-AI-Agent:latest
     container_name: pichkoo-work
     restart: unless-stopped
     command: gateway run
@@ -195,7 +195,7 @@ services:
       - ~/.pichkoo-work:/opt/data
 
   pichkoo-personal:
-    image: nousresearch/pichkoo-agent:latest
+    image: piyushh62/Pichkoo-AI-Agent:latest
     container_name: pichkoo-personal
     restart: unless-stopped
     command: gateway run
@@ -214,7 +214,7 @@ docker run -it --rm \
   -v ~/.pichkoo:/opt/data \
   -e ANTHROPIC_API_KEY="sk-ant-..." \
   -e OPENAI_API_KEY="sk-..." \
-  nousresearch/pichkoo-agent
+  piyushh62/Pichkoo-AI-Agent
 ```
 
 直接传入的 `-e` 标志会覆盖 `.env` 中的值。这对于不希望将密钥写入磁盘的 CI/CD 或密钥管理器集成非常有用。
@@ -230,7 +230,7 @@ docker run -it --rm \
 ```yaml
 services:
   pichkoo:
-    image: nousresearch/pichkoo-agent:latest
+    image: piyushh62/Pichkoo-AI-Agent:latest
     container_name: pichkoo
     restart: unless-stopped
     command: gateway run
@@ -274,7 +274,7 @@ docker run -d \
   --restart unless-stopped \
   --memory=4g --cpus=2 \
   -v ~/.pichkoo:/opt/data \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 ## Dockerfile 说明
@@ -334,13 +334,13 @@ pichkoo profile delete coder            # 拆除 s6 槽
 拉取最新镜像并重建容器。你的数据目录不受影响。
 
 ```sh
-docker pull nousresearch/pichkoo-agent:latest
+docker pull piyushh62/Pichkoo-AI-Agent:latest
 docker rm -f pichkoo
 docker run -d \
   --name pichkoo \
   --restart unless-stopped \
   -v ~/.pichkoo:/opt/data \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 或使用 Docker Compose：
@@ -374,10 +374,10 @@ SSH 和 Modal 后端也会进行相同的同步——技能和凭据文件在每
 
 ### 持久安装——构建派生镜像
 
-当工具必须在每次容器启动时立即可用且无需重新安装延迟时，构建一个继承自 `nousresearch/pichkoo-agent` 并在层中安装该工具的新镜像：
+当工具必须在每次容器启动时立即可用且无需重新安装延迟时，构建一个继承自 `piyushh62/Pichkoo-AI-Agent` 并在层中安装该工具的新镜像：
 
 ```dockerfile
-FROM nousresearch/pichkoo-agent:latest
+FROM piyushh62/Pichkoo-AI-Agent:latest
 
 USER root
 RUN apt-get update \
@@ -398,7 +398,7 @@ docker run -d \
   my-pichkoo:latest gateway run
 ```
 
-入口点脚本和 `/opt/data` 语义原样继承，本页其余内容仍然适用。拉取更新的上游 `nousresearch/pichkoo-agent` 时记得重新构建镜像。
+入口点脚本和 `/opt/data` 语义原样继承，本页其余内容仍然适用。拉取更新的上游 `piyushh62/Pichkoo-AI-Agent` 时记得重新构建镜像。
 
 ### 复杂工具或多服务栈——运行 sidecar 容器
 
@@ -407,7 +407,7 @@ docker run -d \
 ```yaml
 services:
   pichkoo:
-    image: nousresearch/pichkoo-agent:latest
+    image: piyushh62/Pichkoo-AI-Agent:latest
     container_name: pichkoo
     restart: unless-stopped
     command: gateway run
@@ -434,7 +434,7 @@ networks:
 
 ### 广泛有用的工具——提交 issue 或 pull request
 
-如果某个工具可能对大多数 Pichkoo AI Agent 用户有用，考虑将其贡献到上游，而不是在私有派生镜像中维护。在 [pichkoo-agent 仓库](https://github.com/NousResearch/pichkoo-agent)提交 issue 或 pull request，描述该工具及其使用场景。被纳入官方镜像的工具惠及所有用户，并避免了维护下游 fork 的开销。
+如果某个工具可能对大多数 Pichkoo AI Agent 用户有用，考虑将其贡献到上游，而不是在私有派生镜像中维护。在 [pichkoo-agent 仓库](https://github.com/piyushh62/Pichkoo-AI-Agent)提交 issue 或 pull request，描述该工具及其使用场景。被纳入官方镜像的工具惠及所有用户，并避免了维护下游 fork 的开销。
 
 ## 连接本地推理服务器（vLLM、Ollama 等）
 
@@ -465,7 +465,7 @@ services:
             - capabilities: [gpu]
 
   pichkoo:
-    image: nousresearch/pichkoo-agent:latest
+    image: piyushh62/Pichkoo-AI-Agent:latest
     container_name: pichkoo
     restart: unless-stopped
     command: gateway run
@@ -509,7 +509,7 @@ docker run -d \
   --name pichkoo \
   -v ~/.pichkoo:/opt/data \
   -p 8642:8642 \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 ```yaml
@@ -528,7 +528,7 @@ docker run -d \
   --name pichkoo \
   --network host \
   -v ~/.pichkoo:/opt/data \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 ```yaml
@@ -594,7 +594,7 @@ docker run -d \
   --name pichkoo \
   --shm-size=1g \
   -v ~/.pichkoo:/opt/data \
-  nousresearch/pichkoo-agent gateway run
+  piyushh62/Pichkoo-AI-Agent gateway run
 ```
 
 ### 网络问题后 gateway 无法重连
@@ -609,6 +609,6 @@ docker restart pichkoo
 
 ```sh
 docker logs --tail 50 pichkoo          # 最近日志
-docker run -it --rm nousresearch/pichkoo-agent:latest version     # 验证版本
+docker run -it --rm piyushh62/Pichkoo-AI-Agent:latest version     # 验证版本
 docker stats pichkoo                    # 资源使用情况
 ```

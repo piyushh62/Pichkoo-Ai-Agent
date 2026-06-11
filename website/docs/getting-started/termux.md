@@ -80,7 +80,7 @@ Why these packages?
 ### 2. Clone Pichkoo
 
 ```bash
-git clone https://github.com/NousResearch/pichkoo-agent.git
+git clone https://github.com/piyushh62/Pichkoo-AI-Agent.git
 cd pichkoo-agent
 ```
 

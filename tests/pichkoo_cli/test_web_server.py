@@ -818,7 +818,7 @@ class TestWebServerEndpoints:
         assert data["name"] == "pichkoo-update"
         assert data["pid"] is None
         assert data["error"] == "docker_update_unsupported"
-        assert "docker pull nousresearch/pichkoo-agent:latest" in data["message"]
+        assert "docker pull piyushh62/Pichkoo-AI-Agent:latest" in data["message"]
         assert spawned is False
 
         status = self.client.get("/api/actions/pichkoo-update/status")
@@ -827,7 +827,7 @@ class TestWebServerEndpoints:
         assert status_data["running"] is False
         assert status_data["exit_code"] == 1
         assert status_data["pid"] is None
-        assert any("docker pull nousresearch/pichkoo-agent:latest" in line for line in status_data["lines"])
+        assert any("docker pull piyushh62/Pichkoo-AI-Agent:latest" in line for line in status_data["lines"])
 
     def test_update_hermes_spawns_on_non_docker_install(self, monkeypatch):
         import pichkoo_cli.web_server as web_server

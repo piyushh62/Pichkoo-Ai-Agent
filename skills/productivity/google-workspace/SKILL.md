@@ -13,7 +13,7 @@ required_credential_files:
 metadata:
   pichkoo:
     tags: [Google, Gmail, Calendar, Drive, Sheets, Docs, Contacts, Email, OAuth]
-    homepage: https://github.com/NousResearch/pichkoo-agent
+    homepage: https://github.com/piyushh62/Pichkoo-AI-Agent
     related_skills: [himalaya]
 ---
 

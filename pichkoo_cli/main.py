@@ -5696,7 +5696,7 @@ def _update_via_zip(args):
         )
         sys.exit(1)
     zip_url = (
-        f"https://github.com/NousResearch/pichkoo-agent/archive/refs/heads/{branch}.zip"
+        f"https://github.com/piyushh62/Pichkoo-AI-Agent/archive/refs/heads/{branch}.zip"
     )
 
     print("→ Downloading latest version...")
@@ -6100,12 +6100,12 @@ def _discard_stashed_changes(
 # =========================================================================
 
 OFFICIAL_REPO_URLS = {
-    "https://github.com/NousResearch/pichkoo-agent.git",
-    "git@github.com:NousResearch/pichkoo-agent.git",
-    "https://github.com/NousResearch/pichkoo-agent",
-    "git@github.com:NousResearch/pichkoo-agent",
+    "https://github.com/piyushh62/Pichkoo-AI-Agent.git",
+    "git@github.com:piyushh62/Pichkoo-AI-Agent.git",
+    "https://github.com/piyushh62/Pichkoo-AI-Agent",
+    "git@github.com:piyushh62/Pichkoo-AI-Agent",
 }
-OFFICIAL_REPO_URL = "https://github.com/NousResearch/pichkoo-agent.git"
+OFFICIAL_REPO_URL = "https://github.com/piyushh62/Pichkoo-AI-Agent.git"
 SKIP_UPSTREAM_PROMPT_FILE = ".skip_upstream_prompt"
 
 
@@ -6239,7 +6239,7 @@ def _sync_with_upstream_if_needed(git_cmd: list[str], cwd: Path) -> None:
         # Ask user if they want to add upstream
         print()
         print("ℹ Your fork is not tracking the official Pichkoo repository.")
-        print("  This means you may miss updates from NousResearch/pichkoo-agent.")
+        print("  This means you may miss updates from piyushh62/Pichkoo-AI-Agent.")
         print()
         try:
             response = (
@@ -6253,7 +6253,7 @@ def _sync_with_upstream_if_needed(git_cmd: list[str], cwd: Path) -> None:
             print("→ Adding upstream remote...")
             if _add_upstream_remote(git_cmd, cwd):
                 print(
-                    "  ✓ Added upstream: https://github.com/NousResearch/pichkoo-agent.git"
+                    "  ✓ Added upstream: https://github.com/piyushh62/Pichkoo-AI-Agent.git"
                 )
                 has_upstream = True
             else:
@@ -6261,7 +6261,7 @@ def _sync_with_upstream_if_needed(git_cmd: list[str], cwd: Path) -> None:
                 return
         else:
             print(
-                "  Skipped. Run 'git remote add upstream https://github.com/NousResearch/pichkoo-agent.git' to add later."
+                "  Skipped. Run 'git remote add upstream https://github.com/piyushh62/Pichkoo-AI-Agent.git' to add later."
             )
             _mark_skip_upstream_prompt()
             return

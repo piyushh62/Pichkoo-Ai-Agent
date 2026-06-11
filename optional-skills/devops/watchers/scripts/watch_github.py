@@ -6,7 +6,7 @@ Usage (via cron with --no-agent):
     pichkoo cron create pichkoo-issues \\
       --schedule "*/5 * * * *" --no-agent \\
       --script "$PICHKOO_HOME/skills/devops/watchers/scripts/watch_github.py" \\
-      --script-args "--name pichkoo-issues --repo NousResearch/pichkoo-agent --scope issues"
+      --script-args "--name pichkoo-issues --repo piyushh62/Pichkoo-AI-Agent --scope issues"
 
 Set GITHUB_TOKEN (or GH_TOKEN) in ~/.pichkoo/.env to avoid the 60 req/hr
 anonymous rate limit.

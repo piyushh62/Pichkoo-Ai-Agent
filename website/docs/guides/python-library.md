@@ -15,19 +15,19 @@ Pichkoo isn't just a CLI tool. You can import `AIAgent` directly and use it prog
 Install Pichkoo directly from the repository:
 
 ```bash
-pip install git+https://github.com/NousResearch/pichkoo-agent.git
+pip install git+https://github.com/piyushh62/Pichkoo-AI-Agent.git
 ```
 
 Or with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv pip install git+https://github.com/NousResearch/pichkoo-agent.git
+uv pip install git+https://github.com/piyushh62/Pichkoo-AI-Agent.git
 ```
 
 You can also pin it in your `requirements.txt`:
 
 ```text
-pichkoo-agent @ git+https://github.com/NousResearch/pichkoo-agent.git
+pichkoo-agent @ git+https://github.com/piyushh62/Pichkoo-AI-Agent.git
 ```
 
 :::tip

@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   pichkoo:
     tags: [pichkoo, setup, configuration, multi-agent, spawning, cli, gateway, development]
-    homepage: https://github.com/NousResearch/pichkoo-agent
+    homepage: https://github.com/piyushh62/Pichkoo-AI-Agent
     related_skills: [claude-code, codex, opencode]
 ---
 

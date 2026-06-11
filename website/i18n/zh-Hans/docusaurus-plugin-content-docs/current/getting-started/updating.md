@@ -140,7 +140,7 @@ tail -f ~/.pichkoo/logs/update.log
 pichkoo version
 ```
 
-与 [GitHub releases 页面](https://github.com/NousResearch/pichkoo-agent/releases) 上的最新版本进行比较。
+与 [GitHub releases 页面](https://github.com/piyushh62/Pichkoo-AI-Agent/releases) 上的最新版本进行比较。
 
 ### 从消息平台更新
 

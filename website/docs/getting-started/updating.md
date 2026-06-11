@@ -170,7 +170,7 @@ You no longer need to wrap `pichkoo update` in `screen` or `tmux` to survive a t
 pichkoo version
 ```
 
-Compare against the latest release at the [GitHub releases page](https://github.com/NousResearch/pichkoo-agent/releases).
+Compare against the latest release at the [GitHub releases page](https://github.com/piyushh62/Pichkoo-AI-Agent/releases).
 
 ### Updating from Messaging Platforms
 

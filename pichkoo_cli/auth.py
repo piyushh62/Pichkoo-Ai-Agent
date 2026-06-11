@@ -6633,7 +6633,7 @@ def _xai_oauth_exchange_code_for_tokens(
         raise AuthError(
             "xAI token exchange refused locally: PKCE code_verifier is empty. "
             "This is a bug in Pichkoo — please report at "
-            "https://github.com/NousResearch/pichkoo-agent/issues/26990.",
+            "https://github.com/piyushh62/Pichkoo-AI-Agent/issues/26990.",
             provider="xai-oauth",
             code="xai_pkce_verifier_missing",
         )

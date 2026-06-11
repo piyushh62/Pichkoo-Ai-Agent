@@ -35,11 +35,11 @@ No clone needed. Nix fetches, builds, and runs everything:
 
 ```bash
 # Run directly (builds on first use, cached after)
-nix run github:NousResearch/pichkoo-agent -- setup
-nix run github:NousResearch/pichkoo-agent -- chat
+nix run github:piyushh62/Pichkoo-AI-Agent -- setup
+nix run github:piyushh62/Pichkoo-AI-Agent -- chat
 
 # Or install persistently
-nix profile install github:NousResearch/pichkoo-agent
+nix profile install github:piyushh62/Pichkoo-AI-Agent
 pichkoo setup
 pichkoo chat
 ```
@@ -50,13 +50,13 @@ After `nix profile install`, `pichkoo`, `pichkoo-agent`, and `pichkoo-acp` are o
 The default package doesn't include messaging platform libraries — they were moved to on-demand installation, which can't work in Nix's read-only environment. If you plan to connect the agent to Discord, Telegram, or Slack, install the `messaging` variant:
 
 ```bash
-nix profile install github:NousResearch/pichkoo-agent#messaging
+nix profile install github:piyushh62/Pichkoo-AI-Agent#messaging
 ```
 
 For all optional extras (voice, all providers, all platforms):
 
 ```bash
-nix profile install github:NousResearch/pichkoo-agent#full
+nix profile install github:piyushh62/Pichkoo-AI-Agent#full
 ```
 
 The `full` variant adds ~700 MB to the closure. If you only need messaging platforms, `#messaging` adds just ~33 MB.
@@ -66,7 +66,7 @@ The `full` variant adds ~700 MB to the closure. If you only need messaging platf
 <summary><strong>Building from a local clone</strong></summary>
 
 ```bash
-git clone https://github.com/NousResearch/pichkoo-agent.git
+git clone https://github.com/piyushh62/Pichkoo-AI-Agent.git
 cd pichkoo-agent
 nix build
 ./result/bin/pichkoo setup
@@ -91,7 +91,7 @@ This module requires NixOS. For non-NixOS systems (macOS, other Linux distros), 
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    pichkoo-agent.url = "github:NousResearch/pichkoo-agent";
+    pichkoo-agent.url = "github:piyushh62/Pichkoo-AI-Agent";
   };
 
   outputs = { nixpkgs, pichkoo-agent, ... }: {
@@ -730,7 +730,7 @@ External flakes can override the package directly:
 
 ```nix
 {
-  inputs.pichkoo-agent.url = "github:NousResearch/pichkoo-agent";
+  inputs.pichkoo-agent.url = "github:piyushh62/Pichkoo-AI-Agent";
   outputs = { pichkoo-agent, nixpkgs, ... }: {
     nixpkgs.overlays = [ pichkoo-agent.overlays.default ];
     # Then:

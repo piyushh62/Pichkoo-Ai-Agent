@@ -68,7 +68,7 @@ pichkoo memory setup        # select "honcho" — runs the Honcho-specific post-
 
 The legacy `pichkoo honcho setup` command still works (it now redirects to `pichkoo memory setup`), but is only registered after Honcho is selected as the active memory provider.
 
-**Config:** `$PICHKOO_HOME/honcho.json` (profile-local) or `~/.honcho/config.json` (global). Resolution order: `$PICHKOO_HOME/honcho.json` > `~/.pichkoo/honcho.json` > `~/.honcho/config.json`. See the [config reference](https://github.com/NousResearch/pichkoo-agent/blob/main/plugins/memory/honcho/README.md) and the [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/pichkoo).
+**Config:** `$PICHKOO_HOME/honcho.json` (profile-local) or `~/.honcho/config.json` (global). Resolution order: `$PICHKOO_HOME/honcho.json` > `~/.pichkoo/honcho.json` > `~/.honcho/config.json`. See the [config reference](https://github.com/piyushh62/Pichkoo-AI-Agent/blob/main/plugins/memory/honcho/README.md) and the [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/pichkoo).
 
 <details>
 <summary>Full config reference</summary>
@@ -255,7 +255,7 @@ See the [Honcho page](./honcho.md#observation-directional-vs-unified) for the fu
 
 </details>
 
-See the [config reference](https://github.com/NousResearch/pichkoo-agent/blob/main/plugins/memory/honcho/README.md) and [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/pichkoo).
+See the [config reference](https://github.com/piyushh62/Pichkoo-AI-Agent/blob/main/plugins/memory/honcho/README.md) and [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/pichkoo).
 
 
 ---
@@ -366,7 +366,7 @@ The setup wizard installs dependencies automatically and only installs what's ne
 | `retain_assistant_prefix` | `Assistant` | Label used before assistant turns in auto-retained transcripts |
 | `recall_tags` | — | Tags to filter on recall |
 
-See [plugin README](https://github.com/NousResearch/pichkoo-agent/blob/main/plugins/memory/hindsight/README.md) for the full configuration reference.
+See [plugin README](https://github.com/piyushh62/Pichkoo-AI-Agent/blob/main/plugins/memory/hindsight/README.md) for the full configuration reference.
 
 ---
 
