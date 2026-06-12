@@ -1,4 +1,4 @@
-name: Deploy Site to Hugging Face
+name: Deploy Site to Hugging Face.
 
 on:
   push:
