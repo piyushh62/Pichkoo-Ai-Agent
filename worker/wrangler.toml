@@ -1,0 +1,5 @@
+name = "pichkoo-ai-agent"
+compatibility_date = "2024-09-01"
+main = "src/index.js"
+
+# Optional: add routes or kv bindings if needed
