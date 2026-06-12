@@ -1,0 +1,6 @@
+name = "pichkoo-ai-agent"
+compatibility_date = "2024-09-01"
+# Point to the worker project inside the repository
+main = "worker/src/index.js"
+
+# Optional: add any routes, KV bindings, etc. here
