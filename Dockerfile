@@ -333,8 +333,11 @@ VOLUME [ "/opt/data" ]
 # and exec's the final program so its exit code becomes the container
 # exit code. Without the wrapper-as-ENTRYPOINT, leading-dash args
 # like `--version` would be intercepted by /init's POSIX shell.
-ENTRYPOINT [ "/init", "/opt/pichkoo/docker/main-wrapper.sh" ]
-CMD ["dashboard", "--host", "0.0.0.0", "--port", "10000", "--insecure"]
+ENTRYPOINT []
+CMD ["/opt/pichkoo/.venv/bin/pichkoo", "dashboard", "--host", "0.0.0.0", "--port", "10000", "--insecure"]
+
+# ENTRYPOINT [ "/init", "/opt/pichkoo/docker/main-wrapper.sh" ]
+# CMD ["dashboard", "--host", "0.0.0.0", "--port", "10000", "--insecure"]
 # CMD ["dashboard", "--host", "0.0.0.0", "--port", "10000"]
 # CMD [ ]
 # CMD /opt/pichkoo/docker/main-wrapper.sh dashboard --host 0.0.0.0 --port ${PORT:-7860} --no-open --insecure
